@@ -1,0 +1,27 @@
+@media all{
+    body,h1,h2,h3,h4,html{margin:0;padding:0}
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol"; background-color:#d1d1d1; font-size: 1rem; color:#212529; font-weight: 400;}
+    .Portrait{width:820px;margin-bottom:10px;margin-left:auto;margin-right:auto;text-align:left;background-color:#fff;padding:10px; min-height: 1060px; }
+    .Landscape{width:1220px;margin-bottom:10px;margin-left:auto;margin-right:auto;text-align:left;background-color:#fff;padding:10px; min-height: 800px;}
+    .Header{border-spacing:0; margin-left: -10px; margin-bottom: 20px; width: calc(100% + 20px); margin-top: -10px; display: flex; border-bottom: 1px solid #faa22a; background-color: #e9e9e9;}
+    /*.Header .Title{font-size:40px;font-weight:700;padding:5px 5px 5px 15px; background-color: #faa22a;        color: #333;        text-align: right;}*/
+    .Header .Title{font-size:40px;font-weight:700;padding:5px 5px 5px 15px; background-color: tranparent;        color: #333;        text-align: right;}
+    /*.Header .Subtitle{font-size:20px;padding:0 5px 5px 15px; background-color: #0069bf;        text-align: right;        color: #FFF;}*/
+    .Header .Subtitle{font-size:20px;padding:0 5px 5px 15px; background-color: tranparent;        text-align: right;        color: #333}
+    .Logo{ width: 215px; display: inline-flex; flex-wrap: wrap; justify-content: center; align-content: center; margin: 10px;}
+    
+    .Table1{width:100%; max-width: 100%; margin-bottom: 1rem;  background-color: transparent; border-collapse:collapse;}
+    .Table1 caption{font-size:24px;font-weight:700;text-align:left; color: #555; background-color:#FFF;}
+    .Table1 thead th {        vertical-align: bottom;        border-bottom: 2px solid #dee2e6;  padding: 12px;  }
+    .Table1 tbody td{  padding: 12px;}
+    .Table1 tbody tr:nth-of-type(odd) {background-color: rgba(0,0,0,.05);   padding: 12px;}
+
+    footer{width:calc(100% - 5px - 5px);border-top: 1px solid #DDD; height:20px; white-space: nowrap; padding: 5px;color: #5d5d5d; margin-top: 10px; font-size: 12px; text-align: right;}
+    thead {  display: table-row-group;} /* patch for Chrome do not overlap table head*/
+}
+
+@media screen{
+}
+
+@media print {
+}
