@@ -1,4 +1,4 @@
-var recit = recit || {};
+/*var recit = recit || {};
 recit.mod = recit.mod || {};
 recit.mod.cahiercanada = recit.mod.cahiercanada || {};
 
@@ -760,4 +760,4 @@ var recitModCahierCanada = new recit.mod.cahiercanada.Main();
     recitModCahierCanada.init();
 }*/
 
-recit.utils.onDocumentReady(recitModCahierCanada.init);
+//recit.utils.onDocumentReady(recitModCahierCanada.init);

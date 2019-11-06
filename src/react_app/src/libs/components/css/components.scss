@@ -1,0 +1,348 @@
+//////////////////////////////////////////////////////////////
+// Components
+//////////////////////////////////////////////////////////////
+/*@import "../../csstheme/themes.scss";
+
+$themes2: (
+    DarkTheme: (
+        controlbar-primary-bg: #f9f9f9,
+        controlbar-primary-fg: #3f3f3f,
+        controlbar-sec-bg: #f9f9f9,
+        controlbar-sec-fg: #3f3f3f,
+        radiogroup-selected-bg: #337ab7,
+        radiogroup-selected-fg: #f3f3f3,
+        radiogroup-selected-shadow: 0px 1px 0px #3f3f3f,
+        datagrid-head-bg: #3f3f3f,
+        datagrid-head-fg: #f3f3f3,
+        datagrid-body-pair-bg: #f3f3f3,
+        datagrid-body-pair-fg: #3f3f3f,
+        datagrid-body-odd-bg: #ffffff,
+        datagrid-body-odd-fg: #3f3f3f,
+        datagrid-body-selected-bg: #f0ad4e,
+        datagrid-body-selected-fg: #f3f3f3,
+        datagrid-body-hover-bg: #f0ad4e,
+        datagrid-body-hover-fg: #f3f3f3,
+        listctrl-item-pair-bg: #f3f3f3,
+        listctrl-item-pair-fg: #3f3f3f,
+        listctrl-item-odd-bg: #ffffff,
+        listctrl-item-odd-fg: #3f3f3f,
+        proform-legend-bg:#3f3f3f,
+        proform-legend-fg:#f9f9f9,
+        proform-formgroup-bg:#f3f3f3,
+        proform-formgroup-fg:#3f3f3f,
+        switch-selected-bg: #337ab7,
+        switch-selected-fg: #f3f3f3,
+        switch-selected-shadow: 0px 1px 0px #3f3f3f,
+        treectrl-bg: #f3f3f3,
+        treectrl-fg: #3f3f3f,
+        treectrl-selected-bg: #f0ad4e !important,
+        treectrl-selected-fg: #f3f3f3 !important,
+        treectrl-hover-bg: #f0ad4e,
+        treectrl-hover-fg: #f3f3f3,
+        treectrl-striped-bg: #ffffff,
+        treectrl-striped-fg: #3f3f3f,
+        btn-primary-bg: #337ab7,
+        btn-primary-border: #2e6da4,
+        btn-primary-fg: #f3f3f3,
+        btn-primary-shadow: 0 1px 0 #3f3f3f,
+        btn-primary-hover: #2c6292,
+        navpanel-selected-bg: #f0ad4e
+    ),
+    LightTheme: (
+        controlbar-primary-bg: #f9f9f9,
+        controlbar-primary-fg: #3f3f3f,
+        controlbar-sec-bg: #f9f9f9,
+        controlbar-sec-fg: #3f3f3f,
+        radiogroup-selected-bg: #337ab7,
+        radiogroup-selected-fg: #f3f3f3,
+        radiogroup-selected-shadow: 0px 1px 0px #3f3f3f,
+        datagrid-head-bg: #3f3f3f,
+        datagrid-head-fg: #f3f3f3,
+        datagrid-body-pair-bg: #f3f3f3,
+        datagrid-body-pair-fg: #3f3f3f,
+        datagrid-body-odd-bg: #ffffff,
+        datagrid-body-odd-fg: #3f3f3f,
+        datagrid-body-selected-bg: #f0ad4e,
+        datagrid-body-selected-fg: #f3f3f3,
+        datagrid-body-hover-bg: #f0ad4e,
+        datagrid-body-hover-fg: #f3f3f3,
+        listctrl-item-pair-bg: #f3f3f3,
+        listctrl-item-pair-fg: #3f3f3f,
+        listctrl-item-odd-bg: #ffffff,
+        listctrl-item-odd-fg: #3f3f3f,
+        proform-legend-bg:#3f3f3f,
+        proform-legend-fg:#f9f9f9,
+        proform-formgroup-bg:#f3f3f3,
+        proform-formgroup-fg:#3f3f3f,
+        switch-selected-bg: #337ab7,
+        switch-selected-fg: #f3f3f3,
+        switch-selected-shadow: 0px 1px 0px #3f3f3f,
+        treectrl-bg: #f3f3f3,
+        treectrl-fg: #3f3f3f,
+        treectrl-selected-bg: #f0ad4e !important,
+        treectrl-selected-fg: #f3f3f3 !important,
+        treectrl-hover-bg: #f0ad4e,
+        treectrl-hover-fg: #f3f3f3,
+        treectrl-striped-bg: #ffffff,
+        treectrl-striped-fg: #3f3f3f,
+        btn-primary-bg: #337ab7,
+        btn-primary-border: #2e6da4,
+        btn-primary-fg: #f3f3f3,
+        btn-primary-shadow: 0 1px 0 #3f3f3f,
+        btn-primary-hover: #2c6292,
+        navpanel-selected-bg: #f0ad4e
+    ), 
+);
+
+ 
+$themes: add-props-theme($themes2);*/
+
+input[type="number"]{text-align: right;}
+
+*[data-alert="success"]{background-color: #dff0d8 !important; color: #3c763d !important; }
+*[data-alert="error"]{background-color: #f2dede !important; color: #a94442 !important; }
+*[data-alert="warning"]{background-color: #fcf8e3 !important; color: #8a6d3b !important; }
+
+/*
+//////////////////////////////////////////////////////////////
+// ControlBar
+//////////////////////////////////////////////////////////////
+.ControlBar{
+    margin-bottom: 0px; background-image: none; @include theme(background-color, controlbar-primary-bg); @include theme(color, controlbar-primary-fg);
+
+    .Breadcrumb{
+         list-style: none; padding: 0px; margin: 0px;
+        .Item{display: inline-block;  font-size: 20px; margin-top: 10px;}
+        .Separator{ display: inline-block; font-size: 20px; margin-left: 10px; margin-right: 10px;}
+    } 
+}
+
+//////////////////////////////////////////////////////////////
+// RadioGroup
+//////////////////////////////////////////////////////////////
+.RadioGroup{
+    .RadioItem[data-selected="1"]{ 
+        background-image: none; @include theme(background-color, radiogroup-selected-bg); @include theme(color, radiogroup-selected-fg);
+        @include theme(text-shadow, radiogroup-selected-shadow);
+    }
+}
+*/
+/*
+//////////////////////////////////////////////////////////////
+// ADataGrid
+//////////////////////////////////////////////////////////////
+.ADataGrid{
+    table-layout: fixed;
+    caption {caption-side: top;}
+    thead {
+        tr{ 
+            @include theme(background-color, datagrid-head-bg); @include theme(color, datagrid-head-fg);
+            th{vertical-align: middle; text-align: center;}
+        }        
+    }
+    tbody{
+        tr{
+            cursor: pointer; @include theme(background-color, datagrid-body-pair-bg); @include theme(color, datagrid-body-pair-fg);
+
+            td, th{text-align: center; vertical-align: middle;}
+            td[data-align="r"]{text-align: right;}
+            td[data-align="l"]{text-align: left;}
+        }
+        tr:nth-of-type(odd){ @include theme(background-color, datagrid-body-odd-bg); @include theme(color, datagrid-body-odd-fg); }
+        tr:hover{@include theme(background-color, datagrid-body-hover-bg); @include theme(color, datagrid-body-hover-fg);}
+        tr[data-selected="1"]{@include theme(background-color, datagrid-body-selected-bg); @include theme(color, datagrid-body-selected-fg); }    
+        tr[data-selected="1"][data-edition="1"] td{ padding: 0px;}
+        tr[data-selected="1"][data-edition="1"]{
+            input[type="number"], input[type="text"], input[type="color"]{margin: 3px; width: calc(100% - 6px); height: 30px;}
+            select{margin: 3px; width: calc(100% - 6px); height: 30px;}
+            .checkbox, .radio{ margin: 3px;}
+        }
+    } 
+}
+
+//////////////////////////////////////////////////////////////
+// DateTimeInterval
+//////////////////////////////////////////////////////////////
+.DateTimeInterval{
+    .Container{width: calc(50% - 10px); display: inline-block; margin-right: 10px;}
+}
+
+//////////////////////////////////////////////////////////////
+// ListCtrl
+//////////////////////////////////////////////////////////////
+.ListCtrl{
+    border: 1px solid #CCC; padding: 0px; border-radius: 8px; display: block; max-height: 300px; overflow-y: auto; 
+    .ListCtrlItem{
+        @include theme(background-color, listctrl-item-pair-bg); @include theme(color, listctrl-item-pair-fg); padding: 3px 5px 3px 5px; 
+        input[type="checkbox"]{margin-right: 5px;} 
+    }
+    .ListCtrlItem:nth-child(odd){ @include theme(background-color, listctrl-item-odd-bg); @include theme(color, listctrl-item-odd-fg);}
+    .ListCtrlItem:hover{cursor: pointer}
+}
+
+//////////////////////////////////////////////////////////////
+// ProForm
+//////////////////////////////////////////////////////////////
+.ProForm{
+    .Fieldset1{
+        .Legend1{@include theme(background-color, proform-legend-bg); @include theme(color, proform-legend-fg); padding: 5px; margin-bottom: 0px;}
+    }
+    
+    .FormGroup{
+        @include theme(background-color,proform-formgroup-bg); @include theme(color, proform-formgroup-fg); padding: 10px; margin: 0px;
+        .FormControl{padding-top: 7px;}
+    }  
+    .FormGroup[data-show-help="0"]{ padding: 5px;}
+}
+
+.Fieldset2{
+    border: 1px solid #e5e5e5; border-radius: 4px; padding: 5px;
+    .Legend2{width: auto; color: #333; margin: 0px; padding-left: 5px; padding-right: 5px; border: none;}
+}
+
+//////////////////////////////////////////////////////////////
+// Switch
+//////////////////////////////////////////////////////////////
+.Switch{
+    display: table;
+    .SwitchCtrl{
+        position: relative; width: 90px; height: 34px; padding-left: 15px; padding-right: 15px; display: inline-block; border: 1px solid rgb(204, 204, 204);
+        border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: 500px;
+        .Toggle{display: block; width: 30px;  margin: 0px; position: absolute; top: 0; bottom: 0; background: #FFFFFF; border: 1px solid #CCC;
+                border-radius: 3px; transition: all 0.2s ease-out; box-shadow: 0 1px 1px white inset
+        }
+        .Description{position: absolute; padding: 0px; top: 50%; }
+    }
+    .SwitchCtrl[data-value="0"]{
+        background-image: linear-gradient(to bottom,#fff 0,#e0e0e0 100%); color: #666666; text-align: left;
+        .Toggle{right: 0px}
+        .Description{transform: translate(0%,-50%); }
+    }
+    .SwitchCtrl[data-value="1"]{
+        @include theme(background-color, switch-selected-bg); @include theme(color, switch-selected-fg);  @include theme(text-shadow, switch-selected-shadow); text-align: right;
+        .Toggle{left: 0px}
+        .Description{transform: translate(-100%,-50%); }
+    }
+    .Spacer{display: table-cell; width: 100%;}
+}
+*/
+//////////////////////////////////////////////////////////////
+// VisualFeedback
+//////////////////////////////////////////////////////////////
+.VisualFeedback{
+    position: fixed; z-index: 9999; padding: 0; margin: 0; max-width: 800px; max-height: 500px; overflow: auto;
+}
+
+.VisualFeedback[data-feedback-type="error"]{overflow: auto; top: 50%; left: 50%; transform: translate(-50%,-50%);}
+.VisualFeedback[data-feedback-type="warning"]{top: auto; left: auto; right: 0; bottom: 0;}
+.VisualFeedback[data-feedback-type="info"]{top: auto; left: auto; right: 0; bottom: 0;}
+/*
+//////////////////////////////////////////////////////////////
+// Tile
+//////////////////////////////////////////////////////////////
+.Tile{
+    display: inline-flex; flex-direction: row; flex-wrap: wrap; justify-content: center; align-content: center; align-items: center;
+    .TileItem{
+        cursor: pointer; text-align: center; background-color: #5bc0de; margin: 10px; padding: 10px;        
+        .Description {color: #FFF; font-size: 16px; display: block;}   
+    }
+}
+
+//////////////////////////////////////////////////////////////
+// TreeCtrl
+//////////////////////////////////////////////////////////////
+.TreeCtrl{ 
+    border: 1px solid #DDD;
+        
+    .TreeNode{ 
+        list-style: none; cursor: pointer; @include theme(background-color, treectrl-bg); @include theme(color,treectrl-fg);
+        .Content{ 
+            display: inline-block; vertical-align: middle; width: calc(100%); 
+            .Description{font-size: 16px;}
+        }
+        .Content:hover{@include theme(background-color, treectrl-hover-bg); @include theme(color, treectrl-hover-fg);}
+    }
+    
+    .Branch{
+        @extend .TreeNode;
+        .ImgExpandCollapse{margin: 8px; float: left; } 
+    }
+    .Branch[data-selected="1"]{@include theme(background-color, treectrl-selected-bg); @include theme(color, treectrl-selected-fg);}
+    
+    .Leaf{
+        @extend .TreeNode;
+        .Content{ padding-left: 28px;}
+    }
+    .Leaf[data-selected="1"]{
+        .Content{@include theme(background-color, treectrl-selected-bg); @include theme(color, treectrl-selected-fg);}
+    }
+}
+
+.TreeCtrl[data-layout="menu"]{
+    .TreeNode{
+        .Content{
+            .Description{padding-left: 3px; font-size: 20px; line-height: 35px; font-weight: bold;}
+        }
+    }
+    .Leaf{
+        .Content{
+            .Description{font-size: 16px; line-height: 30px; font-weight: 500;}
+        }
+    }
+}
+
+.TreeCtrl[data-striped="1"]{
+    .TreeNode:nth-child(odd){@include theme(background-color, treectrl-striped-bg); @include theme(color, treectrl-striped-fg);}       
+}
+
+//////////////////////////////////////////////////////////////
+// NavPanel
+//////////////////////////////////////////////////////////////
+.NavPanel{
+    list-style: none; margin: 0px; padding: 0px; width: fit-content; position: relative; z-index: 100;
+    .NavPanelItem{
+        background-color: #FFF; display: block; border: 1px solid #DDD; padding: 10px; color: #555; cursor: pointer;
+        border-left: 1px solid #ddd; border-right: 1px solid #ddd; border-top: 1px solid #ddd;
+        .ShortDesc{text-align: center; font-size: 20px; margin-left: 10px; margin-right: 10px;  font-weight: bold; }
+
+        .FullDesc{display: none; font-size: 16px;  margin-left: 10px; }
+    }
+    .NavPanelItem:first-child { border-top-right-radius: 4px; border-top-left-radius: 4px;    }
+    .NavPanelItem:last-child { border-bottom-right-radius: 4px; border-bottom-left-radius: 4px;    }
+    .NavPanelItem[data-selected="1"]{@include theme(background-color, navpanel-selected-bg); color: #FFF;}
+    .NavPanelItem:hover{background-color: #F5F5F5;}
+}
+
+.NavPanel:hover{
+    .FullDesc{display: inline; }
+}
+*/
+//////////////////////////////////////////////////////////////
+// InputNumber
+//////////////////////////////////////////////////////////////
+.InputNumber{
+    text-align: right;
+}
+
+//////////////////////////////////////////////////////////////
+// Loading
+//////////////////////////////////////////////////////////////
+.Loading{
+    position: absolute; top: 0; left: 0; z-index: 9999; display: none; pointer-events: none; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.5);
+    .Img{width: 128px; height: 128px; position: relative; top: 50%; left: 50%; margin-right: -50%; transform: translate(-50%, -50%); }
+}
+
+//////////////////////////////////////////////////////////////
+// DATE PICKER OVERRIDE
+//////////////////////////////////////////////////////////////
+/*Datepicker is showing too small in size when triggered  because of the component sizes are set in rem units.*/
+.react-datepicker-popper{z-index: 3; width: max-content;}
+.react-datepicker {    font-size: 1em;  }
+.react-datepicker__header {    padding-top: 1em;  }
+.react-datepicker__month {    margin: 0.5em 1em;  }
+.react-datepicker__day-name, .react-datepicker__day {    width: 1.9em;    line-height: 1.9em;    margin: 0.166em;  }
+.react-datepicker__current-month {    font-size: 1em;  }
+.react-datepicker__navigation {    top: 1em;    line-height: 1.7em;    border: 0.45em solid transparent;  }
+.react-datepicker__navigation--previous {    border-right-color: #ccc;    left: 1em;  }
+.react-datepicker__navigation--next {    border-left-color: #ccc;    right: 1em;  }
+.react-datepicker-time__header {    font-size: 0.8em;  }

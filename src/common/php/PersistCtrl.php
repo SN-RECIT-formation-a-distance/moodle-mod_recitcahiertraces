@@ -157,7 +157,7 @@ class PersistCtrl
     }   */ 
 
     public function getPersonalNotes($cmId, $userId){
-        $query = "select t1.instance, t4.id as ccCmId, t4.ccid as ccId, t4.cmid as cmId, t4.title, t4.slot, t5.id as personalNoteId, 
+        $query = "select t1.instance, t4.id as ccCmId, t4.ccid as ccId, t4.cmid as cmId, t4.title as noteTitle, t4.slot, t5.id as personalNoteId, 
                 (case length(recit_strip_tags(coalesce(t5.note, ''))) when 0 then t4.templatenote else t5.note end) as note,
                 coalesce(t5.userid, 0) as userId, coalesce(t5.feedback, '') as feedback, 
                 t5.grade, t5.lastupdate as lastUpdate, concat(find_in_set(t4.cmId, t2.sequence), t4.slot) as orderByCustom, t3.name as ccName
@@ -166,14 +166,20 @@ class PersistCtrl
                 inner join mdl_recitcahiercanada as t3 on t1.instance = t3.id                
                 inner join mdl_recitcc_cm_notes as t4 on t3.id = t4.ccid
                 left join mdl_recitcc_user_notes as t5 on t4.id = t5.cccmid and t5.userId in ($userId, 0)
-                where t1.id = $cmId 
+                where t1.id = $cmId and exists(select id from mdl_course_modules cm where id = t4.cmid and deletioninprogress = 0) -- avoid to fetch deleted activities
                 order by orderByCustom";
                 
-        $result = $this->mysqlConn->execSQLAndGetObjects($query);
+        $tmp = $this->mysqlConn->execSQLAndGetObjects($query, 'PersonalNote');
 
-        $this->setSectionActivitiesName($cmId, $result);
+        $this->setSectionActivitiesName($cmId, $tmp);
 
-        return $result;
+        // index by activity
+        $result = array();
+        foreach($tmp as $item){
+            $result[$item->cmId][] = $item;
+        }
+
+        return array_values($result); // reset the array indexes
     }
 
     public function getPersonalNote($ccCmId, $userId){
@@ -181,11 +187,11 @@ class PersistCtrl
         t2.id, t2.cccmid as ccCmId, t2.userid as userId,  
         (case length(recit_strip_tags(coalesce(t2.note, ''))) when 0 then t1.templatenote else t2.note end) as note,
         t2.feedback, t2.grade, t2.lastupdate as lastUpdate
-                from mdl_recitcc_cm_notes as t1 
-                left join mdl_recitcc_user_notes as t2 on t1.id = t2.cccmid and t2.userid = $userId
-                where t1.id = $ccCmId";
+        from mdl_recitcc_cm_notes as t1 
+        left join mdl_recitcc_user_notes as t2 on t1.id = t2.cccmid and t2.userid = $userId
+        where t1.id = $ccCmId";
         
-        return $this->mysqlConn->execSQLAndGetObject($query);
+        return $this->mysqlConn->execSQLAndGetObject($query, 'PersonalNote');
     }
 
     public function savePersonalNote($data, $flag){
@@ -220,30 +226,10 @@ class PersistCtrl
     }
 
     public function getCmNotes($ccCmId = 0, $cmId = 0){
-        /*$query = "select t1.id as ccCmId, t1.ccid as ccId, t1.cmid as cmId, t1.title, t1.slot, t1.templatenote as templateNote, t1.lastupdate as lastUpdate
-                from mdl_recitcc_cm_notes as t1
-                where t1.cmid = $cmId
-                order by ccCmId asc";*/
-       /* $query = "select t1.id as ccCmId, t1.ccid as ccId, t1.cmid as cmId, t1.title, t1.slot, t1.templatenote as templateNote, t1.lastupdate as lastUpdate, 
-        CONCAT('[', 
-            GROUP_CONCAT(  
-                JSON_OBJECT(
-                    'tagId', coalesce(t3.id,0),
-                    'tagName', coalesce(t3.name,'')
-                )
-            ),']'
-        ) as tagList
-                        from mdl_recitcc_cm_notes as t1
-                        left join mdl_tag_instance as t2 on t1.id and itemtype = 'cccmnote' and component = 'mod_cahiercanada'
-                        left join mdl_tag as t3 on t2.tagid = t3.id
-                        where t1.cmid = $cmId
-                        group by t1.id                
-                        order by ccCmId asc";*/
-
         $ccCmIdStmt = ($ccCmId == 0 ? "1" : " t1.id = $ccCmId");
         $cmStmt = ($cmId == 0 ? "1" : " t1.cmid = $cmId");
 
-        $query = "select t1.id as ccCmId, t1.ccid as ccId, t1.cmid as cmId, t1.title, t1.slot, t1.templatenote as templateNote, t1.lastupdate as lastUpdate, 
+        $query = "select t1.id as ccCmId, t1.ccid as ccId, t1.cmid as cmId, t1.title as noteTitle, t1.slot, t1.templatenote as templateNote, t1.lastupdate as lastUpdate, 
                     GROUP_CONCAT(t2.id) as tagList
                     from mdl_recitcc_cm_notes as t1
                     left join mdl_tag_instance as t2 on t1.id = t2.itemid and itemtype = 'cccmnote' and component = 'mod_cahiercanada'
@@ -296,7 +282,7 @@ class PersistCtrl
             $data->lastUpdate = time();
             
             $fields = array("ccid", "cmid", "title", "slot", "templatenote", "lastupdate");
-            $values = array($data->ccId, $data->cmId, $data->title,  $data->slot, $data->templateNote, $data->lastUpdate);
+            $values = array($data->ccId, $data->cmId, $data->noteTitle,  $data->slot, $data->templateNote, $data->lastUpdate);
 
             if($data->ccCmId == 0){
                 $query = $this->mysqlConn->prepareStmt("insert", "mdl_recitcc_cm_notes", $fields, $values);
@@ -416,7 +402,7 @@ class PersistCtrl
                 from mdl_course_modules as t1 
                 inner join mdl_course_sections as t2 on t1.section = t2.id 
                 inner join mdl_modules as t3 on t1.module = t3.id
-                where t1.section in (select section from mdl_course_modules where id = $cmId) and t1.module not in (12)";
+                where t1.section in (select section from mdl_course_modules where id = $cmId) and t3.name not in ('recitcahiercanada') and t1.deletioninprogress = 0";
         $activityList = $this->mysqlConn->execSQLAndGetObjects($query);
 
         $queryTemplate = "(select %ld as ccId, %ld as cmId, id, name from mdl_%s where id = %ld)";
@@ -521,17 +507,25 @@ class PersistCtrl
         return $this->mysqlConn->execSQLAndGetObject($query);
     }
 
-    public function getTagList($itemId, $itemType, $component){
-        $itemStmt = "1";
+    public function getTagList($itemId, $itemType = "", $component = ""){
+        $whereStmt = "1";
         if($itemId > 0){
-            $itemStmt = "t2.itemid = $itemId ";
+            $whereStmt = " t2.itemid = $itemId ";
+        }
+
+        if(!empty($itemType)){
+            $whereStmt .= " and t2.itemtype = '$itemType' ";
+        }
+
+        if(!empty($component)){
+            $whereStmt = " and t2.component = '$component' ";
         }
         
         $query = "SELECT distinct t1.id as tagId, t1.name as tagName, t2.itemtype as itemType, t2.component, 
                 group_concat(t2.id) as instanceIds  
                 FROM  mdl_tag as t1
                  inner join mdl_tag_instance as t2 on t1.id = t2.tagid
-                 where $itemStmt and t2.itemtype = '$itemType' and t2.component = '$component'
+                 where $whereStmt
                  group by t1.id";
         $result = $this->mysqlConn->execSQLAndGetObjects($query);
 
@@ -677,10 +671,29 @@ class CmNote
     public $ccCmId = 0;
     public $ccId = 0;
     public $cmId = 0;
-    public $title = "";
+    public $noteTitle = "";
+    public $templateNote = "";
     public $slot = 0;
     public $lastUpdate = 0;
     public $tagList = array();
+}
+
+class PersonalNote
+{
+    public $activityName = "";
+    public $ccCmId = 0;
+    public $ccId = 0;
+    public $cmName = "";
+    public $cmId = 0;
+    public $feedback = "";
+    public $grade = 0;
+    public $instance = 0;
+    public $lastUpdate = 0;
+    public $note = "";
+    public $personalNoteId = 0;
+    public $slot = 0;
+    public $noteTitle = "";
+    public $userId = 0;
 }
 
 class MoodleTag
@@ -703,14 +716,7 @@ class CcCm
     public $personalNotes = array();
 }
 
-class PersonalNote
-{
-    public $id = 0;
-    public $ccCmId = 0;
-    public $userId = 0;
-    public $note = "";
-    public $feedback = "";
-}
+
 
 
         $obj2 = new stdClass();

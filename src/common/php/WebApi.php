@@ -326,6 +326,25 @@ abstract class CahierCanadaApi extends MoodleApi
         }     
     }
 
+    protected function getPersonalNote($request){
+        try{
+            $cmId = intval($request['cmId']);
+            $ccCmId = intval($request['ccCmId']);
+            $userId = intval($request['userId']);
+
+            $this->canUserAccess('s', $cmId, $userId);
+            
+            $result = PersistCtrl::getInstance()->getPersonalNote($ccCmId, $userId);
+
+            $this->prepareJson($result);
+            return new WebApiResult(true, $result);
+        }
+        catch(Exception $ex){
+            return new WebApiResult(false, null, $ex->GetMessage());
+        }     
+    }
+
+    
     protected function savePersonalNote($request){        
         try{			
             $data = json_decode(json_encode($request['data']), FALSE);
@@ -356,6 +375,25 @@ abstract class CahierCanadaApi extends MoodleApi
             return new WebApiResult(false, null, $ex->GetMessage());
         }     
     }
+
+    protected function getCcCmNoteFormKit($request){
+        try{
+            $ccCmId = intval($request['ccCmId']);
+            $cmId = intval($request['cmId']);
+
+            $this->canUserAccess('a', $cmId);
+
+            $result = new stdClass();
+            $result->data = ($ccCmId == 0 ? new CmNote() : PersistCtrl::getInstance()->getCcCmNote($ccCmId));
+            $result->tagList = PersistCtrl::getInstance()->getTagList($result->data->cmId);
+
+            $this->prepareJson($result);
+            return new WebApiResult(true, $result);
+        }
+        catch(Exception $ex){
+            return new WebApiResult(false, null, $ex->GetMessage());
+        }     
+    }
     
     protected function removeCcCmNote($request){
         try{
@@ -373,12 +411,12 @@ abstract class CahierCanadaApi extends MoodleApi
     protected function saveCcCmNote($request){        
         try{            
             $data = json_decode(json_encode($request['data']), FALSE);
-            $tagMetadata = json_decode(json_encode($request['tagMetadata']), FALSE);
+            //$tagMetadata = json_decode(json_encode($request['tagMetadata']), FALSE);
 
             $this->canUserAccess('a', $data->cmId);
 
             $result = PersistCtrl::getInstance()->saveCcCmNote($data);
-            PersistCtrl::getInstance()->moodleTagItem($result, $tagMetadata);
+            //PersistCtrl::getInstance()->moodleTagItem($result, $tagMetadata);
             $this->prepareJson($result);
             return new WebApiResult(true, $result);
 		}
@@ -449,8 +487,6 @@ class RecitApi extends CahierCanadaApi
         catch(Exception $ex){
             return new WebApiResult(false, null, $ex->GetMessage());
         }     
-    }
-
-    
+    }   
 }
 

@@ -42,18 +42,14 @@ class RecitCahierCanadaView
         $this->page->set_url('/mod/recitcahiercanada/view.php', array('id' => $this->cm->id));
         $this->page->set_title($this->course->shortname.': '.$this->cm->name);
         $this->page->set_heading($this->course->fullname);
-        $this->page->requires->js(new moodle_url('/mod/recitcahiercanada/common/js/WebApi.js'), true);
-        $this->page->requires->js(new moodle_url('/mod/recitcahiercanada/common/js/Utils.js'), true);
-        $this->page->requires->js(new moodle_url('/mod/recitcahiercanada/common/js/Components.js'), true);
-        $this->page->requires->js(new moodle_url('/mod/recitcahiercanada/view.js'), true);
-        $this->page->requires->css(new moodle_url('/mod/recitcahiercanada/common/css/components.css'), true);
+        $this->page->requires->css(new moodle_url('./react_app/dist/index.css'), true);
 
-        $i18n = array("sectionActivities", 'turnOnEditingMode', 'turnOffEditingMode', 'selectGroup', 'selectUser', 'selectOption', 'previous', 'next',
+       /* $i18n = array("sectionActivities", 'turnOnEditingMode', 'turnOffEditingMode', 'selectGroup', 'selectUser', 'selectOption', 'previous', 'next',
         'activity', 'noteTitle', 'templateNote', 'studentNote', 
         'teacherFeedback', 'edit', 'save', 'remove', 'cancel', 'copy', 'selectSectionActivity', 'integrationCode', 'addNewNote', 'msgActionCompleted', 
         'msgConfirmDeletion', 'msgDeletionExtraInfo', 'noData', 'printNotes', 'msgCCSeqPos', 'tags', 'typeToSearch'); 
 
-        $this->page->requires->strings_for_js($i18n, "recitcahiercanada");
+        $this->page->requires->strings_for_js($i18n, "recitcahiercanada");*/
         //$PAGE->set_activity_record($cm);
         
         echo $this->output->header();
@@ -62,10 +58,17 @@ class RecitCahierCanadaView
         $roles = Utils::getUserRoles($this->course->id, $this->user->id);
         $studentId = (in_array('ad', $roles) ? 0 : $this->user->id);
 
-        echo sprintf("<div id='recitCahierCanada' data-student-id='%ld' data-roles='%s'></div>", $studentId, implode(",", $roles));
-
-        //echo Utils::createTagsForm($this->db, $this->cm->id);
+        echo sprintf("<div id='recit_cahiertraces' data-student-id='%ld' data-roles='%s'></div>", $studentId, implode(",", $roles));
         echo Utils::createEditorHtml(false);
+        
+      /*  echo '<script src="react_app/build/lib/react/react.development.js"></script>';
+        echo '<script src="react_app/build/lib/react/react-dom.development.js"></script>';
+        echo '<script src="react_app/build/lib/react/react-bootstrap.min.js"></script>';
+        echo '<script src="react_app/build/cahiertraces_app.js"></script>';*/
+        
+        echo '<script src="./react_app/dist/index.js"></script>';
+        //echo Utils::createTagsForm($this->db, $this->cm->id);
+        
         
         echo $this->output->footer();
     }

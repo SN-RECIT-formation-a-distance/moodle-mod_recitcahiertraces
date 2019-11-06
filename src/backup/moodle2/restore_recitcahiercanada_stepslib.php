@@ -63,7 +63,6 @@ class restore_recitcahiercanada_activity_structure_step extends restore_activity
     protected function process_recitcc_cm_notes($data) {
         global $DB, $USER;
 
-        //$fp = fopen("C:\Users\Prologic\Desktop\debug.txt", "a") or die("Unable to open file!");
         //fwrite($fp, print_r($data, true) . chr(10));
 
         $data = (object)$data;
