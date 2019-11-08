@@ -343,7 +343,6 @@ abstract class CahierCanadaApi extends MoodleApi
             return new WebApiResult(false, null, $ex->GetMessage());
         }     
     }
-
     
     protected function savePersonalNote($request){        
         try{			
@@ -386,6 +385,7 @@ abstract class CahierCanadaApi extends MoodleApi
             $result = new stdClass();
             $result->data = ($ccCmId == 0 ? new CmNote() : PersistCtrl::getInstance()->getCcCmNote($ccCmId));
             $result->tagList = PersistCtrl::getInstance()->getTagList($result->data->cmId);
+            $result->activityList = PersistCtrl::getInstance()->getSectionCmList($result->data->cmId);
 
             $this->prepareJson($result);
             return new WebApiResult(true, $result);
@@ -423,6 +423,20 @@ abstract class CahierCanadaApi extends MoodleApi
 		catch(Exception $ex){
             return new WebApiResult(false, null, $ex->GetMessage());
         } 
+    }
+
+    protected function switchCcCmNoteSlot($request){
+        try{
+            $this->canUserAccess('a');
+
+            $from = intval($request['from']);
+            $to = intval($request['to']);
+            PersistCtrl::getInstance()->switchCcCmNoteSlot($from, $to);
+            return new WebApiResult(true);
+        }
+        catch(Exception $ex){
+            return new WebApiResult(false, null, $ex->GetMessage());
+        }     
     }
 
     protected function checkCCSeqPos($request){

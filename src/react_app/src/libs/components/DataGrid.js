@@ -218,6 +218,80 @@ class BRow extends Component {
     }
 };
 
+class BRowDraggable extends BRow {
+    static defaultProps = {
+        children: null,
+        index: -1,
+        selected: false,
+        onClick: null,
+        onDbClick: null,        
+        style: null,
+        alert: "",
+        onDrag: null,
+        onDrop: null,
+        data: null
+    };
+
+    constructor(props){
+        super(props);
+
+        this.onDrop = this.onDrop.bind(this);
+        this.onDragOver = this.onDragOver.bind(this);
+        this.onDragEnter = this.onDragEnter.bind(this);
+        this.onDragLeave = this.onDragLeave.bind(this);
+        this.onDragStart = this.onDragStart.bind(this);
+        this.onDragEnd = this.onDragEnd.bind(this);
+        
+        this.state = {hovering: 0, dragging: 0};
+    }
+
+    render() {       
+        let style = this.props.style || {};
+        style.borderBottom = (this.state.hovering === 1 ? "2px dotted #dc3545" : "none");
+        style.cursor = (this.state.dragging === 1 ? "grabbing" : "grab");
+
+        let main = 
+                <tr data-alert={this.props.alert} onClick={() => this.onClick()}  onDoubleClick={(event) => this.onDbClick(event)} data-selected={(this.props.selected ? 1 : 0)}
+                    style={style} onDragOver={this.onDragOver} onDrop={this.onDrop} onDragEnter={this.onDragEnter} onDragLeave={this.onDragLeave} data-hovering={this.state.hovering}
+                    draggable="true" onDragStart={(event) => this.onDragStart(event)}  onDragEnd={(event) => this.onDragEnd(event)} data-dragging={this.state.dragging}>
+                    {this.renderChildren()}
+                </tr>;
+
+        return (main);
+    }
+
+    onDragStart(event){
+        this.setState({dragging: 1});
+        this.props.onDrag(this.props.data, this.props.index);
+    }
+    
+    onDragEnd(event){
+        this.setState({dragging: 0});
+        this.props.onDrag(null, -1);
+    }
+
+    onDragEnter(event){
+        event.stopPropagation(); 
+        this.setState({hovering: 1});
+    }
+    
+    onDragLeave(event){
+        event.stopPropagation(); 
+        this.setState({hovering: 0});
+    }
+    
+    onDrop(event){
+        // it needs to stop propagation otherwise it will dispatch in cascade
+        event.stopPropagation(); 
+        this.setState({hovering: 0});  
+        this.props.onDrop(this.props.data, this.props.index);
+    } 
+
+    onDragOver(event){
+        event.preventDefault(); // Necessary to allows us to drop.
+    }
+}
+
 class ACell extends Component {
     getColSpan(){
         return (this.props.colSpan > 0 ? this.props.colSpan : "");
@@ -331,4 +405,5 @@ DataGrid.Header.Row = HRow;
 DataGrid.Header.Cell = HCell;
 DataGrid.Body = Body;
 DataGrid.Body.Row = BRow;
+DataGrid.Body.RowDraggable = BRowDraggable;
 DataGrid.Body.Cell = BCell;

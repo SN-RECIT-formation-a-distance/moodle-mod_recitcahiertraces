@@ -20,13 +20,7 @@ if(!Utils::isAdminRole($roles)){
 }
 
 
-$tmp = PersistCtrl::getInstance($DB, $USER)->getPersonalNotes($cmId, $userId);
-
-$personalNotes = array();
-foreach($tmp as $item){
-    $item->lastUpdate = ($item->lastUpdate > 0 ? date('Y-m-d H:i:s', $item->lastUpdate) : '');
-    $personalNotes[$item->cmId][] = $item;
-}
+$personalNotes = PersistCtrl::getInstance($DB, $USER)->getPersonalNotes($cmId, $userId);
 
 $cahierCanada = current(current($personalNotes));
 $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahiercanada'), $cahierCanada->ccName, get_string('printedOn', 'mod_recitcahiercanada'), date('Y-m-d H:i:s'));
@@ -35,7 +29,8 @@ $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahie
 <!DOCTYPE html>
 <html>
 <head>
-    <title><?php echo $pageTitle; ?></title>
+    <title><?php echo $pageTitle; ?></title>    
+    <link rel="stylesheet" type="text/css" href="../react_app/build/index.css">
     <link rel="stylesheet" type="text/css" href="../common/css/report.css">
     <link rel="icon" href="../pix/icon.png?v=2"  />
 </head>
@@ -53,31 +48,25 @@ $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahie
         foreach($personalNotes as $notes){
             
             $note = current($notes);
-            echo sprintf("<h1 style='text-align: center; margin-bottom: 20px;'>%s: %s</h1>", get_string('activity', 'mod_recitcahiercanada'), $note->activityName);
+            echo '<div class="card" style="margin-bottom: 20px">';
+            echo sprintf("<div class='card-header'>%s: %s</div>", get_string('activity', 'mod_recitcahiercanada'), $note->activityName);
             foreach($notes as $note){
-                echo "<table class='Table1'>";
-                echo sprintf("<caption>%s</caption>", $note->title);
-                echo "<thead>";
-                echo "<tr>";
-                echo sprintf("<th>%s</th>", get_string('studentNote', 'mod_recitcahiercanada'));
-                if($showFeedback){
-                    echo sprintf("<th>%s</th>", get_string('teacherFeedback', 'mod_recitcahiercanada'));
-                }                
+                // overflow = hidden for the notes that overflow the page dimensions
+                echo "<div class='card-body' style='overflow: hidden;'>";
+                echo sprintf("<h5 class='card-title'>%s</h5>", $note->noteTitle);
+                echo '<blockquote class="blockquote mb-0">';
+                echo sprintf('<footer class="blockquote-footer">%s: %s</footer>',  get_string('timestamp', 'mod_recitcahiercanada'), $note->lastUpdateFormat());
+                echo '</blockquote>';
                 
-                echo sprintf("<th>%s</th>", get_string('timestamp', 'mod_recitcahiercanada'));
-                echo "</tr>";
-                echo "</thead>";
-                echo "<tbody>";
-                echo "<tr>";
-                echo "<td>{$note->note}</td>";
+                echo "{$note->note}";
+                
                 if($showFeedback){
-                    echo "<td>{$note->feedback}</td>";
+                    echo sprintf('<div class="alert alert-primary" role="alert" style="margin-top: 15px;"><strong>%s:</strong><br/>%s</div>', get_string('teacherFeedback', 'mod_recitcahiercanada'), $note->feedback);
                 }
-                echo "<td>{$note->lastUpdate}</td>";
-                echo "</tr>";
+                
+                echo "</div>";
             }
-            echo "</tbody>";
-            echo "</table>";
+            echo "</div>";
         }
     ?>
 

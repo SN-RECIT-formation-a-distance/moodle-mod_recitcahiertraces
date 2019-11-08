@@ -1,10 +1,8 @@
 import React, { Component } from 'react';
 import { FormControl  } from 'react-bootstrap';
-import {Dialog} from './Dialog.js'
-import {ProForm, FormItem, ActionBar} from './ProForm.js'
 
 export class DlgInput extends Component {
-    static type = {
+  /*  static type = {
         STRING: 'string',
         INT: 'int'
     };
@@ -53,5 +51,5 @@ export class DlgInput extends Component {
     
     onChange(event){
         this.setState({value: event.target.value});
-    }
+    }*/
 }

@@ -1,5 +1,3 @@
-//import $ from 'jquery'
-
 export class HttpRequest
 {
     static contentType = {
@@ -122,51 +120,6 @@ export class HttpRequest
         alert("The request was canceled for timeout. Please try again.");
         console.log(event);
     }
-
-    /*jQuerySend(method, url, data, successCallback, errorCallback, completeCallback, requestDataType, responseDataType ){
-        successCallback = successCallback || null;
-        errorCallback = errorCallback || null;
-        completeCallback = completeCallback || null;    
-        responseDataType = responseDataType || HttpRequest.responseType.json;
-        requestDataType = requestDataType || HttpRequest.contentType.json;
-
-        let jqXHR = {
-            type: method,
-            url: url,
-            data: data,
-            cache: false,
-            dataType: responseDataType, // telling jQuery what kind of response to expect.
-            contentType: requestDataType, // header sent to the server, specifying a particular format (the content of message body)
-            success:  function(result){
-                if(successCallback !== null){
-                    try{
-                        let json = (responseDataType === HttpRequest.responseType.json ? JSON.parse(result) : result);
-                        successCallback.call(this, json);
-                    }
-                    catch(error){
-                        successCallback.call(this, result);
-                    }
-                }
-            },
-
-            error: function (jqXHR, textStatus, errorThrown){
-                if(errorCallback !== null){
-                    errorCallback.call(this, jqXHR, textStatus, errorThrown);
-                }
-            },
-            complete: function(){
-                if(completeCallback !== null){
-                    completeCallback.call(this);
-                }
-            }
-        };
-
-        if(this.useCORS){ jqXHR.xhrFields = {withCredentials: true}; }
-                   
-        if(this.timeout > 0){ jqXHR.timeout = this.timeout; }
-
-        $.ajax(jqXHR);    
-    };*/
 };
 
 export class WebApi
@@ -176,9 +129,7 @@ export class WebApi
         this.http = new HttpRequest();
         this.domVisualFeedback = null;
 
-        //this.get = this.get.bind(this);
         this.post = this.post.bind(this);
-        //this.postFile = this.postFile.bind(this);
         this.onError = this.onError.bind(this);
         this.onComplete = this.onComplete.bind(this);
     }
@@ -187,18 +138,6 @@ export class WebApi
         alert("Error on server communication ("+ textStatus +").\n\nSee console for more details");
         console.log(jqXHR);
     };
-
-    /*postFile(url, data, callbackSuccess, callbackError){
-        this.showLoadingFeedback();
-        callbackError = callbackError || this.onError;
-        this.http.send("post", url, data, callbackSuccess, callbackError, this.onComplete, HttpRequest.contentType.file);
-    }*/
-    
-    /*get(url, callbackSuccess, callbackError){
-        this.showLoadingFeedback();
-        callbackError = callbackError || this.onError;
-        this.http.send("get", url, null, callbackSuccess, callbackError, this.onComplete);
-    }*/
     
     post(url, data, callbackSuccess, callbackError, showFeedback){
         showFeedback = (typeof showFeedback === 'undefined' ? true : showFeedback);
@@ -208,8 +147,6 @@ export class WebApi
         }
         
         callbackError = callbackError || this.onError;
-        //data = $.param(data); // json to post data
-        //this.http.send("post", url, data, callbackSuccess, callbackError, this.onComplete, Http.contentType.postData);
         data = JSON.stringify(data);
 
         this.http.send("post", url, data, callbackSuccess, callbackError, this.onComplete, HttpRequest.contentType.json, HttpRequest.responseType.json);

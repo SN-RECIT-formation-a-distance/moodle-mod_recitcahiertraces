@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {ButtonGroup, Button, Form, Col, Tabs, Tab, DropdownButton, Dropdown, Modal} from 'react-bootstrap';
-import {faArrowLeft, faArrowRight, faPencilAlt, faPlusCircle, faWrench, faTrashAlt, faCopy, faBars, faGripVertical, faSquare, faCheckSquare} from '@fortawesome/free-solid-svg-icons';
+import {faArrowLeft, faArrowRight, faPencilAlt, faPlusCircle, faWrench, faTrashAlt, faCopy, faBars, faGripVertical, faCheckSquare} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {ComboBox, FeedbackCtrl, DataGrid} from '../libs/components/Components';
 import Utils,{ UtilsMoodle} from '../libs/utils/Utils';
@@ -217,7 +217,8 @@ export class NoteForm extends Component
             data: null,  
             formValidated: false,
             dropdownLists: {
-                tagList: []
+                tagList: [],
+                activityList: []
             }
         };
 
@@ -245,6 +246,12 @@ export class NoteForm extends Component
                 </Modal.Header>
                 <Modal.Body>      
                     <Form noValidate validated={this.state.formValidated} ref={this.formRef}>
+                        <Form.Row>
+                            <Form.Group as={Col}>
+                                <Form.Label>{"Activité de la section:"}</Form.Label>
+                                <ComboBox placeholder={"Sélectionnez votre option"} required={true}  name="cmId" value={data.cmId} options={this.state.dropdownLists.activityList} onChange={this.onDataChange} />
+                            </Form.Group>
+                        </Form.Row>
                         <Form.Row>
                             <Form.Group as={Col}>
                                 <Form.Label>{"Titre"}</Form.Label>
@@ -291,6 +298,12 @@ export class NoteForm extends Component
     onDataChange(event){
         let data = this.state.data;
         data[event.target.name] = event.target.value;
+
+        // if the activity has changed then it restart the slot
+        if(event.target.name === "cmId"){
+            data.slot = 0;
+        }
+
         this.setState({data: data})
     }
 
@@ -301,7 +314,7 @@ export class NoteForm extends Component
 
     getDataResult(result){         
         if(result.success){
-            this.setState(this.prepareNewState(result.data.data, {tagList: result.data.tagList}));
+            this.setState(this.prepareNewState(result.data.data, {tagList: result.data.tagList, activityList: result.data.activityList}));
         }
         else{
             $glVars.feedback.showError($glVars.i18n.tags.appname, result.msg);
@@ -319,9 +332,14 @@ export class NoteForm extends Component
 
         if(dropdownLists !== null){
             result.dropdownLists.tagList = [];
+            result.dropdownLists.activityList = [];
 
             for(let item of dropdownLists.tagList){
                 result.dropdownLists.tagList.push({value: item.tagId, label: item.tagName, data: item});
+            }
+
+            for(let item of dropdownLists.activityList){
+                result.dropdownLists.activityList.push({value: item.cmId, text: item.name});
             }
         }
 
@@ -379,8 +397,10 @@ export class EditionMode extends Component{
         this.onCopyIC = this.onCopyIC.bind(this);
         this.onSelectCm = this.onSelectCm.bind(this);
         this.onClose = this.onClose.bind(this);
+        this.onDragRow = this.onDragRow.bind(this);
+        this.onDropRow = this.onDropRow.bind(this);
 
-        this.state = {ccCm: null, ccCmId: -1, cmList: [], cmNoteList: [] };
+        this.state = {ccCm: null, ccCmId: -1, cmList: [], cmNoteList: [], draggingItem: null };
 
         this.intCodeRef = React.createRef();
     }
@@ -455,6 +475,7 @@ export class EditionMode extends Component{
                 <DataGrid orderBy={false}>
                     <DataGrid.Header>
                         <DataGrid.Header.Row>
+                            <DataGrid.Header.Cell style={{width: 40}}></DataGrid.Header.Cell>
                             <DataGrid.Header.Cell style={{width: 80}}>{"#"}</DataGrid.Header.Cell>
                             <DataGrid.Header.Cell >{"Titre de la note"}</DataGrid.Header.Cell>
                             <DataGrid.Header.Cell  style={{width: 80}}></DataGrid.Header.Cell>
@@ -463,9 +484,9 @@ export class EditionMode extends Component{
                     <DataGrid.Body>
                         {this.state.cmNoteList.map((item, index) => {                            
                                 let row = 
-                                    <DataGrid.Body.Row key={index} onDbClick={() => this.onEdit(item.ccCmId)}>
-                                        
-                                        <DataGrid.Body.Cell>{index + 1}</DataGrid.Body.Cell>
+                                    <DataGrid.Body.RowDraggable key={index} data={item} onDbClick={() => this.onEdit(item.ccCmId)} onDrag={this.onDragRow} onDrop={this.onDropRow}>
+                                        <DataGrid.Body.Cell><FontAwesomeIcon icon={faGripVertical} title="Déplacer l'item"/></DataGrid.Body.Cell>
+                                        <DataGrid.Body.Cell>{(index + 1)}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell>{item.noteTitle}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell>
                                             <DropdownButton size="sm" title={<span><FontAwesomeIcon icon={faBars}/>{" Actions"}</span>}>
@@ -474,8 +495,8 @@ export class EditionMode extends Component{
                                                 <Dropdown.Item onClick={() => this.onCopyIC(item.ccCmId)}><FontAwesomeIcon icon={faCopy}/>{" Code d'intégration"}</Dropdown.Item>
                                             </DropdownButton>
                                         </DataGrid.Body.Cell>
-                                    </DataGrid.Body.Row>
-                                return (row);                                    
+                                    </DataGrid.Body.RowDraggable>
+                                return (row);
                             }
                         )}
                     </DataGrid.Body>
@@ -483,8 +504,25 @@ export class EditionMode extends Component{
                 <Form.Control type="hidden" ref={this.intCodeRef}/>
                 {this.state.ccCmId >= 0 && <NoteForm ccCmId={this.state.ccCmId} ccCm={this.state.ccCm} onClose={this.onClose}/>}
             </div> 
-            //<DataGrid.Body.Cell><FontAwesomeIcon icon={faGripVertical} title="Déplacer l'item"/></DataGrid.Body.Cell>
+
         return (main);
+    }
+
+    onDragRow(item, index){
+        this.setState({draggingItem: item});
+    }
+
+    onDropRow(item, index){
+        let that = this;
+        let callback = function(result){
+            if(result.success){
+                that.getData2();
+            }
+            else{
+                $glVars.feedback.showError($glVars.i18n.tags.appName, result.msg);
+            }
+        }
+        $glVars.webApi.switchCcCmNoteSlot(this.state.draggingItem.ccCmId, item.ccCmId, callback);
     }
 
     onAdd(){
@@ -710,11 +748,12 @@ export class Notebook extends Component{
         this.onEdit = this.onEdit.bind(this);
         this.onClose = this.onClose.bind(this);
 
-        this.state = {dataProvider: [], activeTab: 0, personalNote: null};
+        let params = Utils.getUrlVars();
+        this.state = {dataProvider: [], activeTab: 0, personalNote: null, cmId: params.id};
     }
     
     componentDidMount(){
-        $glVars.webApi.addObserver("Notebook", this.getData, ['savePersonalNote']);
+        $glVars.webApi.addObserver("Notebook", this.getData, ['savePersonalNote']);        
         this.getData();
     }
 
@@ -746,15 +785,24 @@ export class Notebook extends Component{
             return;
         }
 
-        let params = Utils.getUrlVars();
-        $glVars.webApi.getPersonalNotes(params.id, this.props.userId, callback);
+        $glVars.webApi.getPersonalNotes(this.state.cmId, this.props.userId, callback);
+    }
+
+    getPrintLink(showFeedback){
+        return UtilsMoodle.wwwRoot()+`/mod/recitcahiercanada/classes/ReportStudentNotes.php?cmId=${this.state.cmId}&userId=${this.props.userId}&sf=${showFeedback || 0}`;
     }
 
     render(){
-        let that = this;
+        if(this.state.dataProvider.length === 0){ return null;}
 
+        let that = this;
         let main = 
             <div>  
+                <div style={{textAlign: "right"}}>
+                    <a href={this.getPrintLink()} target="_blank">{"Imprimer des notes"}</a>{ " | "}
+                    <a href={this.getPrintLink(1)} target="_blank">{"Imprimer des notes + Rétroaction"}</a>
+                </div>
+
                 <Tabs id="tabActivities" activeKey={this.state.activeTab} onSelect={this.onSelectTab}>
                     {this.state.dataProvider.map(function(items, index){
                         let result = 

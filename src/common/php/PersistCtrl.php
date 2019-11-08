@@ -235,7 +235,7 @@ class PersistCtrl
                     left join mdl_tag_instance as t2 on t1.id = t2.itemid and itemtype = 'cccmnote' and component = 'mod_cahiercanada'
                     where $ccCmIdStmt and $cmStmt
                     group by t1.id                
-                    order by ccCmId asc";
+                    order by slot asc";
 
         $result = $this->mysqlConn->execSQLAndGetObjects($query, 'CmNote');
 
@@ -268,12 +268,24 @@ class PersistCtrl
         return $result;
     }
 
-    public function removeCcCmNote($ccCmId){
-        $query = "delete from mdl_recitcc_user_notes where cccmid = $ccCmId";
-        $this->mysqlConn->execSQL($query);
+    public function removeCcCmNote($ccCmId){  
+        try{  
+            $this->mysqlConn->beginTransaction();
 
-        $query = "delete from mdl_recitcc_cm_notes where id = $ccCmId";
-        $this->mysqlConn->execSQL($query);
+            $query = "delete from mdl_recitcc_user_notes where cccmid = $ccCmId";
+            $this->mysqlConn->execSQL($query);
+
+            $query = "delete from mdl_recitcc_cm_notes where id = $ccCmId";
+            $this->mysqlConn->execSQL($query);
+            
+            $this->mysqlConn->commitTransaction();
+
+            return true;
+        }
+        catch(Exception $ex){
+            $this->mysqlConn->rollbackTransaction();
+            throw $ex;
+        }
         return true;
     }
 
@@ -281,15 +293,22 @@ class PersistCtrl
         try{
             $data->lastUpdate = time();
             
-            $fields = array("ccid", "cmid", "title", "slot", "templatenote", "lastupdate");
-            $values = array($data->ccId, $data->cmId, $data->noteTitle,  $data->slot, $data->templateNote, $data->lastUpdate);
+            $fields = array("ccid", "cmid", "title", "templatenote", "lastupdate");
+            $values = array($data->ccId, $data->cmId, $data->noteTitle, $data->templateNote, $data->lastUpdate);
 
             if($data->ccCmId == 0){
+                $curSlot = $this->mysqlConn->execSQLAndGetObject("select slot from mdl_recitcc_cm_notes where cmid = $data->cmId order by slot desc limit 1");
+                $fields[] = "slot";
+                $values[] = (empty($curSlot) ? 1 : $curSlot->slot + 1);
+
                 $query = $this->mysqlConn->prepareStmt("insert", "mdl_recitcc_cm_notes", $fields, $values);
                 $this->mysqlConn->execSQL($query);
                 $data->ccCmId = $this->mysqlConn->getLastInsertId("mdl_recitcc_cm_notes", "id");
             }
             else{
+                $fields[] = "slot";
+                $values[] = $data->slot;
+
                 $query = $this->mysqlConn->prepareStmt("update", "mdl_recitcc_cm_notes", $fields, $values, array("id"), array($data->ccCmId));
                 $this->mysqlConn->execSQL($query);
             }
@@ -297,6 +316,60 @@ class PersistCtrl
             return $this->getCcCmNote($data->ccCmId);
         }
         catch(Exception $ex){
+            throw $ex;
+        }
+    }
+
+   /* public function reorderCcCmNotesSlots($cmId){
+        try{
+            $this->mysqlConn->beginTransaction();
+            $tmp = $this->mysqlConn->execSQLAndGetObjects("select slot from mdl_recitcc_cm_notes where id in ($from, $to) order by FIELD(id, $from, $to)");
+
+            // $tmp[0] = from
+            // $tmp[1] = to
+            if(!isset($tmp[0]) || !isset($tmp[1])){
+                throw new Exception("Unknown slots");
+            }
+
+            $query = sprintf("update mdl_recitcc_cm_notes set slot = %d where id = %d", $tmp[1]->slot, $from);
+            $this->mysqlConn->execSQL($query);
+
+            $query = sprintf("update mdl_recitcc_cm_notes set slot = %d where id = %d", $tmp[0]->slot, $to);
+            $this->mysqlConn->execSQL($query);
+
+            $this->mysqlConn->commitTransaction();
+
+            return true;
+        }
+        catch(Exception $ex){
+            $this->mysqlConn->rollbackTransaction();
+            throw $ex;
+        }
+    }*/
+
+    public function switchCcCmNoteSlot($from, $to){
+        try{
+            $this->mysqlConn->beginTransaction();
+            $tmp = $this->mysqlConn->execSQLAndGetObjects("select slot from mdl_recitcc_cm_notes where id in ($from, $to) order by FIELD(id, $from, $to)");
+
+            // $tmp[0] = from
+            // $tmp[1] = to
+            if(!isset($tmp[0]) || !isset($tmp[1])){
+                throw new Exception("Unknown slots");
+            }
+
+            $query = sprintf("update mdl_recitcc_cm_notes set slot = %d where id = %d", $tmp[1]->slot, $from);
+            $this->mysqlConn->execSQL($query);
+
+            $query = sprintf("update mdl_recitcc_cm_notes set slot = %d where id = %d", $tmp[0]->slot, $to);
+            $this->mysqlConn->execSQL($query);
+
+            $this->mysqlConn->commitTransaction();
+
+            return true;
+        }
+        catch(Exception $ex){
+            $this->mysqlConn->rollbackTransaction();
             throw $ex;
         }
     }
@@ -694,6 +767,10 @@ class PersonalNote
     public $slot = 0;
     public $noteTitle = "";
     public $userId = 0;
+
+    public function lastUpdateFormat(){
+        return ($this->lastUpdate > 0 ? date('Y-m-d H:i:s', $this->lastUpdate) : '');
+    }
 }
 
 class MoodleTag

@@ -1,7 +1,9 @@
 import React, { Component } from 'react';
 import ReactDOM from "react-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import {VisualFeedback} from "./libs/components/Components";
+import {faSync} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {VisualFeedback, Loading} from "./libs/components/Components";
 import {UtilsMoodle} from "./libs/utils/Utils";
 import {TeacherView, StudentView} from "./views/Views";
 import {$glVars} from "./common/common";
@@ -40,6 +42,7 @@ class App extends Component {
                 {$glVars.feedback.msg.map((item, index) => {  
                     return (<VisualFeedback key={index} id={index} msg={item.msg} type={item.type} title={item.title} timeout={item.timeout}/>);                                    
                 })}
+                <Loading webApi={$glVars.webApi}><FontAwesomeIcon icon={faSync} spin/></Loading>
             </div>
 
         return (main);

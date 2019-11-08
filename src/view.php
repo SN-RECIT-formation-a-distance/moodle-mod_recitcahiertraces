@@ -1,4 +1,25 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ *
+ * @package   mod_recitcahiercanada
+ * @copyright 2019 RÉCIT FAD
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 
 require('../../config.php');
 require_once($CFG->dirroot . "/mod/recitcahiercanada/common/php/Utils.php");
@@ -42,16 +63,8 @@ class RecitCahierCanadaView
         $this->page->set_url('/mod/recitcahiercanada/view.php', array('id' => $this->cm->id));
         $this->page->set_title($this->course->shortname.': '.$this->cm->name);
         $this->page->set_heading($this->course->fullname);
-        $this->page->requires->css(new moodle_url('./react_app/dist/index.css'), true);
+        $this->page->requires->css(new moodle_url('./react_app/build/index.css'), true);
 
-       /* $i18n = array("sectionActivities", 'turnOnEditingMode', 'turnOffEditingMode', 'selectGroup', 'selectUser', 'selectOption', 'previous', 'next',
-        'activity', 'noteTitle', 'templateNote', 'studentNote', 
-        'teacherFeedback', 'edit', 'save', 'remove', 'cancel', 'copy', 'selectSectionActivity', 'integrationCode', 'addNewNote', 'msgActionCompleted', 
-        'msgConfirmDeletion', 'msgDeletionExtraInfo', 'noData', 'printNotes', 'msgCCSeqPos', 'tags', 'typeToSearch'); 
-
-        $this->page->requires->strings_for_js($i18n, "recitcahiercanada");*/
-        //$PAGE->set_activity_record($cm);
-        
         echo $this->output->header();
         echo $this->output->heading(format_string($this->cm->name), 2);
                         
@@ -60,15 +73,8 @@ class RecitCahierCanadaView
 
         echo sprintf("<div id='recit_cahiertraces' data-student-id='%ld' data-roles='%s'></div>", $studentId, implode(",", $roles));
         echo Utils::createEditorHtml(false);
-        
-      /*  echo '<script src="react_app/build/lib/react/react.development.js"></script>';
-        echo '<script src="react_app/build/lib/react/react-dom.development.js"></script>';
-        echo '<script src="react_app/build/lib/react/react-bootstrap.min.js"></script>';
-        echo '<script src="react_app/build/cahiertraces_app.js"></script>';*/
-        
-        echo '<script src="./react_app/dist/index.js"></script>';
+        echo '<script src="./react_app/build/index.js"></script>';
         //echo Utils::createTagsForm($this->db, $this->cm->id);
-        
         
         echo $this->output->footer();
     }

@@ -1,6 +1,5 @@
 import {WebApi} from '../libs/utils/Utils';
 import { Options } from './Options';
-import { isNumber } from 'util';
 
 export class AppWebApi extends WebApi
 {    
@@ -64,6 +63,13 @@ export class AppWebApi extends WebApi
 
     getCmNotes(cmId, onSuccess){
         let data = {cmId: cmId, service: "getCmNotes"};
+        this.post(this.gateway, data, onSuccess);
+    }
+
+    switchCcCmNoteSlot(from, to, onSuccess){
+        if(from === to){ return;}
+
+        let data = {from: from, to: to, service: "switchCcCmNoteSlot"};
         this.post(this.gateway, data, onSuccess);
     }
     
