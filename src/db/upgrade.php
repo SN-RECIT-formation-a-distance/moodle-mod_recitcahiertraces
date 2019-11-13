@@ -4,19 +4,29 @@
 defined('MOODLE_INTERNAL') || die;
 
 function xmldb_recitcahiercanada_upgrade($oldversion) {
-    global $CFG;
+    global $CFG, $DB;
+    $dbman = $DB->get_manager();
 
-    // Automatically generated Moodle v3.2.0 release upgrade line.
-    // Put any upgrade step following this.
+    /// Add a new column newcol to the mdl_myqtype_options
+    if ($oldversion < 2019111301) {
+           // Define field jsoncontent to be added to filter_wiris_formulas.
+           $table = new xmldb_table('recitcc_cm_notes');
+           $field = new xmldb_field('suggestednote', XMLDB_TYPE_TEXT, null, null, null, null, null, 'templatenote');
+   
+           // Conditionally launch add field jsoncontent.
+           if (!$dbman->field_exists($table, $field)) {
+               $dbman->add_field($table, $field);
+           }
 
-    // Automatically generated Moodle v3.3.0 release upgrade line.
-    // Put any upgrade step following this.
+           $field = new xmldb_field('teachertip', XMLDB_TYPE_TEXT, null, null, null, null, null, 'suggestednote');
+   
+           // Conditionally launch add field jsoncontent.
+           if (!$dbman->field_exists($table, $field)) {
+               $dbman->add_field($table, $field);
+           }
 
-    // Automatically generated Moodle v3.4.0 release upgrade line.
-    // Put any upgrade step following this.
-
-    // Automatically generated Moodle v3.5.0 release upgrade line.
-    // Put any upgrade step following this.
+           upgrade_plugin_savepoint(true, 2019111301, 'mod', 'recitcahiercanada');
+    }
 
     return true;
 }

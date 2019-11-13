@@ -28,6 +28,8 @@
         <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="slot" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="templatenote" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="suggestednote" TYPE="text" NOTNULL="false" SEQUENCE="false"/> 
+        <FIELD NAME="teachertip" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="lastupdate" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>

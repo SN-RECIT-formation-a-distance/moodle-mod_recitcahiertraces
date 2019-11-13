@@ -64,6 +64,7 @@ class RecitCahierCanadaView
         $this->page->set_title($this->course->shortname.': '.$this->cm->name);
         $this->page->set_heading($this->course->fullname);
         $this->page->requires->css(new moodle_url('./react_app/build/index.css'), true);
+        //$this->page->requires->js(new moodle_url('./react_app/build/index.js'), true);
 
         echo $this->output->header();
         echo $this->output->heading(format_string($this->cm->name), 2);

@@ -29,6 +29,7 @@ class App extends Component {
 
     componentDidMount(){
         $glVars.feedback.addObserver("App", this.onFeedback); 
+        //$glVars.editorMoodle = new EditorMoodle(); // be sure that the Atto Editor is already loaded
     }
 
     componentWillUnmount(){

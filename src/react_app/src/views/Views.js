@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import {ButtonGroup, Button, Form, Col, Tabs, Tab, DropdownButton, Dropdown, Modal} from 'react-bootstrap';
+import {ButtonGroup, Button, Form, Col, Tabs, Tab, DropdownButton, Dropdown, Modal, Collapse, Card} from 'react-bootstrap';
 import {faArrowLeft, faArrowRight, faPencilAlt, faPlusCircle, faWrench, faTrashAlt, faCopy, faBars, faGripVertical, faCheckSquare} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {ComboBox, FeedbackCtrl, DataGrid} from '../libs/components/Components';
+import {ComboBox, FeedbackCtrl, DataGrid, RichEditor} from '../libs/components/Components';
 import Utils,{ UtilsMoodle} from '../libs/utils/Utils';
 import {$glVars} from '../common/common';
 
@@ -204,6 +204,7 @@ export class NoteForm extends Component
     constructor(props){
         super(props);
 
+        this.onSelectTab = this.onSelectTab.bind(this);
         this.onDataChange = this.onDataChange.bind(this);
         this.getData = this.getData.bind(this);
         this.getDataResult = this.getDataResult.bind(this);
@@ -238,33 +239,52 @@ export class NoteForm extends Component
         if(this.state.data === null){return null;}
 
         let data = this.state.data;
+        let styleTab = {padding: 10};
     
         let main =
             <Modal show={true} onHide={() => this.props.onClose()} backdrop="static" size="xl" >
                 <Modal.Header closeButton>
                     <Modal.Title>{`Note: ${data.noteTitle}`}</Modal.Title>
                 </Modal.Header>
-                <Modal.Body>      
+                <Modal.Body>                          
                     <Form noValidate validated={this.state.formValidated} ref={this.formRef}>
-                        <Form.Row>
-                            <Form.Group as={Col}>
-                                <Form.Label>{"Activité de la section:"}</Form.Label>
-                                <ComboBox placeholder={"Sélectionnez votre option"} required={true}  name="cmId" value={data.cmId} options={this.state.dropdownLists.activityList} onChange={this.onDataChange} />
-                            </Form.Group>
-                        </Form.Row>
-                        <Form.Row>
-                            <Form.Group as={Col}>
-                                <Form.Label>{"Titre"}</Form.Label>
-                                <Form.Control type="text" required value={data.noteTitle} name="noteTitle" onChange={this.onDataChange}/>
-                            </Form.Group>
-                        </Form.Row>
-                        <Form.Row>
-                            <Form.Group as={Col}>
-                                <Form.Label>{"Modèle de note"}</Form.Label>
-                                <div ref={this.editorRef}></div>
-                            </Form.Group>
-                        </Form.Row>
-                        
+                        <Tabs defaultActiveKey={this.state.activeTab} id="tab" onSelect={this.onSelectTag}>
+                            <Tab eventKey={0} title="Note" style={styleTab}>
+                                <Form.Row>
+                                    <Form.Group as={Col}>
+                                        <Form.Label>{"Activité de la section:"}</Form.Label>
+                                        <ComboBox placeholder={"Sélectionnez votre option"} required={true}  name="cmId" value={data.cmId} options={this.state.dropdownLists.activityList} onChange={this.onDataChange} />
+                                    </Form.Group>
+                                </Form.Row>
+                                <Form.Row>
+                                    <Form.Group as={Col}>
+                                        <Form.Label>{"Titre"}</Form.Label>
+                                        <Form.Control type="text" required value={data.noteTitle} name="noteTitle" onChange={this.onDataChange}/>
+                                    </Form.Group>
+                                </Form.Row>
+                            </Tab>
+                            <Tab eventKey={1} title="Modèle de note"  style={styleTab}>
+                                <Form.Row>
+                                    <Form.Group as={Col}>
+                                        <div ref={this.editorRef}></div>
+                                    </Form.Group>
+                                </Form.Row>
+                            </Tab>
+                            <Tab eventKey={2} title="Réponse suggérée"  style={styleTab}>
+                                <Form.Row>
+                                    <Form.Group as={Col}>
+                                    <RichEditor nbRows={10} name="suggestedNote" value={data.suggestedNote} onChange={this.onDataChange}/>
+                                    </Form.Group>
+                                </Form.Row>
+                            </Tab>
+                            <Tab eventKey={3} title="Rétroaction automatique"  style={styleTab}> 
+                                <Form.Row>
+                                    <Form.Group as={Col}>
+                                    <RichEditor nbRows={10} name="teacherTip" value={data.teacherTip} onChange={this.onDataChange}/>
+                                    </Form.Group>
+                                </Form.Row>
+                            </Tab>
+                        </Tabs>
                     </Form>
                 </Modal.Body>
                 <Modal.Footer>
@@ -281,6 +301,10 @@ export class NoteForm extends Component
         return (main);
     }
     
+    onSelectTab(eventKey){
+        this.setState({activeTab: eventKey});
+    }
+
     componentDidUpdate(){
         if(this.editorRef.current !== null){
             $glVars.editorMoodle.show();        
@@ -478,6 +502,7 @@ export class EditionMode extends Component{
                             <DataGrid.Header.Cell style={{width: 40}}></DataGrid.Header.Cell>
                             <DataGrid.Header.Cell style={{width: 80}}>{"#"}</DataGrid.Header.Cell>
                             <DataGrid.Header.Cell >{"Titre de la note"}</DataGrid.Header.Cell>
+                            <DataGrid.Header.Cell style={{width: 80}}>{"Code d'intégration"}</DataGrid.Header.Cell>
                             <DataGrid.Header.Cell  style={{width: 80}}></DataGrid.Header.Cell>
                         </DataGrid.Header.Row>
                     </DataGrid.Header>
@@ -488,6 +513,7 @@ export class EditionMode extends Component{
                                         <DataGrid.Body.Cell><FontAwesomeIcon icon={faGripVertical} title="Déplacer l'item"/></DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell>{(index + 1)}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell>{item.noteTitle}</DataGrid.Body.Cell>
+                                        <DataGrid.Body.Cell>{item.ccCmId}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell>
                                             <DropdownButton size="sm" title={<span><FontAwesomeIcon icon={faBars}/>{" Actions"}</span>}>
                                                 <Dropdown.Item onClick={() => this.onEdit(item.ccCmId)}><FontAwesomeIcon icon={faPencilAlt}/>{" Modifier"}</Dropdown.Item>
@@ -501,6 +527,7 @@ export class EditionMode extends Component{
                         )}
                     </DataGrid.Body>
                 </DataGrid>
+                
                 <Form.Control type="hidden" ref={this.intCodeRef}/>
                 {this.state.ccCmId >= 0 && <NoteForm ccCmId={this.state.ccCmId} ccCm={this.state.ccCm} onClose={this.onClose}/>}
             </div> 
@@ -548,9 +575,12 @@ export class EditionMode extends Component{
         }
     }
 
+    getIntegrationCode(ccCmId){
+        return `{"cccmid":"${ccCmId}", "nbLines": "15"}`;
+    }
+
     onCopyIC(ccCmId){
-        let intCode = `{"cccmid":"${ccCmId}", "nbLines": "15"}`;
-        this.intCodeRef.current.value = intCode;
+        this.intCodeRef.current.value = this.getIntegrationCode(ccCmId);
         this.intCodeRef.current.type = "text";
         this.intCodeRef.current.select()
 		document.execCommand('copy');
@@ -585,6 +615,7 @@ export class PersonalNote extends Component{
         this.onSaveResult = this.onSaveResult.bind(this);
         this.prepareNewState = this.prepareNewState.bind(this);
         this.onClose = this.onClose.bind(this);
+        this.onCollapse = this.onCollapse.bind(this);
         
         let mode = "";// it is a student?
          if(UtilsMoodle.checkRoles($glVars.signedUser.roles, UtilsMoodle.rolesL3)){
@@ -594,7 +625,7 @@ export class PersonalNote extends Component{
         else if(UtilsMoodle.checkRoles($glVars.signedUser.roles, UtilsMoodle.rolesL2)){
             mode = "t";
         }
-        this.state = {data: null, dropdownLists: null, mode: mode};
+        this.state = {data: null, dropdownLists: null, mode: mode, collapse: {note: true, suggestedNote: false, feedback: true}};
 
         this.editorRef = React.createRef();
     }
@@ -638,46 +669,62 @@ export class PersonalNote extends Component{
         let data = this.state.data;
         let student = null;
         let teacher = null;
-        let styleText = {height: 300, overflowY: "auto", border: "1px solid #333", backgroundColor: "#fafafa", padding: 10};
+        let suggestedNote = null;
+        let styleText = {minHeight: 50, maxHeight: 400, overflowY: "auto", border: "1px solid #ddd", backgroundColor: "#fafafa", padding: 10};
 
         // it is a student?
         if(this.state.mode === "s"){
             $glVars.editorMoodle.setValue(data.note);       
             student = <div ref={this.editorRef}></div>;
-            teacher =  <div style={styleText} dangerouslySetInnerHTML={{__html: data.feedback}}></div>;
+            teacher = <div style={styleText} dangerouslySetInnerHTML={{__html: data.feedback}}></div>;
         }
         // it is a teacher
         else if(this.state.mode === "t"){
             $glVars.editorMoodle.setValue(data.feedback);       
             teacher = <div ref={this.editorRef}></div>;
             student =  <div style={styleText} dangerouslySetInnerHTML={{__html: data.note}}></div>;
+            suggestedNote = <div style={styleText} dangerouslySetInnerHTML={{__html: data.suggestedNote}}></div>;
         }
         else{
             console.log(this.state);
             return null;
         }
-
-        let styleRow = {maxHeight: 500, overflowY: "auto"};
+        let styleHeader = {cursor: "pointer"};
+        
         let main =
             <Modal show={true} onHide={() => this.props.onClose()} backdrop="static" size="xl" >
                 <Modal.Header closeButton>
                     <Modal.Title>{`Note: ${this.props.noteTitle}`}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>      
-                    <Form>
-                        <Form.Row style={styleRow}>
-                            <Form.Group as={Col}>
-                                <Form.Label>{"Note de l'élève"}</Form.Label>
-                                {student}
-                            </Form.Group>
-                        </Form.Row>
-                        <Form.Row style={styleRow}>
-                            <Form.Group as={Col}>
-                                <Form.Label>{"Rétroaction de l'enseignant"}</Form.Label>
-                                {teacher}
-                            </Form.Group>
-                        </Form.Row>
-                    </Form>
+                    <Card>
+                        <Card.Header style={styleHeader} onClick={() => this.onCollapse("note")}>
+                            {"Note de l'élève"}
+                        </Card.Header>
+                        <Collapse in={this.state.collapse.note}>
+                            <Card.Body>{student}</Card.Body>
+                        </Collapse>
+                    </Card>
+                    <br/>
+                    {suggestedNote !== null &&
+                        <div>
+                            <Card>
+                                <Card.Header style={styleHeader} onClick={() => this.onCollapse("suggestedNote")}>
+                                    {"Réponse suggérée"}
+                                </Card.Header>
+                                <Collapse in={this.state.collapse.suggestedNote}>
+                                    <Card.Body>{suggestedNote}</Card.Body>
+                                </Collapse>
+                            </Card>
+                            <br/>
+                        </div>
+                    }
+                    <Card>
+                        <Card.Header style={styleHeader} onClick={() => this.onCollapse("feedback")}>{"Rétroaction de l'enseignant"}</Card.Header>
+                        <Collapse in={this.state.collapse.feedback}>
+                            <Card.Body>{teacher}</Card.Body>
+                        </Collapse>
+                    </Card>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={this.onClose}>{"Annuler"}</Button>
@@ -685,6 +732,32 @@ export class PersonalNote extends Component{
                 </Modal.Footer>
             </Modal>;       
 
+/* <Accordion defaultActiveKey={0}>
+                        <Card>
+                            <Card.Header>
+                                <Accordion.Toggle as={Button} variant="link"eventKey={0}>{"Note de l'élève"}</Accordion.Toggle>
+                            </Card.Header>
+                            <Accordion.Collapse eventKey={0}>
+                                <Card.Body style={styleRow}>{student}</Card.Body>
+                            </Accordion.Collapse>
+                        </Card>
+                        <Card>
+                            <Card.Header>
+                                <Accordion.Toggle as={Button} variant="link" eventKey={1}>{"Réponse suggérée"}</Accordion.Toggle>
+                            </Card.Header>
+                            <Accordion.Collapse eventKey={1}>
+                                <Card.Body>{<div style={styleText} dangerouslySetInnerHTML={{__html: data.suggestedNote}}></div>}</Card.Body>
+                            </Accordion.Collapse>
+                        </Card>
+                        <Card>
+                            <Card.Header>
+                                <Accordion.Toggle as={Button} variant="link" eventKey={2}>{"Rétroaction de l'enseignant"}</Accordion.Toggle>
+                            </Card.Header>
+                            <Accordion.Collapse eventKey={2}>
+                                <Card.Body>{teacher}</Card.Body>
+                            </Accordion.Collapse>
+                        </Card>
+                    </Accordion>*/
         return (main);
     }
 
@@ -697,6 +770,11 @@ export class PersonalNote extends Component{
         }
     }
     
+    onCollapse(name){
+        let data = this.state.collapse;
+        data[name] = !data[name];
+        this.setState({collapse: data});
+    }
     onClose(){
         this.props.onClose();
     }
@@ -812,8 +890,8 @@ export class Notebook extends Component{
                                         <DataGrid.Header.Row>
                                             <DataGrid.Header.Cell style={{width: 80}}>{"#"}</DataGrid.Header.Cell>
                                             <DataGrid.Header.Cell >{"Titre de la note"}</DataGrid.Header.Cell>
-                                            <DataGrid.Header.Cell style={{width: 80}}>{"Élève"}</DataGrid.Header.Cell>
-                                            <DataGrid.Header.Cell style={{width: 80}}>{"Enseignant"}</DataGrid.Header.Cell>
+                                            <DataGrid.Header.Cell style={{width: 90}}>{"Élève"}</DataGrid.Header.Cell>
+                                            <DataGrid.Header.Cell style={{width: 90}}>{"Enseignant"}</DataGrid.Header.Cell>
                                             <DataGrid.Header.Cell  style={{width: 80}}></DataGrid.Header.Cell>
                                         </DataGrid.Header.Row>
                                     </DataGrid.Header>
@@ -848,7 +926,6 @@ export class Notebook extends Component{
                 {this.state.personalNote !== null && 
                             <PersonalNote userId={this.props.userId} personalNoteId={this.state.personalNote.personalNoteId} cmId={this.state.personalNote.cmId} onClose={this.onClose}
                                     noteTitle={this.state.personalNote.noteTitle} ccCmId={this.state.personalNote.ccCmId} />}
-
             </div>;
 
         return (main);

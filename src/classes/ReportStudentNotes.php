@@ -21,6 +21,7 @@ if(!Utils::isAdminRole($roles)){
 
 
 $personalNotes = PersistCtrl::getInstance($DB, $USER)->getPersonalNotes($cmId, $userId);
+$student = current(current(PersistCtrl::getInstance()->getEnrolledUserList($cmId, $userId)));
 
 $cahierCanada = current(current($personalNotes));
 $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahiercanada'), $cahierCanada->ccName, get_string('printedOn', 'mod_recitcahiercanada'), date('Y-m-d H:i:s'));
@@ -41,7 +42,7 @@ $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahie
             <div class='Logo'><img src='../pix/recit-logo.png' alt='RECIT logo'/></div>
             <div style='flex-grow: 1'>
                 <div class='Title'><?php echo get_string('pluginname', 'mod_recitcahiercanada'); ?></div>
-                <div class='Subtitle'><?php echo $cahierCanada->ccName; ?></div>
+                <div class='Subtitle'><?php echo sprintf("%s | %s | %s", $cahierCanada->ccName, $student->userName, $student->groupName) ; ?></div>
             </div>
         </header>
     <?php 

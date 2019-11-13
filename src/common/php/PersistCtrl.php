@@ -126,7 +126,12 @@ class PersistCtrl
         return $result;
     }*/
 
-    public function getEnrolledUserList($cmId){
+    public function getEnrolledUserList($cmId, $userId = 0){
+        $whereStmt = " and 1";
+        if($userId > 0){
+            $whereStmt = " and t3.id = $userId";
+        }
+
         $query = "select t1.enrol, t1.courseid as courseId, t3.id as userId, concat(t3.firstname, ' ', t3.lastname) as userName, coalesce(t5.id,0) as groupId, 
             coalesce(t5.name, 'na') as groupName 
             from mdl_enrol as t1
@@ -134,7 +139,7 @@ class PersistCtrl
         inner join mdl_user as t3 on t2.userid = t3.id
         left join mdl_groups_members as t4 on t3.id = t4.userid
         left join mdl_groups as t5 on t4.groupid = t5.id 
-        where t1.courseid = (select course from mdl_course_modules where id = $cmId)
+        where t1.courseid = (select course from mdl_course_modules where id = $cmId) $whereStmt
         order by userName";
         $tmp = $this->mysqlConn->execSQLAndGetObjects($query);    
 
@@ -186,7 +191,7 @@ class PersistCtrl
         $query = "select t1.title as noteTitle, t1.cmid as cmId, t1.ccid as ccId,
         t2.id, t2.cccmid as ccCmId, t2.userid as userId,  
         (case length(recit_strip_tags(coalesce(t2.note, ''))) when 0 then t1.templatenote else t2.note end) as note,
-        t2.feedback, t2.grade, t2.lastupdate as lastUpdate
+        t1.teachertip as teacherTip, t1.suggestednote as suggestedNote, t2.feedback, t2.grade, t2.lastupdate as lastUpdate
         from mdl_recitcc_cm_notes as t1 
         left join mdl_recitcc_user_notes as t2 on t1.id = t2.cccmid and t2.userid = $userId
         where t1.id = $ccCmId";
@@ -229,7 +234,8 @@ class PersistCtrl
         $ccCmIdStmt = ($ccCmId == 0 ? "1" : " t1.id = $ccCmId");
         $cmStmt = ($cmId == 0 ? "1" : " t1.cmid = $cmId");
 
-        $query = "select t1.id as ccCmId, t1.ccid as ccId, t1.cmid as cmId, t1.title as noteTitle, t1.slot, t1.templatenote as templateNote, t1.lastupdate as lastUpdate, 
+        $query = "select t1.id as ccCmId, t1.ccid as ccId, t1.cmid as cmId, t1.title as noteTitle, t1.slot, t1.templatenote as templateNote, t1.suggestednote as suggestedNote, 
+                    t1.teachertip as teacherTip, t1.lastupdate as lastUpdate, 
                     GROUP_CONCAT(t2.id) as tagList
                     from mdl_recitcc_cm_notes as t1
                     left join mdl_tag_instance as t2 on t1.id = t2.itemid and itemtype = 'cccmnote' and component = 'mod_cahiercanada'
@@ -251,18 +257,6 @@ class PersistCtrl
     }
 
     public function getCcCmNote($ccCmId){
-        /*$query = "select id as ccCmId, ccid as ccId, cmid as cmId, title, slot, lastupdate as lastUpdate
-                from mdl_recitcc_cm_notes
-                where id = $ccCmId";*/
-        
-       /* $query = "select t1.id as ccCmId, t1.ccid as ccId, t1.cmid as cmId, t1.title, t1.slot, t1.lastupdate as lastUpdate,
-                GROUP_CONCAT(t2.id) as tagList
-                from mdl_recitcc_cm_notes as t1
-                left join mdl_tag_instance as t2 on t1.id = t2.itemid and itemtype = 'cccmnote' and component = 'mod_cahiercanada'
-                where t1.id = $ccCmId
-                group by t1.id ";
-
-        $result = $this->mysqlConn->execSQLAndGetObject($query, 'CmNote');*/
         $result = $this->getCmNotes($ccCmId);
         $result = array_shift($result);
         return $result;
@@ -293,8 +287,8 @@ class PersistCtrl
         try{
             $data->lastUpdate = time();
             
-            $fields = array("ccid", "cmid", "title", "templatenote", "lastupdate");
-            $values = array($data->ccId, $data->cmId, $data->noteTitle, $data->templateNote, $data->lastUpdate);
+            $fields = array("ccid", "cmid", "title", "templatenote", "suggestednote", "teachertip", "lastupdate");            
+            $values = array($data->ccId, $data->cmId, $data->noteTitle, $data->templateNote, $data->suggestedNote, $data->teacherTip, $data->lastUpdate);
 
             if($data->ccCmId == 0){
                 $curSlot = $this->mysqlConn->execSQLAndGetObject("select slot from mdl_recitcc_cm_notes where cmid = $data->cmId order by slot desc limit 1");
@@ -746,6 +740,8 @@ class CmNote
     public $cmId = 0;
     public $noteTitle = "";
     public $templateNote = "";
+    public $suggestedNote = "";
+    public $teacherTip = "";
     public $slot = 0;
     public $lastUpdate = 0;
     public $tagList = array();
@@ -765,6 +761,8 @@ class PersonalNote
     public $note = "";
     public $personalNoteId = 0;
     public $slot = 0;
+    public $teacherTip = "";
+    public $suggestedNote = "";
     public $noteTitle = "";
     public $userId = 0;
 
