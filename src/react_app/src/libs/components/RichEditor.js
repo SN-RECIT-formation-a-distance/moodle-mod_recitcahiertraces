@@ -16,7 +16,7 @@ export class RichEditor extends Component {
     }
     
     render() {    
-        let main = <Form.Control as="textarea" rows={this.props.nbRows} onChange={this.onChange} value={this.props.value} />;
+        let main = <Form.Control as="textarea" rows={this.props.nbRows} onChange={this.onChange} value={this.props.value || ""} />;
 
         return (main);
     }   

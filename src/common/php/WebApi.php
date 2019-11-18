@@ -383,7 +383,15 @@ abstract class CahierCanadaApi extends MoodleApi
             $this->canUserAccess('a', $cmId);
 
             $result = new stdClass();
-            $result->data = ($ccCmId == 0 ? new CmNote() : PersistCtrl::getInstance()->getCcCmNote($ccCmId));
+
+            if($ccCmId == 0 ){
+                $result->data = new CmNote();
+                $result->data->cmId = $cmId;
+            }
+            else{
+                $result->data = PersistCtrl::getInstance()->getCcCmNote($ccCmId);
+            }
+
             $result->tagList = PersistCtrl::getInstance()->getTagList($result->data->cmId);
             $result->activityList = PersistCtrl::getInstance()->getSectionCmList($result->data->cmId);
 
