@@ -510,5 +510,20 @@ class RecitApi extends CahierCanadaApi
             return new WebApiResult(false, null, $ex->GetMessage());
         }     
     }   
+	
+	protected function setSectionLevel($request){
+        try{
+			$data = json_decode(json_encode($request['data']), FALSE);
+
+            $this->canUserAccess('a', 0, 0, $data->courseId);
+			
+			PersistCtrl::getInstance()->setSectionLevel($data);
+			
+            return new WebApiResult(true);
+        }
+        catch(Exception $ex){
+            return new WebApiResult(false, false, $ex->GetMessage());
+        }     
+    } 
 }
 

@@ -731,6 +731,14 @@ class PersistCtrl
         $tmp = $this->mysqlConn->execSQLAndGetObjects($query);
         return (empty($tmp) ? array() : $tmp);
     }
+	
+	public function setSectionLevel($data){
+        $query = "insert into mdl_course_format_options (courseid, format, sectionid, name, value) 
+				values($data->courseId, 'treetopics', $data->sectionId, 'ttsectiondisplay', '$data->level') 
+				ON DUPLICATE KEY UPDATE value = '$data->level'";
+        $this->mysqlConn->execSQL($query);
+		return true;
+    }
 }
 
 class CmNote

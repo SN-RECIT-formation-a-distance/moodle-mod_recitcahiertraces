@@ -249,6 +249,13 @@ recit.http.WebApi = class
         params.service = "getReportDiagTag";
         this.post(this.gateway, params, onSuccess);
     }
+	
+	setSectionLevel(data, onSuccess){
+        let options = {};
+        options.data = data;
+        options.service = "setSectionLevel";
+        this.post(this.gateway, options, onSuccess);
+    }
 }
 
 recit.http.WebApi.singleton = null;
