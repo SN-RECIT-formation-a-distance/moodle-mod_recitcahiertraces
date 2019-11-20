@@ -22,7 +22,7 @@
  */
 
 require('../../config.php');
-require_once($CFG->dirroot . "/mod/recitcahiercanada/common/php/Utils.php");
+require_once($CFG->dirroot . "/local/recitcommon/php/Utils.php");
 
 $id = required_param('id', PARAM_INT);
 list ($course, $cm) = get_course_and_cm_from_cmid($id, 'recitcahiercanada');

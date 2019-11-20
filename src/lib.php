@@ -23,7 +23,7 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once($CFG->dirroot . "/mod/recitcahiercanada/common/php/PersistCtrl.php");
+require_once($CFG->dirroot . "/local/recitcommon/php/PersistCtrl.php");
 
 /**
  * List of features supported in recitcahiercanada module

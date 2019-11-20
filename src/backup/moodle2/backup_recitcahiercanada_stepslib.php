@@ -23,7 +23,7 @@
  */
 
 defined('MOODLE_INTERNAL') || die;
-require_once($CFG->dirroot . "/mod/recitcahiercanada/common/php/PersistCtrl.php");
+require_once($CFG->dirroot . "/local/recitcommon/php/PersistCtrl.php");
 
  /**
  * Define the complete recitcahiercanada structure for backup, with file and id annotations

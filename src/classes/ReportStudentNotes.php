@@ -1,7 +1,7 @@
 <?php
 require('../../../config.php');
-require_once($CFG->dirroot . "/mod/recitcahiercanada/common/php/PersistCtrl.php");
-require_once($CFG->dirroot . "/mod/recitcahiercanada/common/php/Utils.php");
+require_once($CFG->dirroot . "/local/recitcommon/php/PersistCtrl.php");
+require_once($CFG->dirroot . "/local/recitcommon/php/Utils.php");
 
 $cmId = required_param('cmId', PARAM_INT);
 $userId = required_param('userId', PARAM_INT);

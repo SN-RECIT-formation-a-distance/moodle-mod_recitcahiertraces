@@ -21,7 +21,7 @@ export class Options
             //return window.location.origin + "/sas2-backend/";
             return "http://conventionadmin.gnosis.ca/index.php";
         }*/
-        return `${M.cfg.wwwroot}/mod/recitcahiercanada/common/php/WebApi.php`;
+        return `${M.cfg.wwwroot}/local/recitcommon/php/RecitApi.php`;
     }
     
 }
