@@ -496,14 +496,14 @@ export class EditionMode extends Component{
                     <Button variant="primary" disabled={this.state.ccCm === null} onClick={this.onAdd}><FontAwesomeIcon icon={faPlusCircle}/>{" Ajouter une nouvelle note"}</Button>
                 </ButtonGroup>
                 <br/><br/>
-                <DataGrid orderBy={false}>
+                <DataGrid orderBy={true}>
                     <DataGrid.Header>
                         <DataGrid.Header.Row>
                             <DataGrid.Header.Cell style={{width: 40}}></DataGrid.Header.Cell>
                             <DataGrid.Header.Cell style={{width: 80}}>{"#"}</DataGrid.Header.Cell>
                             <DataGrid.Header.Cell >{"Titre de la note"}</DataGrid.Header.Cell>
-                            <DataGrid.Header.Cell style={{width: 80}}>{"Code d'intégration"}</DataGrid.Header.Cell>
-                            <DataGrid.Header.Cell  style={{width: 80}}></DataGrid.Header.Cell>
+                            <DataGrid.Header.Cell style={{width: 200}}>{"Code d'intégration"}</DataGrid.Header.Cell>
+                            <DataGrid.Header.Cell  style={{width: 120}}></DataGrid.Header.Cell>
                         </DataGrid.Header.Row>
                     </DataGrid.Header>
                     <DataGrid.Body>
@@ -885,14 +885,14 @@ export class Notebook extends Component{
                     {this.state.dataProvider.map(function(items, index){
                         let result = 
                             <Tab key={index} eventKey={index} title={items.nxAt(0).activityName}>
-                                <DataGrid orderBy={false}>
+                                <DataGrid orderBy={true}>
                                     <DataGrid.Header>
                                         <DataGrid.Header.Row>
                                             <DataGrid.Header.Cell style={{width: 80}}>{"#"}</DataGrid.Header.Cell>
                                             <DataGrid.Header.Cell >{"Titre de la note"}</DataGrid.Header.Cell>
-                                            <DataGrid.Header.Cell style={{width: 90}}>{"Élève"}</DataGrid.Header.Cell>
-                                            <DataGrid.Header.Cell style={{width: 90}}>{"Enseignant"}</DataGrid.Header.Cell>
-                                            <DataGrid.Header.Cell  style={{width: 80}}></DataGrid.Header.Cell>
+                                            <DataGrid.Header.Cell style={{width: 110}}>{"Élève"}</DataGrid.Header.Cell>
+                                            <DataGrid.Header.Cell style={{width: 140}}>{"Enseignant"}</DataGrid.Header.Cell>
+                                            <DataGrid.Header.Cell  style={{width: 120}}></DataGrid.Header.Cell>
                                         </DataGrid.Header.Row>
                                     </DataGrid.Header>
                                     <DataGrid.Body>

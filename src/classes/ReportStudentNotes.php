@@ -32,7 +32,7 @@ $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahie
 <head>
     <title><?php echo $pageTitle; ?></title>    
     <link rel="stylesheet" type="text/css" href="../react_app/build/index.css">
-    <link rel="stylesheet" type="text/css" href="../common/css/report.css">
+    <link rel="stylesheet" type="text/css" href="<?php echo $CFG->wwwroot . "/local/recitcommon/css/report.css"; ?>">
     <link rel="icon" href="../pix/icon.png?v=2"  />
 </head>
 
