@@ -76913,6 +76913,111 @@ RichEditor.defaultProps = {
   name: "",
   nbRows: 5
 };
+},{"react":"../node_modules/react/index.js","react-bootstrap":"../node_modules/react-bootstrap/esm/index.js"}],"libs/components/ToggleButtons.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.ToggleButtons = void 0;
+
+var _react = _interopRequireWildcard(require("react"));
+
+var _reactBootstrap = require("react-bootstrap");
+
+function _getRequireWildcardCache() { if (typeof WeakMap !== "function") return null; var cache = new WeakMap(); _getRequireWildcardCache = function () { return cache; }; return cache; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } var cache = _getRequireWildcardCache(); if (cache && cache.has(obj)) { return cache.get(obj); } var newObj = {}; if (obj != null) { var hasPropertyDescriptor = Object.defineProperty && Object.getOwnPropertyDescriptor; for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = hasPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : null; if (desc && (desc.get || desc.set)) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; if (cache) { cache.set(obj, newObj); } return newObj; }
+
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } return _assertThisInitialized(self); }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+var ToggleButtons =
+/*#__PURE__*/
+function (_Component) {
+  _inherits(ToggleButtons, _Component);
+
+  function ToggleButtons(props) {
+    var _this;
+
+    _classCallCheck(this, ToggleButtons);
+
+    _this = _possibleConstructorReturn(this, _getPrototypeOf(ToggleButtons).call(this, props));
+    _this.onChange = _this.onChange.bind(_assertThisInitialized(_this));
+    return _this;
+  }
+
+  _createClass(ToggleButtons, [{
+    key: "render",
+    value: function render() {
+      var _this2 = this;
+
+      var main = _react.default.createElement(_reactBootstrap.ButtonToolbar, {
+        style: this.props.style,
+        "data-read-only": this.props.disabled ? 1 : 0
+      }, _react.default.createElement(_reactBootstrap.ToggleButtonGroup, {
+        size: this.props.bsSize,
+        type: this.props.type,
+        name: this.props.name,
+        defaultValue: this.props.defaultValue,
+        onChange: this.onChange
+      }, this.props.options.map(function (item, index) {
+        var element = _react.default.createElement(_reactBootstrap.ToggleButton, {
+          key: index,
+          variant: _this2.props.defaultValue.includes(item.value) ? "primary" : "secondary",
+          value: item.value,
+          disabled: _this2.props.disabled
+        }, item.text);
+
+        return element;
+      })));
+
+      return main;
+    }
+  }, {
+    key: "onChange",
+    value: function onChange(eventKey) {
+      this.props.onChange({
+        target: {
+          value: eventKey,
+          name: this.props.name
+        }
+      });
+    }
+  }]);
+
+  return ToggleButtons;
+}(_react.Component);
+
+exports.ToggleButtons = ToggleButtons;
+ToggleButtons.defaultProps = {
+  name: "",
+  defaultValue: [],
+  onChange: null,
+  type: "checkbox",
+  // checkbox | radio
+  options: [],
+  // {value: "", text:"", glyph: ""}
+  bsSize: "",
+  // "" | small
+  style: null,
+  disabled: false
+};
 },{"react":"../node_modules/react/index.js","react-bootstrap":"../node_modules/react-bootstrap/esm/index.js"}],"libs/components/Components.js":[function(require,module,exports) {
 "use strict";
 
@@ -77119,6 +77224,19 @@ Object.keys(_RichEditor).forEach(function (key) {
   });
 });
 
+var _ToggleButtons = require("./ToggleButtons");
+
+Object.keys(_ToggleButtons).forEach(function (key) {
+  if (key === "default" || key === "__esModule") return;
+  if (Object.prototype.hasOwnProperty.call(_exportNames, key)) return;
+  Object.defineProperty(exports, key, {
+    enumerable: true,
+    get: function () {
+      return _ToggleButtons[key];
+    }
+  });
+});
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Components = function Components() {
@@ -77128,7 +77246,7 @@ var Components = function Components() {
 exports.default = Components;
 Components.version = 1.0;
 Components.assets = {};
-},{"./css/components.scss":"libs/components/css/components.scss","./ComboBox":"libs/components/ComboBox.js","./DataGrid":"libs/components/DataGrid.js","./DateTimeInterval":"libs/components/DateTimeInterval.js","./DateTime":"libs/components/DateTime.js","./DlgInput":"libs/components/DlgInput.js","./DropdownList":"libs/components/DropdownList.js","./Feedback":"libs/components/Feedback.js","./InputEmail":"libs/components/InputEmail.js","./InputNumber":"libs/components/InputNumber.js","./ListCtrl":"libs/components/ListCtrl.js","./Loading":"libs/components/Loading.js","./NumberInterval":"libs/components/NumberInterval.js","./RadioGroup":"libs/components/RadioGroup.js","./Switch":"libs/components/Switch.js","./RichEditor":"libs/components/RichEditor.js"}],"libs/utils/WebApi.js":[function(require,module,exports) {
+},{"./css/components.scss":"libs/components/css/components.scss","./ComboBox":"libs/components/ComboBox.js","./DataGrid":"libs/components/DataGrid.js","./DateTimeInterval":"libs/components/DateTimeInterval.js","./DateTime":"libs/components/DateTime.js","./DlgInput":"libs/components/DlgInput.js","./DropdownList":"libs/components/DropdownList.js","./Feedback":"libs/components/Feedback.js","./InputEmail":"libs/components/InputEmail.js","./InputNumber":"libs/components/InputNumber.js","./ListCtrl":"libs/components/ListCtrl.js","./Loading":"libs/components/Loading.js","./NumberInterval":"libs/components/NumberInterval.js","./RadioGroup":"libs/components/RadioGroup.js","./Switch":"libs/components/Switch.js","./RichEditor":"libs/components/RichEditor.js","./ToggleButtons":"libs/components/ToggleButtons.js"}],"libs/utils/WebApi.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -78625,7 +78743,7 @@ function (_Component2) {
           }
         };
 
-        var params = recit.utils.getUrlVars();
+        var params = _Utils.default.getUrlVars();
 
         _common.$glVars.webApi.checkCCSeqPos(params.id, callback);
       }
@@ -79394,7 +79512,7 @@ function (_Component6) {
         }, _react.default.createElement(_Components.DataGrid.Body.Cell, null, _react.default.createElement(_reactFontawesome.FontAwesomeIcon, {
           icon: _freeSolidSvgIcons.faGripVertical,
           title: "D\xE9placer l'item"
-        })), _react.default.createElement(_Components.DataGrid.Body.Cell, null, index + 1), _react.default.createElement(_Components.DataGrid.Body.Cell, null, item.noteTitle), _react.default.createElement(_Components.DataGrid.Body.Cell, null, item.ccCmId), _react.default.createElement(_Components.DataGrid.Body.Cell, null, _react.default.createElement(_reactBootstrap.DropdownButton, {
+        })), _react.default.createElement(_Components.DataGrid.Body.Cell, null, index + 1), _react.default.createElement(_Components.DataGrid.Body.Cell, null, item.noteTitle), _react.default.createElement(_Components.DataGrid.Body.Cell, null, item.intCode), _react.default.createElement(_Components.DataGrid.Body.Cell, null, _react.default.createElement(_reactBootstrap.DropdownButton, {
           size: "sm",
           title: _react.default.createElement("span", null, _react.default.createElement(_reactFontawesome.FontAwesomeIcon, {
             icon: _freeSolidSvgIcons.faBars
@@ -79413,7 +79531,7 @@ function (_Component6) {
           icon: _freeSolidSvgIcons.faTrashAlt
         }), " Supprimer"), _react.default.createElement(_reactBootstrap.Dropdown.Item, {
           onClick: function onClick() {
-            return _this8.onCopyIC(item.ccCmId);
+            return _this8.onCopyIC(item.intCode);
           }
         }, _react.default.createElement(_reactFontawesome.FontAwesomeIcon, {
           icon: _freeSolidSvgIcons.faCopy
@@ -79484,13 +79602,13 @@ function (_Component6) {
     }
   }, {
     key: "getIntegrationCode",
-    value: function getIntegrationCode(ccCmId) {
-      return "{\"cccmid\":\"".concat(ccCmId, "\", \"nbLines\": \"15\"}");
+    value: function getIntegrationCode(intCode) {
+      return "{\"intCode\":\"".concat(intCode, "\", \"nbLines\": \"15\"}");
     }
   }, {
     key: "onCopyIC",
-    value: function onCopyIC(ccCmId) {
-      this.intCodeRef.current.value = this.getIntegrationCode(ccCmId);
+    value: function onCopyIC(intCode) {
+      this.intCodeRef.current.value = this.getIntegrationCode(intCode);
       this.intCodeRef.current.type = "text";
       this.intCodeRef.current.select();
       document.execCommand('copy');
@@ -80723,7 +80841,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "64098" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63092" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

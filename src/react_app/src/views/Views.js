@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import {ButtonGroup, Button, Form, Col, Tabs, Tab, DropdownButton, Dropdown, Modal, Collapse, Card} from 'react-bootstrap';
 import {faArrowLeft, faArrowRight, faPencilAlt, faPlusCircle, faWrench, faTrashAlt, faCopy, faBars, faGripVertical, faCheckSquare} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {ComboBox, FeedbackCtrl, DataGrid, RichEditor} from '../libs/components/Components';
+import {ComboBox, FeedbackCtrl, DataGrid, RichEditor, ToggleButtons} from '../libs/components/Components';
 import Utils,{ UtilsMoodle} from '../libs/utils/Utils';
 import {$glVars} from '../common/common';
 
@@ -62,7 +62,7 @@ export class TeacherView extends Component {
                     $glVars.feedback.showError($glVars.i18n.tags.appName, $glVars.i18n.tags.msgCCSeqPos);
                 }
             }
-            let params = recit.utils.getUrlVars();
+            let params = Utils.getUrlVars();
             $glVars.webApi.checkCCSeqPos(params.id, callback);    
         }
     }
@@ -513,12 +513,12 @@ export class EditionMode extends Component{
                                         <DataGrid.Body.Cell><FontAwesomeIcon icon={faGripVertical} title="Déplacer l'item"/></DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell>{(index + 1)}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell>{item.noteTitle}</DataGrid.Body.Cell>
-                                        <DataGrid.Body.Cell>{item.ccCmId}</DataGrid.Body.Cell>
+                                        <DataGrid.Body.Cell>{item.intCode}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell>
                                             <DropdownButton size="sm" title={<span><FontAwesomeIcon icon={faBars}/>{" Actions"}</span>}>
                                                 <Dropdown.Item onClick={() => this.onEdit(item.ccCmId)}><FontAwesomeIcon icon={faPencilAlt}/>{" Modifier"}</Dropdown.Item>
                                                 <Dropdown.Item onClick={() => this.onRemove(item.ccCmId)}><FontAwesomeIcon icon={faTrashAlt}/>{" Supprimer"}</Dropdown.Item>
-                                                <Dropdown.Item onClick={() => this.onCopyIC(item.ccCmId)}><FontAwesomeIcon icon={faCopy}/>{" Code d'intégration"}</Dropdown.Item>
+                                                <Dropdown.Item onClick={() => this.onCopyIC(item.intCode)}><FontAwesomeIcon icon={faCopy}/>{" Code d'intégration"}</Dropdown.Item>
                                             </DropdownButton>
                                         </DataGrid.Body.Cell>
                                     </DataGrid.Body.RowDraggable>
@@ -575,12 +575,12 @@ export class EditionMode extends Component{
         }
     }
 
-    getIntegrationCode(ccCmId){
-        return `{"cccmid":"${ccCmId}", "nbLines": "15"}`;
+    getIntegrationCode(intCode){
+        return `{"intCode":"${intCode}", "nbLines": "15"}`;
     }
 
-    onCopyIC(ccCmId){
-        this.intCodeRef.current.value = this.getIntegrationCode(ccCmId);
+    onCopyIC(intCode){
+        this.intCodeRef.current.value = this.getIntegrationCode(intCode);
         this.intCodeRef.current.type = "text";
         this.intCodeRef.current.select()
 		document.execCommand('copy');

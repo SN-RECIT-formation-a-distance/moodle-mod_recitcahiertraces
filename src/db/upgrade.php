@@ -7,7 +7,7 @@ function xmldb_recitcahiercanada_upgrade($oldversion) {
     global $CFG, $DB;
     $dbman = $DB->get_manager();
 
-    /// Add a new column newcol to the mdl_myqtype_options
+    /// Add a new columns suggestednote and teachertip
     if ($oldversion < 2019111301) {
            // Define field jsoncontent to be added to filter_wiris_formulas.
            $table = new xmldb_table('recitcc_cm_notes');
@@ -27,6 +27,23 @@ function xmldb_recitcahiercanada_upgrade($oldversion) {
 
            upgrade_plugin_savepoint(true, 2019111301, 'mod', 'recitcahiercanada');
     }
+
+     /// Add a new column inputtype et uid 
+     if ($oldversion < 2019120300) {
+        // Define field jsoncontent to be added to filter_wiris_formulas.
+        $table = new xmldb_table('recitcc_cm_notes');
+
+        $field = new xmldb_field('intcode', XMLDB_TYPE_CHAR, 255, null, null, null, null, 'id');
+
+        // Conditionally launch add field jsoncontent.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        //$table->add_index('uid', XMLDB_INDEX_UNIQUE, ['uid']);
+
+        upgrade_plugin_savepoint(true, 2019120300, 'mod', 'recitcahiercanada');
+ }
 
     return true;
 }

@@ -44,19 +44,18 @@ class backup_recitcahiercanada_activity_structure_step extends backup_activity_s
 
 
         $recitcc_cm_notes = new backup_nested_element('recitcc_cm_notes', array('id'), array(
-            'ccid', 'cmid', 'title', 'slot', 'templatenote', 'lastupdate', 'cmindexpos'));
+            'intcode', 'ccid', 'cmid', 'title', 'slot', 'templatenote', 'suggestednote', 'teachertip', 'lastupdate', 'cmindexpos'));
 
-        $mdl_recitcc_user_notes = new backup_nested_element('recitcc_user_notes', array('id'), array(
-            'cccmid', 'userid', 'note', 'feedback', 'grade', 'lastupdate'));
+       // $mdl_recitcc_user_notes = new backup_nested_element('recitcc_user_notes', array('id'), array('cccmid', 'userid', 'note', 'feedback', 'grade', 'lastupdate'));
 
         // Build the tree
         $recitcahiercanada->add_child($recitcc_cm_notes);
-        $recitcc_cm_notes->add_child($mdl_recitcc_user_notes);
+       // $recitcc_cm_notes->add_child($mdl_recitcc_user_notes);
 
         // Define sources
         $recitcahiercanada->set_source_table('recitcahiercanada', array('id' => backup::VAR_ACTIVITYID));
         $recitcc_cm_notes->set_source_table('vw_recitcc_cm_notes', array('ccid' => backup::VAR_PARENTID));
-        $mdl_recitcc_user_notes->set_source_table('recitcc_user_notes', array('cccmid' => backup::VAR_PARENTID));
+       // $mdl_recitcc_user_notes->set_source_table('recitcc_user_notes', array('cccmid' => backup::VAR_PARENTID));
 
         // Define id annotations
         //$recitcahiercanada->annotate_ids('question', 'questionid');
@@ -64,8 +63,8 @@ class backup_recitcahiercanada_activity_structure_step extends backup_activity_s
         // Define file annotations
         $recitcahiercanada->annotate_files('mod_recitcahiercanada', 'intro', null); // This file area hasn't itemid
         $recitcc_cm_notes->annotate_files('vw_recitcc_cm_notes', 'templatenote', null); // This file area hasn't itemid
-        $mdl_recitcc_user_notes->annotate_files('mdl_recitcc_user_notes', 'note', null); // This file area hasn't itemid
-        $mdl_recitcc_user_notes->annotate_files('mdl_recitcc_user_notes', 'feedback', null); // This file area hasn't itemid       
+       // $mdl_recitcc_user_notes->annotate_files('mdl_recitcc_user_notes', 'note', null); // This file area hasn't itemid
+       // $mdl_recitcc_user_notes->annotate_files('mdl_recitcc_user_notes', 'feedback', null); // This file area hasn't itemid       
 
         // Return the root element (recitcahiercanada), wrapped into standard activity structure
         return $this->prepare_activity_structure($recitcahiercanada);

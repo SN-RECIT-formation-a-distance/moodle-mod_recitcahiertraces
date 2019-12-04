@@ -23,6 +23,7 @@
      <TABLE NAME="recitcc_cm_notes" COMMENT="It keeps the course modules which have notes to be taken by the users">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="intcode" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="integration code"/>
         <FIELD NAME="ccid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Cahier Canada Id"/>
         <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Course Module Id"/>
         <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>

@@ -36,7 +36,7 @@ class restore_recitcahiercanada_activity_structure_step extends restore_activity
         $paths = array();
         $paths[] = new restore_path_element('recitcahiercanada', '/activity/recitcahiercanada');
         $paths[] = new restore_path_element('recitcc_cm_notes', '/activity/recitcahiercanada/recitcc_cm_notes');
-        $paths[] = new restore_path_element('recitcc_user_notes', '/activity/recitcahiercanada/recitcc_cm_notes/recitcc_user_notes');
+     //   $paths[] = new restore_path_element('recitcc_user_notes', '/activity/recitcahiercanada/recitcc_cm_notes/recitcc_user_notes');
 
         // Return the paths wrapped into standard activity structure
         return $this->prepare_activity_structure($paths);
@@ -99,7 +99,7 @@ class restore_recitcahiercanada_activity_structure_step extends restore_activity
         //fclose($fp);
     }
 
-    protected function process_recitcc_user_notes($data) {
+   /* protected function process_recitcc_user_notes($data) {
         global $DB;
 
         $data = (object)$data;
@@ -107,13 +107,13 @@ class restore_recitcahiercanada_activity_structure_step extends restore_activity
 
         // insert the recitcc_user_notes record
         $newitemid = $DB->insert_record('recitcc_user_notes', $data);
-    }
+    }*/
 
     protected function after_execute() {
         // Add recitcahiercanada related files, no need to match by itemname (just internally handled context)
         $this->add_related_files('mod_recitcahiercanada', 'intro', null);
-        $this->add_related_files('mod_recitcc_user_notes', 'note', null);
-        $this->add_related_files('mod_recitcc_user_notes', 'feedback', null);
+        //$this->add_related_files('mod_recitcc_user_notes', 'note', null);
+        //$this->add_related_files('mod_recitcc_user_notes', 'feedback', null);
     }
 }
 

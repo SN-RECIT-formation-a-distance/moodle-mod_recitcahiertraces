@@ -19,6 +19,7 @@ export * from './NumberInterval';
 export * from './RadioGroup';
 export * from './Switch';
 export * from './RichEditor';
+export * from './ToggleButtons';
 
 export default class Components{
     static version = 1.0;
