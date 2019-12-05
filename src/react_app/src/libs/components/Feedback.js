@@ -22,13 +22,24 @@ export class FeedbackCtrl
     }
 
     addObserver(id, update){
-        if(this.observers.nxGetItem("id", id, null) === null){
+        let found = false;
+        for(let item of this.observers){
+            if(item.id === id){
+                found = true;
+            }
+        }
+
+        if(!found){
             this.observers.push({id:id, update:update});
         }
     }
 
     removeObserver(id){
-        this.observers.nxRemoveItem("id", id);
+        for(let i = 0; i < this.observers.length; i++){
+            if(this.observers[i].id === id){
+                this.observers.splice(i,1);
+            }
+        }
     }
 
     notifyObservers(){        
@@ -53,7 +64,7 @@ export class FeedbackCtrl
     }
 
     removeItem(index){
-        if(this.msg.nxRemove(index) !== null){
+        if(this.msg.splice(index,1) !== null){
             this.notifyObservers();
         }
     }

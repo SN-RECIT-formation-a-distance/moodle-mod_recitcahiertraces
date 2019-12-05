@@ -321,7 +321,7 @@ class HCell extends ACell{
     }
 
     render() {    
-        let style = (this.props.style || {}).nxClone();
+        let style = Object.assign({}, this.props.style);
         style.position = "relative";
 
         let main = 

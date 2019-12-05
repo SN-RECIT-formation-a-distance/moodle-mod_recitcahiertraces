@@ -59031,7 +59031,7 @@ function (_ACell) {
   _createClass(HCell, [{
     key: "render",
     value: function render() {
-      var style = (this.props.style || {}).nxClone();
+      var style = Object.assign({}, this.props.style);
       style.position = "relative";
 
       var main = _react.default.createElement("th", {
@@ -75552,29 +75552,18 @@ function () {
   _createClass(FeedbackCtrl, [{
     key: "addObserver",
     value: function addObserver(id, update) {
-      if (this.observers.nxGetItem("id", id, null) === null) {
-        this.observers.push({
-          id: id,
-          update: update
-        });
-      }
-    }
-  }, {
-    key: "removeObserver",
-    value: function removeObserver(id) {
-      this.observers.nxRemoveItem("id", id);
-    }
-  }, {
-    key: "notifyObservers",
-    value: function notifyObservers() {
+      var found = false;
       var _iteratorNormalCompletion = true;
       var _didIteratorError = false;
       var _iteratorError = undefined;
 
       try {
         for (var _iterator = this.observers[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-          var o = _step.value;
-          o.update();
+          var item = _step.value;
+
+          if (item.id === id) {
+            found = true;
+          }
         }
       } catch (err) {
         _didIteratorError = true;
@@ -75587,6 +75576,49 @@ function () {
         } finally {
           if (_didIteratorError) {
             throw _iteratorError;
+          }
+        }
+      }
+
+      if (!found) {
+        this.observers.push({
+          id: id,
+          update: update
+        });
+      }
+    }
+  }, {
+    key: "removeObserver",
+    value: function removeObserver(id) {
+      for (var i = 0; i < this.observers.length; i++) {
+        if (this.observers[i].id === id) {
+          this.observers.splice(i, 1);
+        }
+      }
+    }
+  }, {
+    key: "notifyObservers",
+    value: function notifyObservers() {
+      var _iteratorNormalCompletion2 = true;
+      var _didIteratorError2 = false;
+      var _iteratorError2 = undefined;
+
+      try {
+        for (var _iterator2 = this.observers[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+          var o = _step2.value;
+          o.update();
+        }
+      } catch (err) {
+        _didIteratorError2 = true;
+        _iteratorError2 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion2 && _iterator2.return != null) {
+            _iterator2.return();
+          }
+        } finally {
+          if (_didIteratorError2) {
+            throw _iteratorError2;
           }
         }
       }
@@ -75627,7 +75659,7 @@ function () {
   }, {
     key: "removeItem",
     value: function removeItem(index) {
-      if (this.msg.nxRemove(index) !== null) {
+      if (this.msg.splice(index, 1) !== null) {
         this.notifyObservers();
       }
     }
@@ -77686,12 +77718,13 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 var _exportNames = {
+  JsNx: true,
   UtilsMoodle: true,
   UtilsString: true,
   UtilsDateTime: true,
   UtilsTreeStruct: true
 };
-exports.UtilsTreeStruct = exports.UtilsDateTime = exports.UtilsString = exports.UtilsMoodle = exports.default = void 0;
+exports.UtilsTreeStruct = exports.UtilsDateTime = exports.UtilsString = exports.UtilsMoodle = exports.default = exports.JsNx = void 0;
 
 var _WebApi = require("./WebApi");
 
@@ -77740,11 +77773,243 @@ function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.
 
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
 
+function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var JsNx =
+/*#__PURE__*/
+function () {
+  function JsNx() {
+    _classCallCheck(this, JsNx);
+  }
+
+  _createClass(JsNx, null, [{
+    key: "at",
+
+    /**
+     * Return the array item at the indicated index. If it not exists, then return the default value.
+     * @param {number} index
+     * @param {*} default value
+     * @returns {*}
+     */
+    value: function at(arr, index, defaultValue) {
+      if (JsNx.exists(arr, index)) {
+        return arr[index];
+      } else {
+        return defaultValue;
+      }
+    }
+  }, {
+    key: "exists",
+
+    /**
+     * Check if the index exists in the array.
+     * @param {number} index
+     * @returns {boolean}
+     */
+    value: function exists(arr, index) {
+      if (typeof arr[index] === "undefined") {
+        return false;
+      } else {
+        return true;
+      }
+    }
+  }, {
+    key: "getItem",
+
+    /**
+     * Return the array item (an object) according to the property and value indicated. If it not exists, then return the default value.
+     * @param {string} property
+     * @param {*} property value
+     * @param {*} default value
+     * @returns {*}
+     */
+    value: function getItem(arr, prop, value, defaultValue) {
+      var _iteratorNormalCompletion = true;
+      var _didIteratorError = false;
+      var _iteratorError = undefined;
+
+      try {
+        for (var _iterator = arr[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+          var item = _step.value;
+
+          if (JsNx.nxGet(item, prop, null) === value) {
+            return item;
+          }
+        }
+      } catch (err) {
+        _didIteratorError = true;
+        _iteratorError = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion && _iterator.return != null) {
+            _iterator.return();
+          }
+        } finally {
+          if (_didIteratorError) {
+            throw _iteratorError;
+          }
+        }
+      }
+
+      return defaultValue;
+    }
+  }, {
+    key: "remove",
+
+    /**
+     * Remove an element from the array. If the element does not exists then do nothing.
+     * @param {number} index
+     * @returns {object}
+     */
+    value: function remove(arr, index) {
+      var result = [];
+
+      if (JsNx.exists(arr, index)) {
+        result = arr.splice(index, 1);
+      }
+
+      return result.length > 0 ? result[0] : null;
+    }
+    /**
+     * Remove an element from the array according to the property and value indicated.
+     * @param {string} property
+     * @param {*} property value
+     * @returns {object}
+     */
+
+    /**
+     * Return the array item (an object) index according to the property and value indicated. 
+     * @param {string} property
+     * @param {*} property value
+     * @returns {number}
+     */
+
+    /**
+    * Get the property value. If it not exists, then return the default value.
+    * @param {string} prop
+    * @param {*} defaultValue
+    * @returns {*}
+    */
+
+    /*
+    * @description Deep clone the object and return a new one
+    * @returns {Object}
+    */
+
+  }]);
+
+  return JsNx;
+}();
+
+exports.JsNx = JsNx;
+
+JsNx.removeItem = function (arr, prop, value) {
+  var index = JsNx.getItemIndex(arr, prop, value, -1);
+  return JsNx.remove(arr, index);
+};
+
+JsNx.getItemIndex = function (arr, prop, value) {
+  for (var i = 0; i < arr.length; i++) {
+    var item = arr[i];
+
+    if (JsNx.get(item, prop, null) === value) {
+      return i;
+    }
+  }
+
+  return -1;
+};
+
+JsNx.get = function (obj, prop, defaultValue) {
+  var props = prop.split('.');
+  var result = typeof defaultValue === "undefined" ? null : defaultValue;
+
+  if (typeof obj[prop] === "function") {
+    result = obj[prop]();
+  } else if (props.length === 1 && obj.hasOwnProperty(props[0])) {
+    result = obj[props[0]];
+  } else if (props.length === 2 && obj[props[0]].hasOwnProperty(props[1])) {
+    result = obj[props[0]][props[1]];
+  }
+
+  return result;
+};
+
+JsNx.clone = function (obj) {
+  if (obj instanceof Date) {
+    return new Date(obj.valueOf());
+  }
+
+  var result = Object.create(obj.__proto__);
+
+  for (var prop in obj) {
+    if (Array.isArray(obj[prop])) {
+      switch (_typeof(JsNx.at(obj[prop], 0, null))) {
+        case "object":
+          result[prop] = JsNx.copy(obj[prop], 2);
+          break;
+
+        default:
+          result[prop] = JsNx.copy(obj[prop]);
+      }
+    } else if (_typeof(obj[prop]) === "object" && obj[prop] !== null) {
+      result[prop] = JsNx.clone(obj[prop]);
+    } else {
+      result[prop] = obj[prop];
+    }
+  }
+
+  return result;
+};
+
+JsNx.copy = function (arr, level) {
+  level = level || 0;
+
+  switch (level) {
+    case 1:
+      return JSON.parse(JSON.stringify(arr));
+    //  Array of literal-structures (array, object) ex: [[], {}];
+
+    case 2:
+      //return jQuery.extend(this); // Array of prototype-objects (function). The jQuery technique can be used to deep-copy all array-types. ex: [function () {}, function () {}];
+      var result = [];
+      var _iteratorNormalCompletion2 = true;
+      var _didIteratorError2 = false;
+      var _iteratorError2 = undefined;
+
+      try {
+        for (var _iterator2 = arr[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
+          var item = _step2.value;
+          result.push(item !== null ? JsNx.clone(item) : null);
+        }
+      } catch (err) {
+        _didIteratorError2 = true;
+        _iteratorError2 = err;
+      } finally {
+        try {
+          if (!_iteratorNormalCompletion2 && _iterator2.return != null) {
+            _iterator2.return();
+          }
+        } finally {
+          if (_didIteratorError2) {
+            throw _iteratorError2;
+          }
+        }
+      }
+
+      return result;
+
+    default:
+      return arr.slice();
+    // Array of literal-values (boolean, number, string) ex:  [true, 1, "true"]
+  }
+};
 
 var Utils =
 /*#__PURE__*/
@@ -77834,29 +78099,29 @@ function () {
 
       var filter = /^([a-zA-Z0-9_.-])+@(([a-zA-Z0-9-])+\.)+([a-zA-Z0-9]{2,4})+$/;
       var emails = email.split(",");
-      var _iteratorNormalCompletion = true;
-      var _didIteratorError = false;
-      var _iteratorError = undefined;
+      var _iteratorNormalCompletion3 = true;
+      var _didIteratorError3 = false;
+      var _iteratorError3 = undefined;
 
       try {
-        for (var _iterator = emails[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-          var e = _step.value;
+        for (var _iterator3 = emails[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
+          var e = _step3.value;
 
           if (!filter.test(e.trim())) {
             return false;
           }
         }
       } catch (err) {
-        _didIteratorError = true;
-        _iteratorError = err;
+        _didIteratorError3 = true;
+        _iteratorError3 = err;
       } finally {
         try {
-          if (!_iteratorNormalCompletion && _iterator.return != null) {
-            _iterator.return();
+          if (!_iteratorNormalCompletion3 && _iterator3.return != null) {
+            _iterator3.return();
           }
         } finally {
-          if (_didIteratorError) {
-            throw _iteratorError;
+          if (_didIteratorError3) {
+            throw _iteratorError3;
           }
         }
       }
@@ -78279,7 +78544,7 @@ function (_WebApi) {
   }, {
     key: "removeObserver",
     value: function removeObserver(id) {
-      this.observers.nxRemoveItem("id", id);
+      _Utils.JsNx.removeItem(this.observers, "id", id);
     }
   }, {
     key: "notifyObservers",
@@ -78522,17 +78787,109 @@ export class Assets
    // static customers = require('../assets/handshake.svg');
    static brand = require('../assets/eagle.png');
 }*/
+
+/*
+export class AttoEditor{
+    constructor(){
+        this.dom = null;
+        this.atto = null;
+        this.ready = false;
+
+        let tmp = document.createElement("div");
+        tmp.setAttribute("id", "recitCTEditorContainer");
+        document.body.appendChild(tmp);
+
+        let that = this;
+
+        YUI().use(['moodle-editor_atto-editor', 'Y.M.atto_vvvebjs'], function(Y) {
+            let params = {
+                'elementid': tmp.id,
+                'contextid': 300,
+                'autosaveEnabled': false,
+                'autosaveFrequency': 0,
+                'language': "fr_ca",
+                'filepickeroptions': [],
+                'plugins': {
+                    group: {
+                        group: "vvvebjs",
+                        plugins: {
+                            plugin: {name: "vvvebjs"}
+                            }
+                        }
+                    }
+                }
+            
+             /*   
+                'autosaveEnabled': false,
+                'autosaveFrequency': 0,
+                'language': "fr_ca",
+                'filepickeroptions': [],
+                'plugins': [],
+            }*/
+
+/*'content_css' =>  $this->page->theme->editor_css_url()->out(false),
+'contextid' => $context->id,
+'directionality' => get_string('thisdirection', 'langconfig'),
+'pageHash' => $pagehash,*/
+
+/*that.atto = new Y.M.editor_atto.Editor(params);                       
+  that.dom = that.atto._wrapper._node;
+that.ready = true;
+console.log(that.atto);
+});
+}
+show(){
+if(!this.ready){return;}
+this.dom.style.display = 'block';
+}
+close(){
+if(!this.ready){return;}
+this.setValue("");
+this.dom.style.display = 'none';
+}
+setValue(value){
+if(!this.ready){return;}
+this.dom.getElementsByClassName("editor_atto_content")[0].innerHTML = value;
+}
+getValue(){
+if(!this.ready){return;}
+return this.dom.getElementsByClassName("editor_atto_content")[0].innerHTML;
+}
+}
+*/
 var EditorMoodle =
 /*#__PURE__*/
 function () {
   function EditorMoodle(id) {
     _classCallCheck(this, EditorMoodle);
 
-    this.dom = document.getElementById(id || 'recitCCEditorContainer');
-    this.format = this.dom.getAttribute("data-format");
+    this.id = id || "recitCCEditorContainer";
+    this.dom = null;
+    this.format = null;
+    this.count = 0;
+    this.init = this.init.bind(this);
+    this.init();
   }
 
   _createClass(EditorMoodle, [{
+    key: "init",
+    value: function init() {
+      this.dom = document.getElementById(this.id);
+      console.log("Loading Editor Moodle...");
+      this.count++;
+
+      if (this.count >= 10) {
+        return console.log("Failure no loading Editor Moodle...");
+      }
+
+      if (this.dom === null) {
+        window.setTimeout(this.init, 500);
+        return;
+      }
+
+      this.format = this.dom.getAttribute("data-format");
+    }
+  }, {
     key: "show",
     value: function show() {
       this.dom.style.display = 'block';
@@ -78545,10 +78902,16 @@ function () {
       document.body.appendChild(this.dom);
     }
   }, {
+    key: "dispose",
+    value: function dispose() {
+      this.dom.remove();
+    }
+  }, {
     key: "setValue",
     value: function setValue(value) {
       switch (this.format) {
         case 'atto_texteditor':
+          console.log(this.format, value);
           this.dom.getElementsByClassName("editor_atto_content")[0].innerHTML = value; //this.atto.editor.setHTML(value);
 
           break;
@@ -78918,9 +79281,9 @@ function (_Component4) {
         });
       }
 
-      var value = "";
+      var value = ""; //if(userList.nxExists(this.state.selectedUserIndex)){
 
-      if (userList.nxExists(this.state.selectedUserIndex)) {
+      if (_Utils.JsNx.exists(userList, this.state.selectedUserIndex)) {
         value = userList[this.state.selectedUserIndex].value;
       }
 
@@ -78976,10 +79339,11 @@ function (_Component4) {
     value: function onSelectUser(event) {
       var _this4 = this;
 
+      var userId = parseInt(event.target.value, 10) || 0;
       this.setState({
         selectedUserIndex: event.target.index
       }, function () {
-        return _this4.props.onSelectUser(parseInt(event.target.value, 10));
+        return _this4.props.onSelectUser(userId);
       });
     }
   }, {
@@ -79308,7 +79672,7 @@ function (_Component5) {
   }, {
     key: "onSave",
     value: function onSave() {
-      var data = this.state.data.nxClone();
+      var data = _Utils.JsNx.clone(this.state.data);
 
       if (data.ccCmId === 0) {
         data.ccId = this.props.ccCm.ccId;
@@ -79884,7 +80248,7 @@ function (_Component7) {
   }, {
     key: "onSave",
     value: function onSave() {
-      var data = this.state.data.nxClone();
+      var data = _Utils.JsNx.clone(this.state.data);
 
       if (this.state.mode === "s") {
         data.note = _common.$glVars.editorMoodle.getValue();
@@ -79892,6 +80256,8 @@ function (_Component7) {
       else if (this.state.mode === "t") {
           data.feedback = _common.$glVars.editorMoodle.getValue();
         }
+
+      data.userId = this.props.userId;
 
       _common.$glVars.webApi.savePersonalNote(data, this.state.mode, this.onSaveResult);
     }
@@ -79965,7 +80331,11 @@ function (_Component8) {
   }, {
     key: "componentDidUpdate",
     value: function componentDidUpdate(prevProps) {
-      // Typical usage (don't forget to compare props):
+      if (isNaN(prevProps.userId)) {
+        return;
+      } // Typical usage (don't forget to compare props):
+
+
       if (this.props.userId !== prevProps.userId) {
         this.getData();
       }
@@ -80028,7 +80398,7 @@ function (_Component8) {
         var result = _react.default.createElement(_reactBootstrap.Tab, {
           key: index,
           eventKey: index,
-          title: items.nxAt(0).activityName
+          title: _Utils.JsNx.at(items, 0).activityName
         }, _react.default.createElement(_Components.DataGrid, {
           orderBy: true
         }, _react.default.createElement(_Components.DataGrid.Header, null, _react.default.createElement(_Components.DataGrid.Header.Row, null, _react.default.createElement(_Components.DataGrid.Header.Cell, {
@@ -80125,544 +80495,7 @@ exports.Notebook = Notebook;
 Notebook.defaultProps = {
   userId: 0
 };
-},{"react":"../node_modules/react/index.js","react-bootstrap":"../node_modules/react-bootstrap/esm/index.js","@fortawesome/free-solid-svg-icons":"../node_modules/@fortawesome/free-solid-svg-icons/index.es.js","@fortawesome/react-fontawesome":"../node_modules/@fortawesome/react-fontawesome/index.es.js","../libs/components/Components":"libs/components/Components.js","../libs/utils/Utils":"libs/utils/Utils.js","../common/common":"common/common.js"}],"libs/utils/JsExtension.js":[function(require,module,exports) {
-function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-////////////////////////////////////
-// Native JavaScript Extensions
-// The use of prefix nx (Native eXtension) is to avoid functions name conflicts in case of a possible Java Script expansion 
-////////////////////////////////////
-
-/*eslint no-extend-native: ["error", { "exceptions": ["String", "Number", "Date", "Array", "Object"] }]*/
-////////////////////////////////////
-// String
-////////////////////////////////////
-String.prototype.nxPrintf = function () {
-  var str = this.toString();
-
-  if (arguments.length) {
-    var t = _typeof(arguments[0]);
-
-    var key;
-    var args = "string" === t || "number" === t ? Array.prototype.slice.call(arguments) : arguments[0];
-
-    for (key in args) {
-      str = str.replace(new RegExp("\\{" + key + "\\}", "gi"), args[key]);
-    }
-  }
-
-  return str;
-};
-
-String.prototype.nxNumberFormat = function (decimals, decPoint) {
-  var n = Number.parseFloat(this);
-  return n.nxFormat(decimals);
-};
-
-String.prototype.nxLpad = function (padString, length) {
-  var str = this;
-
-  while (str.length < length) {
-    str = padString + str;
-  }
-
-  return str;
-};
-
-String.prototype.nxGetRegExp = function () {
-  var strEscape = this.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
-
-  return new RegExp(strEscape, 'i');
-}; ////////////////////////////////////
-// Number
-////////////////////////////////////
-
-
-Number.prototype.nxIsNumber = function () {
-  return !isNaN(parseFloat(this)) && isFinite(this);
-};
-
-Number.prototype.nxFormat = function (decimals) {
-  return this.toFixed(decimals);
-}; ////////////////////////////////////
-// Date
-////////////////////////////////////
-
-/**
- * The JavaScript Date use always the client timezone. So this function format the date converting to the UTC timezone.
- */
-
-
-Date.prototype.nxFormat = function (option) {
-  option = option || "default";
-  var result = "";
-
-  switch (option) {
-    case "utc":
-      result += this.getUTCFullYear();
-      result += "-" + (this.getUTCMonth() + 1).toString().nxLpad(0, 2);
-      result += "-" + this.getUTCDate().toString().nxLpad(0, 2);
-      result += " " + this.getUTCHours().toString().nxLpad(0, 2);
-      result += ":" + this.getUTCMinutes().toString().nxLpad(0, 2); //result += ":" + this.getUTCSeconds().toString().nxLpad(0,2);    
-
-      break;
-
-    default:
-      result += this.getFullYear();
-      result += "-" + (this.getMonth() + 1).toString().nxLpad(0, 2);
-      result += "-" + this.getDate().toString().nxLpad(0, 2);
-      result += " " + this.getHours().toString().nxLpad(0, 2);
-      result += ":" + this.getMinutes().toString().nxLpad(0, 2);
-    //result += ":" + this.getSeconds().toString().nxLpad(0,2);
-  }
-
-  return result;
-};
-
-Date.nxFormat = function (value) {
-  return value === null ? "" : new Date(value).nxFormat();
-}; ////////////////////////////////////
-// Array
-////////////////////////////////////
-
-/**
- * Check if the array is empty
- * @returns {boolean}
- */
-
-
-Array.prototype.nxEmpty = function () {
-  return this.length === 0;
-};
-/**
- * Check if the index exists in the array.
- * @param {number} index
- * @returns {boolean}
- */
-
-
-Array.prototype.nxExists = function (index) {
-  if (typeof this[index] === "undefined") {
-    return false;
-  } else {
-    return true;
-  }
-};
-/**
- * Return the array item at the indicated index. If it not exists, then return the default value.
- * @param {number} index
- * @param {*} default value
- * @returns {*}
- */
-
-
-Array.prototype.nxAt = function (index, defaultValue) {
-  if (this.nxExists(index)) {
-    return this[index];
-  } else {
-    return defaultValue;
-  }
-};
-/**
- * Return the first array item. If it not exists, then return the default value.
- * @param {*} default value
- * @returns {*}
- */
-
-
-Array.prototype.nxLast = function (defaultValue) {
-  return this.nxAt(0, defaultValue);
-};
-/**
- * Return the last array item. If it not exists, then return the default value.
- * @param {*} default value
- * @returns {*}
- */
-
-
-Array.prototype.nxLast = function (defaultValue) {
-  return this.nxAt(this.length - 1, defaultValue);
-};
-/**
- * Return the array item (an object) according to the property and value indicated. If it not exists, then return the default value.
- * @param {string} property
- * @param {*} property value
- * @param {*} default value
- * @returns {*}
- */
-
-
-Array.prototype.nxGetItem = function (prop, value, defaultValue) {
-  var _iteratorNormalCompletion = true;
-  var _didIteratorError = false;
-  var _iteratorError = undefined;
-
-  try {
-    for (var _iterator = this[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-      var item = _step.value;
-
-      if (item.nxGet(prop, null) === value) {
-        return item;
-      }
-    }
-  } catch (err) {
-    _didIteratorError = true;
-    _iteratorError = err;
-  } finally {
-    try {
-      if (!_iteratorNormalCompletion && _iterator.return != null) {
-        _iterator.return();
-      }
-    } finally {
-      if (_didIteratorError) {
-        throw _iteratorError;
-      }
-    }
-  }
-
-  return defaultValue;
-};
-/**
- * Return an array with the result of the property and value indicated. 
- * @param {string} property
- * @param {*} property value
- * @returns {array}
- */
-
-
-Array.prototype.nxGetItems = function (prop, value) {
-  var result = [];
-  var _iteratorNormalCompletion2 = true;
-  var _didIteratorError2 = false;
-  var _iteratorError2 = undefined;
-
-  try {
-    for (var _iterator2 = this[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-      var item = _step2.value;
-
-      if (item.nxGet(prop, null) === value) {
-        result.push(item);
-      }
-    }
-  } catch (err) {
-    _didIteratorError2 = true;
-    _iteratorError2 = err;
-  } finally {
-    try {
-      if (!_iteratorNormalCompletion2 && _iterator2.return != null) {
-        _iterator2.return();
-      }
-    } finally {
-      if (_didIteratorError2) {
-        throw _iteratorError2;
-      }
-    }
-  }
-
-  return result;
-};
-/**
- * Return the array item (an object) index according to the property and value indicated. 
- * @param {string} property
- * @param {*} property value
- * @returns {number}
- */
-
-
-Array.prototype.nxGetItemIndex = function (prop, value) {
-  for (var i = 0; i < this.length; i++) {
-    var item = this[i];
-
-    if (item.nxGet(prop, null) === value) {
-      return i;
-    }
-  }
-
-  return -1;
-};
-/**
- * Find the array item (an object) and copy the values according to the parameter data. 
- * @param {string} prop - property
- * @param {*} value
- * @param {object} data
- */
-
-
-Array.prototype.nxSetItem = function (prop, value, data) {
-  var item = this.nxGetItem(prop, value, null);
-
-  if (item !== null) {
-    data.nxCopy(item);
-  }
-};
-/**
- * Joins the elements of an array into a string, according to the specified property, and returns the string.
- * @param {string} property
- * @param {string} [separator] - The "," is the default value
- * @returns {string}
- */
-
-
-Array.prototype.nxJoin = function (prop, separator) {
-  prop = prop || null;
-  separator = separator || ",";
-  var result = "";
-
-  for (var i = 0; i < this.length; i++) {
-    var obj = this[i];
-
-    if (obj === null || typeof obj === "undefined") {
-      continue;
-    }
-
-    if (i > 0 && i <= this.length - 1 && result.length > 0) {
-      result += separator;
-    }
-
-    if (_typeof(obj) === "object") {
-      if (!obj.hasOwnProperty(prop) || obj[prop] === null) {
-        continue;
-      }
-
-      result += obj.nxGet(prop);
-    } else {
-      result += obj;
-    }
-  }
-
-  return result;
-};
-/**
- * Remove an element from the array. If the element does not exists then do nothing.
- * @param {number} index
-  * @returns {object}
- */
-
-
-Array.prototype.nxRemove = function (index) {
-  var result = [];
-
-  if (this.nxExists(index)) {
-    result = this.splice(index, 1);
-  }
-
-  return result.length > 0 ? result[0] : null;
-};
-/**
- * Remove an element from the array according to the property and value indicated.
- * @param {string} property
- * @param {*} property value
- * @returns {object}
- */
-
-
-Array.prototype.nxRemoveItem = function (prop, value) {
-  var index = this.nxGetItemIndex(prop, value, -1);
-  return this.nxRemove(index);
-};
-/**
- * Remove all elements from the array according to the value indicated.
- * @param {*} property value
- * @returns {void}
- */
-
-
-Array.prototype.nxRemoveValue = function (value) {
-  for (var i = 0; i < this.length; i++) {
-    if (this[i] === value) {
-      this.splice(i, 1);
-    }
-  }
-};
-
-Array.prototype.nxCopy = function (level) {
-  level = level || 0;
-
-  switch (level) {
-    case 1:
-      return JSON.parse(JSON.stringify(this));
-    //  Array of literal-structures (array, object) ex: [[], {}];
-
-    case 2:
-      //return jQuery.extend(this); // Array of prototype-objects (function). The jQuery technique can be used to deep-copy all array-types. ex: [function () {}, function () {}];
-      var result = [];
-      var _iteratorNormalCompletion3 = true;
-      var _didIteratorError3 = false;
-      var _iteratorError3 = undefined;
-
-      try {
-        for (var _iterator3 = this[Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-          var item = _step3.value;
-          result.push(item !== null ? item.nxClone() : null);
-        }
-      } catch (err) {
-        _didIteratorError3 = true;
-        _iteratorError3 = err;
-      } finally {
-        try {
-          if (!_iteratorNormalCompletion3 && _iterator3.return != null) {
-            _iterator3.return();
-          }
-        } finally {
-          if (_didIteratorError3) {
-            throw _iteratorError3;
-          }
-        }
-      }
-
-      return result;
-
-    default:
-      return this.slice();
-    // Array of literal-values (boolean, number, string) ex:  [true, 1, "true"]
-  }
-};
-/**
- * Sort an array of objects
- * @param {string} property to compare
- * @returns {*}
- */
-
-
-Array.prototype.nxSort = function (prop) {
-  var compare = function compare(item1, item2) {
-    if (item1.nxGet(prop) > item2.nxGet(prop)) {
-      return 1;
-    } else {
-      return -1;
-    }
-  };
-
-  this.sort(compare);
-};
-/**
- * Add the item to the array only if it does not exists
- * @param {*} item
- * @returns {boolean}
- */
-
-
-Array.prototype.nxSinglePush = function (item) {
-  if (!this.includes(item)) {
-    this.push(item);
-    return true;
-  } else {
-    return false;
-  }
-}; ////////////////////////////////////
-// Object
-////////////////////////////////////
-
-
-Object.defineProperty(Object.prototype, 'nxGet', {
-  configurable: true,
-  writable: true
-});
-/**
-* Get the property value. If it not exists, then return the default value.
-* @param {string} prop
-* @param {*} defaultValue
-* @returns {*}
-*/
-
-Object.prototype.nxGet = function (prop, defaultValue) {
-  var props = prop.split('.');
-  var result = typeof defaultValue === "undefined" ? null : defaultValue;
-
-  if (typeof this[prop] === "function") {
-    result = this[prop]();
-  } else if (props.length === 1 && this.hasOwnProperty(props[0])) {
-    result = this[props[0]];
-  } else if (props.length === 2 && this[props[0]].hasOwnProperty(props[1])) {
-    result = this[props[0]][props[1]];
-  }
-
-  return result;
-};
-
-Object.defineProperty(Object.prototype, 'nxClone', {
-  configurable: true,
-  writable: true
-});
-/*
- * @description Deep clone the object and return a new one
- * @returns {Object}
- */
-
-Object.prototype.nxClone = function () {
-  if (this instanceof Date) {
-    return new Date(this.valueOf());
-  }
-
-  var result = Object.create(this.__proto__);
-
-  for (var prop in this) {
-    if (Array.isArray(this[prop])) {
-      switch (_typeof(this[prop].nxAt(0, null))) {
-        case "object":
-          result[prop] = this[prop].nxCopy(2);
-          break;
-
-        default:
-          result[prop] = this[prop].nxCopy();
-      }
-    } else if (_typeof(this[prop]) === "object" && this[prop] !== null) {
-      result[prop] = this[prop].nxClone();
-    } else {
-      result[prop] = this[prop];
-    }
-  }
-
-  return result;
-};
-
-Object.defineProperty(Object.prototype, 'nxCopy', {
-  configurable: true,
-  writable: true
-});
-/**
- * @description Copies only the similar attributes
- * @param {object} to
- * @returns {void}
- */
-
-Object.prototype.nxCopy = function (to) {
-  to = to || null;
-  if (to === null) return;
-
-  for (var key in this) {
-    if (!to.hasOwnProperty(key)) {
-      continue;
-    }
-
-    if (this[key] instanceof Array) {
-      // if it is an array of objects then we do a deep copy
-      if (this[key].nxExists(0) && this[key][0] instanceof Object) {
-        to[key] = this[key].nxCopy(2);
-      } else {
-        to[key] = this[key].nxCopy();
-      }
-    } else if (this[key] instanceof Object) {
-      to[key] = this[key].nxClone(); //JSON.parse(JSON.stringify(this[key]));
-    } else {
-      to[key] = this[key];
-    }
-  }
-};
-
-Object.defineProperty(Object.prototype, 'nxEmpty', {
-  configurable: true,
-  writable: true
-});
-/**
- * @description Check if the object is empty
- * @returns {boolean}
- */
-
-Object.prototype.nxEmpty = function () {
-  return Object.keys(this).length === 0 && this.constructor === Object;
-}; //Object.defineProperty(Object.prototype, 'nxGetParentNode', {configurable:true, writable: true});
-},{}],"common/i18n.js":[function(require,module,exports) {
+},{"react":"../node_modules/react/index.js","react-bootstrap":"../node_modules/react-bootstrap/esm/index.js","@fortawesome/free-solid-svg-icons":"../node_modules/@fortawesome/free-solid-svg-icons/index.es.js","@fortawesome/react-fontawesome":"../node_modules/@fortawesome/react-fontawesome/index.es.js","../libs/components/Components":"libs/components/Components.js","../libs/utils/Utils":"libs/utils/Utils.js","../common/common":"common/common.js"}],"common/i18n.js":[function(require,module,exports) {
 "use strict";
 
 var _common = require("./common");
@@ -80700,8 +80533,6 @@ var _Utils = require("./libs/utils/Utils");
 var _Views = require("./views/Views");
 
 var _common = require("./common/common");
-
-require("./libs/utils/JsExtension");
 
 var _i18n = require("./common/i18n");
 
@@ -80800,20 +80631,33 @@ function (_Component) {
 
   return App;
 }(_react.Component);
+/*
+let atto1 = new AttoEditor();
+
+
+let atto2 = new AttoEditor();
+
+window.setTimeout(function(){
+    atto1.setValue("gus");
+    atto2.setValue("kaw");
+}, 1000);*/
+
 
 App.defaultProps = {
   signedUser: null
 };
-var domContainer = document.getElementById('recit_cahiertraces');
-var signedUser = {
-  userId: domContainer.getAttribute('data-student-id'),
-  roles: domContainer.getAttribute('data-roles').split(",")
-};
+document.addEventListener('DOMContentLoaded', function () {
+  var domContainer = document.getElementById('recit_cahiertraces');
+  var signedUser = {
+    userId: domContainer.getAttribute('data-student-id'),
+    roles: domContainer.getAttribute('data-roles').split(",")
+  };
 
-_reactDom.default.render(_react.default.createElement(App, {
-  signedUser: signedUser
-}), domContainer);
-},{"react":"../node_modules/react/index.js","react-dom":"../node_modules/react-dom/index.js","bootstrap/dist/css/bootstrap.min.css":"../node_modules/bootstrap/dist/css/bootstrap.min.css","@fortawesome/free-solid-svg-icons":"../node_modules/@fortawesome/free-solid-svg-icons/index.es.js","@fortawesome/react-fontawesome":"../node_modules/@fortawesome/react-fontawesome/index.es.js","./libs/components/Components":"libs/components/Components.js","./libs/utils/Utils":"libs/utils/Utils.js","./views/Views":"views/Views.js","./common/common":"common/common.js","./libs/utils/JsExtension":"libs/utils/JsExtension.js","./common/i18n":"common/i18n.js"}],"../../../../moodle/mod/recitcahiercanada/react_app/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+  _reactDom.default.render(_react.default.createElement(App, {
+    signedUser: signedUser
+  }), domContainer);
+}, false);
+},{"react":"../node_modules/react/index.js","react-dom":"../node_modules/react-dom/index.js","bootstrap/dist/css/bootstrap.min.css":"../node_modules/bootstrap/dist/css/bootstrap.min.css","@fortawesome/free-solid-svg-icons":"../node_modules/@fortawesome/free-solid-svg-icons/index.es.js","@fortawesome/react-fontawesome":"../node_modules/@fortawesome/react-fontawesome/index.es.js","./libs/components/Components":"libs/components/Components.js","./libs/utils/Utils":"libs/utils/Utils.js","./views/Views":"views/Views.js","./common/common":"common/common.js","./common/i18n":"common/i18n.js"}],"../../../../moodle/mod/recitcahiercanada/react_app/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -80841,7 +80685,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63092" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53448" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

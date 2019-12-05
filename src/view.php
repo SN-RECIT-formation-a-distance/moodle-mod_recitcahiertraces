@@ -64,7 +64,8 @@ class RecitCahierCanadaView
         $this->page->set_title($this->course->shortname.': '.$this->cm->name);
         $this->page->set_heading($this->course->fullname);
         $this->page->requires->css(new moodle_url('./react_app/build/index.css'), true);
-        //$this->page->requires->js(new moodle_url('./react_app/build/index.js'), true);
+        $this->page->requires->js(new moodle_url('./react_app/build/index.js'), true);
+        //$this->page->requires->js(new moodle_url('/lib/editor/atto/yui/build/moodle-editor_atto-editor/moodle-editor_atto-editor-min.js'), true);
 
         echo $this->output->header();
         echo $this->output->heading(format_string($this->cm->name), 2);
@@ -74,9 +75,37 @@ class RecitCahierCanadaView
 
         echo sprintf("<div id='recit_cahiertraces' data-student-id='%ld' data-roles='%s'></div>", $studentId, implode(",", $roles));
         echo Utils::createEditorHtml(false);
-        echo '<script src="./react_app/build/index.js"></script>';
+        //echo '<script src="./react_app/build/index.js"></script>';
+        
         //echo Utils::createTagsForm($this->db, $this->cm->id);
         
+
+        /*$context = context_module::instance($this->cm->id);
+        print_r($context);
+        exit();*/
+
+        /*
+        echo "<div id='recitCTEditorContainer'></div>";
+
+        $modules = array('moodle-editor_atto-editor');
+        // Note <> is a safe separator, because it will not appear in the output of s().
+        $pagehash = sha1($this->page->url . '<>' . s(''));
+        
+        $params = array(
+            'elementid' => "recitCTEditorContainer",
+            'content_css' =>  $this->page->theme->editor_css_url()->out(false),
+            'contextid' => $context->id,
+            'autosaveEnabled' => false,
+            'autosaveFrequency' => 0,
+            'language' => "fr_ca",
+            'directionality' => get_string('thisdirection', 'langconfig'),
+            'filepickeroptions' => array(),
+            'plugins' => array(),
+            'pageHash' => $pagehash,
+        );
+
+        $this->page->requires->yui_module($modules, 'Y.M.editor_atto.Editor.init', array($params));*/
+
         echo $this->output->footer();
     }
 }

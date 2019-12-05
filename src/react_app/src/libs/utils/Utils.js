@@ -6,6 +6,165 @@ export * from './WebApi';
 export * from './Cookies';
 export * from './I18n';
 
+export class JsNx{
+    /**
+     * Return the array item at the indicated index. If it not exists, then return the default value.
+     * @param {number} index
+     * @param {*} default value
+     * @returns {*}
+     */
+    static at(arr, index, defaultValue){
+        if(JsNx.exists(arr, index)){
+            return arr[index];
+        }
+        else{
+            return defaultValue;
+        }
+    };
+
+    /**
+     * Check if the index exists in the array.
+     * @param {number} index
+     * @returns {boolean}
+     */
+    static exists(arr, index){
+        if(typeof arr[index] === "undefined"){
+            return false;
+        }
+        else{
+            return true;
+        }
+    };
+
+    /**
+     * Return the array item (an object) according to the property and value indicated. If it not exists, then return the default value.
+     * @param {string} property
+     * @param {*} property value
+     * @param {*} default value
+     * @returns {*}
+     */
+    static getItem(arr, prop, value, defaultValue){ 
+        for(let item of arr){
+            if(JsNx.nxGet(item, prop, null) === value){return item; }
+        }  
+
+        return defaultValue;
+    };
+
+    /**
+     * Remove an element from the array. If the element does not exists then do nothing.
+     * @param {number} index
+     * @returns {object}
+     */
+    static remove(arr, index){
+        let result = [];
+        
+        if(JsNx.exists(arr, index)){
+            result = arr.splice(index,1);
+        }
+        
+        return (result.length > 0 ? result[0] : null);
+    };
+
+    /**
+     * Remove an element from the array according to the property and value indicated.
+     * @param {string} property
+     * @param {*} property value
+     * @returns {object}
+     */
+    static removeItem = function(arr, prop, value){
+        let index = JsNx.getItemIndex(arr, prop, value, -1);
+        return JsNx.remove(arr, index);
+    };
+
+    /**
+     * Return the array item (an object) index according to the property and value indicated. 
+     * @param {string} property
+     * @param {*} property value
+     * @returns {number}
+     */
+    static getItemIndex = function(arr, prop, value){
+        for(let i = 0; i < arr.length; i++){
+            let item = arr[i];
+            
+            if(JsNx.get(item, prop, null) === value){ return i }
+        }
+        return -1;
+    };
+
+    /**
+    * Get the property value. If it not exists, then return the default value.
+    * @param {string} prop
+    * @param {*} defaultValue
+    * @returns {*}
+    */
+    static get = function(obj, prop, defaultValue){  
+        let props = prop.split('.');
+        let result = (typeof defaultValue === "undefined" ? null : defaultValue);
+
+        if(typeof obj[prop] === "function"){
+            result = obj[prop]();
+        }
+        else if((props.length === 1) && (obj.hasOwnProperty(props[0]))){
+            result = obj[props[0]];
+        }
+        else if((props.length === 2) && (obj[props[0]].hasOwnProperty(props[1]))){
+            result = obj[props[0]][props[1]];
+        }
+    
+        return result;
+    };
+
+    /*
+    * @description Deep clone the object and return a new one
+    * @returns {Object}
+    */
+    static clone = function(obj){
+        if(obj instanceof Date){
+            return new Date(obj.valueOf());
+        }
+
+        let result = Object.create(obj.__proto__);
+        
+        for(let prop in obj){
+            if(Array.isArray(obj[prop])){
+                switch(typeof JsNx.at(obj[prop], 0,null)){
+                    case "object":
+                        result[prop] = JsNx.copy(obj[prop], 2);
+                        break;
+                    default:
+                        result[prop] = JsNx.copy(obj[prop]);
+                }
+            }
+            else if((typeof obj[prop] === "object") && (obj[prop] !== null)){
+                result[prop] = JsNx.clone(obj[prop]);
+            }
+            else{
+                result[prop] = obj[prop];
+            }
+        }
+        return result;   
+    };
+
+    static copy = function(arr, level){
+        level = level || 0;
+        
+        switch(level){
+            case 1:
+                return JSON.parse(JSON.stringify(arr)); //  Array of literal-structures (array, object) ex: [[], {}];
+            case 2:
+                //return jQuery.extend(this); // Array of prototype-objects (function). The jQuery technique can be used to deep-copy all array-types. ex: [function () {}, function () {}];
+                let result = [];
+                for(let item of arr){
+                    result.push((item !== null ? JsNx.clone(item) : null));
+                }
+                return result;
+            default:
+                return arr.slice(); // Array of literal-values (boolean, number, string) ex:  [true, 1, "true"]
+        }
+    };
+}
+
 export default class Utils{
     static version = 1.0;
 

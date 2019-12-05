@@ -2,8 +2,8 @@ import React, { Component } from 'react';
 import {ButtonGroup, Button, Form, Col, Tabs, Tab, DropdownButton, Dropdown, Modal, Collapse, Card} from 'react-bootstrap';
 import {faArrowLeft, faArrowRight, faPencilAlt, faPlusCircle, faWrench, faTrashAlt, faCopy, faBars, faGripVertical, faCheckSquare} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {ComboBox, FeedbackCtrl, DataGrid, RichEditor, ToggleButtons} from '../libs/components/Components';
-import Utils,{ UtilsMoodle} from '../libs/utils/Utils';
+import {ComboBox, FeedbackCtrl, DataGrid, RichEditor} from '../libs/components/Components';
+import Utils, {UtilsMoodle, JsNx} from '../libs/utils/Utils';
 import {$glVars} from '../common/common';
 
 class BtnModeEdition extends Component{
@@ -144,7 +144,8 @@ export class GroupUserSelect extends Component{
         }
 
         let value = "";
-        if(userList.nxExists(this.state.selectedUserIndex)){
+        //if(userList.nxExists(this.state.selectedUserIndex)){
+        if(JsNx.exists(userList, this.state.selectedUserIndex)){
             value = userList[this.state.selectedUserIndex].value;
         }
 
@@ -176,7 +177,8 @@ export class GroupUserSelect extends Component{
     }
 
     onSelectUser(event){
-        this.setState({selectedUserIndex: event.target.index}, () => this.props.onSelectUser(parseInt(event.target.value, 10)));
+        let userId = parseInt(event.target.value, 10) || 0;
+        this.setState({selectedUserIndex: event.target.index}, () => this.props.onSelectUser(userId));
     }
 
     onPrevious(userList){
@@ -383,7 +385,7 @@ export class NoteForm extends Component
     };
 
     onSave(){
-        let data = this.state.data.nxClone();
+        let data = JsNx.clone(this.state.data);
         if(data.ccCmId === 0){
             data.ccId = this.props.ccCm.ccId;
             data.cmId = this.props.ccCm.cmId;
@@ -786,7 +788,7 @@ export class PersonalNote extends Component{
     }   
 
     onSave(){
-        let data = this.state.data.nxClone();
+        let data = JsNx.clone(this.state.data);
         if(this.state.mode === "s"){
             data.note = $glVars.editorMoodle.getValue();
         }
@@ -794,6 +796,8 @@ export class PersonalNote extends Component{
         else if(this.state.mode === "t"){
             data.feedback = $glVars.editorMoodle.getValue();
         }        
+
+        data.userId = this.props.userId;
         
         $glVars.webApi.savePersonalNote(data, this.state.mode, this.onSaveResult);
     }
@@ -840,11 +844,13 @@ export class Notebook extends Component{
     }
 
     componentDidUpdate(prevProps) {
+        if(isNaN(prevProps.userId)){ return;}
+
         // Typical usage (don't forget to compare props):
         if (this.props.userId !== prevProps.userId) {
-          this.getData();
+            this.getData();
         }
-      }
+    }
 
     getData(){
         let that = this;
@@ -884,7 +890,7 @@ export class Notebook extends Component{
                 <Tabs id="tabActivities" activeKey={this.state.activeTab} onSelect={this.onSelectTab}>
                     {this.state.dataProvider.map(function(items, index){
                         let result = 
-                            <Tab key={index} eventKey={index} title={items.nxAt(0).activityName}>
+                            <Tab key={index} eventKey={index} title={JsNx.at(items, 0).activityName}>
                                 <DataGrid orderBy={true}>
                                     <DataGrid.Header>
                                         <DataGrid.Header.Row>

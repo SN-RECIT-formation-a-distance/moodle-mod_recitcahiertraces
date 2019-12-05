@@ -6,8 +6,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {VisualFeedback, Loading} from "./libs/components/Components";
 import {UtilsMoodle} from "./libs/utils/Utils";
 import {TeacherView, StudentView} from "./views/Views";
-import {$glVars} from "./common/common";
-import "./libs/utils/JsExtension";
+import {$glVars, AttoEditor} from "./common/common";
+//import "./libs/utils/JsExtension";
 export * from "./common/i18n";
  
 class App extends Component {
@@ -53,7 +53,22 @@ class App extends Component {
         this.forceUpdate();
     }
 }
+/*
+let atto1 = new AttoEditor();
 
-const domContainer = document.getElementById('recit_cahiertraces');
-let signedUser = {userId: domContainer.getAttribute('data-student-id'), roles: domContainer.getAttribute('data-roles').split(",")};
-ReactDOM.render(<App signedUser={signedUser}/>, domContainer);
+
+let atto2 = new AttoEditor();
+
+window.setTimeout(function(){
+    atto1.setValue("gus");
+    atto2.setValue("kaw");
+}, 1000);*/
+
+
+document.addEventListener('DOMContentLoaded', function(){ 
+    const domContainer = document.getElementById('recit_cahiertraces');
+    let signedUser = {userId: domContainer.getAttribute('data-student-id'), roles: domContainer.getAttribute('data-roles').split(",")};
+    ReactDOM.render(<App signedUser={signedUser}/>, domContainer);
+}, false);
+
+

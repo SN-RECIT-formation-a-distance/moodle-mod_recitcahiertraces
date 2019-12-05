@@ -1,4 +1,4 @@
-import {WebApi} from '../libs/utils/Utils';
+import {WebApi, JsNx} from '../libs/utils/Utils';
 import { Options } from './Options';
 
 export class AppWebApi extends WebApi
@@ -17,7 +17,7 @@ export class AppWebApi extends WebApi
     }
 
     removeObserver(id){
-        this.observers.nxRemoveItem("id", id);
+        JsNx.removeItem(this.observers, "id", id);
     }
 
     notifyObservers(observable){
