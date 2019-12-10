@@ -77838,7 +77838,7 @@ function () {
         for (var _iterator = arr[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
           var item = _step.value;
 
-          if (JsNx.nxGet(item, prop, null) === value) {
+          if (JsNx.get(item, prop, null) === value) {
             return item;
           }
         }
@@ -78911,7 +78911,6 @@ function () {
     value: function setValue(value) {
       switch (this.format) {
         case 'atto_texteditor':
-          console.log(this.format, value);
           this.dom.getElementsByClassName("editor_atto_content")[0].innerHTML = value; //this.atto.editor.setHTML(value);
 
           break;
@@ -79221,11 +79220,14 @@ function (_Component4) {
             try {
               for (var _iterator2 = group[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
                 var user = _step2.value;
-                userList.push({
-                  text: user.userName,
-                  value: user.userId,
-                  data: user
-                });
+
+                if (_Utils.JsNx.getItem(userList, "value", user.userId, null) === null) {
+                  userList.push({
+                    text: user.userName,
+                    value: user.userId,
+                    data: user
+                  });
+                }
               }
             } catch (err) {
               _didIteratorError2 = true;
@@ -79257,6 +79259,12 @@ function (_Component4) {
           }
         }
 
+        groupList.sort(function (a, b) {
+          return ('' + a.text).localeCompare(b.text);
+        });
+        userList.sort(function (a, b) {
+          return ('' + a.text).localeCompare(b.text);
+        });
         that.setState({
           groupList: groupList,
           userList: userList
@@ -80685,7 +80693,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53448" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61951" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

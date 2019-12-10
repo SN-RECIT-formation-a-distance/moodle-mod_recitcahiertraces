@@ -45,7 +45,7 @@ export class JsNx{
      */
     static getItem(arr, prop, value, defaultValue){ 
         for(let item of arr){
-            if(JsNx.nxGet(item, prop, null) === value){return item; }
+            if(JsNx.get(item, prop, null) === value){return item; }
         }  
 
         return defaultValue;

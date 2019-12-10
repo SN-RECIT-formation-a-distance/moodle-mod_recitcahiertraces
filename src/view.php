@@ -74,7 +74,10 @@ class RecitCahierCanadaView
         $studentId = (in_array('ad', $roles) ? 0 : $this->user->id);
 
         echo sprintf("<div id='recit_cahiertraces' data-student-id='%ld' data-roles='%s'></div>", $studentId, implode(",", $roles));
+        
         echo Utils::createEditorHtml(false);
+        //context_user::instance(2)
+        //echo Utils::createEditorHtml(false, "recitCCEditorContainer", "recitCCEditor", "", 15,  context_course::instance(7));
         //echo '<script src="./react_app/build/index.js"></script>';
         
         //echo Utils::createTagsForm($this->db, $this->cm->id);

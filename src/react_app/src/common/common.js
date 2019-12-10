@@ -139,7 +139,6 @@ export class EditorMoodle{
     setValue(value){
         switch(this.format){
             case 'atto_texteditor':
-                console.log(this.format, value)
                 this.dom.getElementsByClassName("editor_atto_content")[0].innerHTML = value;
                 //this.atto.editor.setHTML(value);
                 break;

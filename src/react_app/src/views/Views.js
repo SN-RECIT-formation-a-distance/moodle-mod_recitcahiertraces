@@ -122,10 +122,15 @@ export class GroupUserSelect extends Component{
             for(let group of result.data){
                 groupList.push({text: group[0].groupName, value: group[0].groupId, data: group});
                 for(let user of group){
-                    userList.push({text: user.userName, value: user.userId, data: user});
+                    if(JsNx.getItem(userList, "value", user.userId, null) === null){
+                        userList.push({text: user.userName, value: user.userId, data: user});
+                    }
                 }
             }
 
+            groupList.sort((a, b) => { return ('' + a.text).localeCompare(b.text);})
+            userList.sort((a, b) => { return ('' + a.text).localeCompare(b.text);})
+            
             that.setState({groupList: groupList, userList: userList});
         }
 
