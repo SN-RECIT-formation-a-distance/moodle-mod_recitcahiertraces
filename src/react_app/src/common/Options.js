@@ -14,13 +14,6 @@ export class Options
     ]
 
     static getGateway(){
-        /*if(process.env.NODE_ENV === "development"){
-            return window.location.protocol + "//" + window.location.hostname + "/convention2020/backend2/index.php";
-        }
-        else{
-            //return window.location.origin + "/sas2-backend/";
-            return "http://conventionadmin.gnosis.ca/index.php";
-        }*/
         return `${M.cfg.wwwroot}/local/recitcommon/php/RecitApi.php`;
     }
     

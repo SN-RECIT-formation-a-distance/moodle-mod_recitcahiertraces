@@ -108,16 +108,4 @@ export class AppWebApi extends WebApi
         let options = {cmId: cmId, service: "checkCCSeqPos"};
         this.post(this.gateway, options, onSuccess);
     }
- /*   setPaypalPayment(paymentId, status, onSuccess){
-        let that = this;
-        let onSuccessTmp = function(result){     
-            onSuccess(result);
-            if(result.success){
-                that.notifyObservers('setPaypalPayment');
-            }
-        };
-
-        let data = {sid: this.sid, service: "setPaypalPayment", status: status, paymentId: paymentId};
-        this.post(this.gateway, data, onSuccessTmp);
-    }*/
 };
