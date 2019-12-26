@@ -2,8 +2,8 @@
 $string['pluginname'] = 'Cahier de traces';
 $string['userpreferences'] = 'User preferences';
 $string['modulename'] = 'Cahier de traces';
-$string['modulenameplural'] = "Cahiers Canada";
-$string['modulename_help'] = "L'activité Cahier de traces est à la dernière activité présente dans chaque section du cours. Les paramètres de cette activité déterminent la présence ou non d'un espace de prise de note pour chaque activité de la section. Elle contient toutes les notes de l'élève relatives à cette section.";
+$string['modulenameplural'] = "Cahier de traces";
+$string['modulename_help'] = "L'activité \"Cahier de traces\" doit être la DERNIÈRE ACTIVITÉ DE LA LISTE dans chaque section du cours. Les paramètres de cette activité déterminent la présence ou non d'un espace de prise de note pour chaque activité de la section. Elle contient toutes les notes de l'élève relatives à cette section.";
 $string['pluginadministration'] = "Cahier de traces module administration";
 $string['sectionActivities'] = "Section Activities";
 $string['turnOnEditingMode'] = "Turn On Editing Mode";
