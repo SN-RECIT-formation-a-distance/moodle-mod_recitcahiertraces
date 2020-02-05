@@ -24,6 +24,7 @@
 defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->dirroot . "/local/recitcommon/php/PersistCtrl.php");
+require_once($CFG->dirroot . "/local/recitcommon/php/Utils.php");
 
 /**
  * List of features supported in recitcahiercanada module
@@ -96,3 +97,60 @@ function recitcahiercanada_delete_instance($id) {
     return PersistCtrl::getInstance($DB, $USER)->removeCcInstance($id);
 }
 
+
+/**
+ * file serving callback
+ *
+ * @package  mod_recitcahiercanada
+ * @category files
+ * @param stdClass $course course object
+ * @param stdClass $cm course module object
+ * @param stdClass $context context object
+ * @param string $filearea file area
+ * @param array $args extra arguments
+ * @param bool $forcedownload whether or not force download
+ * @param array $options additional options affecting the file serving
+ * @return bool false if the file was not found, just send the file otherwise and do not return anything
+ */
+function mod_recitcahiercanada_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options=array()) {
+    global $CFG, $USER;
+
+    /*if ($context->contextlevel != CONTEXT_MODULE) {
+        return false;
+    }*/
+    require_login();
+    
+    //require_once($CFG->dirroot . "/mod/wiki/locallib.php");
+
+    if ($filearea == 'personalnote') {
+        $ownerId = (int) array_shift($args);
+        
+        $roles = Utils::getUserRoles($course->id, $USER->id);
+        if((Utils::isAdminRole($roles) == false) && ($USER->id != $ownerId)){
+            return false;
+        }
+        
+        //if (!$subwiki = wiki_get_subwiki($swid)) {
+        //    return false;
+        //}
+
+        //require_capability('mod/wiki:viewpage', $context);
+
+        $relativepath = implode('/', $args);
+
+        $fullpath = "/$context->id/mod_recitcahiercanada/personalnote/$ownerId/$relativepath";
+
+        $fs = get_file_storage();
+		$file = $fs->get_file_by_hash(sha1($fullpath));		
+        
+        if($file == false){
+            return false;
+        }
+        
+        if ($file->is_directory()){		
+            return false;
+        }
+
+        send_stored_file($file, null, 0, $options);
+    }
+}
