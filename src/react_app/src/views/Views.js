@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {ButtonGroup, Button, Form, Col, Tabs, Tab, DropdownButton, Dropdown, Modal, Collapse, Card} from 'react-bootstrap';
+import {ButtonGroup, Button, Form, Col, Tabs, Tab, DropdownButton, Dropdown, Modal, Collapse, Card, Row, Nav} from 'react-bootstrap';
 import {faArrowLeft, faArrowRight, faPencilAlt, faPlusCircle, faWrench, faTrashAlt, faCopy, faBars, faGripVertical, faCheckSquare} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {ComboBox, FeedbackCtrl, DataGrid, RichEditor} from '../libs/components/Components';
@@ -887,52 +887,65 @@ export class Notebook extends Component{
         let that = this;
         let main = 
             <div>  
-                <div style={{textAlign: "right"}}>
+                <div style={{textAlign: "right", marginBottom: "1rem"}}>
                     <a href={this.getPrintLink()} target="_blank">{"Imprimer des notes"}</a>{ " | "}
                     <a href={this.getPrintLink(1)} target="_blank">{"Imprimer des notes + Rétroaction"}</a>
                 </div>
 
-                <Tabs id="tabActivities" activeKey={this.state.activeTab} onSelect={this.onSelectTab}>
-                    {this.state.dataProvider.map(function(items, index){
-                        let result = 
-                            <Tab key={index} eventKey={index} title={JsNx.at(items, 0).activityName}>
-                                <DataGrid orderBy={true}>
-                                    <DataGrid.Header>
-                                        <DataGrid.Header.Row>
-                                            <DataGrid.Header.Cell style={{width: 80}}>{"#"}</DataGrid.Header.Cell>
-                                            <DataGrid.Header.Cell >{"Titre de la note"}</DataGrid.Header.Cell>
-                                            <DataGrid.Header.Cell style={{width: 110}}>{"Élève"}</DataGrid.Header.Cell>
-                                            <DataGrid.Header.Cell style={{width: 140}}>{"Enseignant"}</DataGrid.Header.Cell>
-                                            <DataGrid.Header.Cell  style={{width: 120}}></DataGrid.Header.Cell>
-                                        </DataGrid.Header.Row>
-                                    </DataGrid.Header>
-                                    <DataGrid.Body>
-                                        {items.map((item, index) => {
-                                                let row = 
-                                                    <DataGrid.Body.Row key={index} onDbClick={() => that.onEdit(item)}>
-                                                        <DataGrid.Body.Cell>{index + 1}</DataGrid.Body.Cell>
-                                                        <DataGrid.Body.Cell>{item.noteTitle}</DataGrid.Body.Cell>
-                                                        <DataGrid.Body.Cell alert={(item.note.length > 0 ? 'success' : 'warning')} style={{textAlign: "center"}}>
-                                                            {(item.note.length > 0 ? <FontAwesomeIcon icon={faCheckSquare}/> : null)}
-                                                        </DataGrid.Body.Cell>
-                                                        <DataGrid.Body.Cell alert={(item.feedback.length > 0 ? 'success' : 'warning')}  style={{textAlign: "center"}}>
-                                                            {(item.feedback.length > 0 ? <FontAwesomeIcon icon={faCheckSquare}/> : null)}
-                                                        </DataGrid.Body.Cell>
-                                                        <DataGrid.Body.Cell>
-                                                            <DropdownButton size="sm" title={<span><FontAwesomeIcon icon={faBars}/>{" Actions"}</span>}>
-                                                                <Dropdown.Item onClick={() => that.onEdit(item)}><FontAwesomeIcon icon={faPencilAlt}/>{" Modifier"}</Dropdown.Item>
-                                                            </DropdownButton>
-                                                        </DataGrid.Body.Cell>
-                                                    </DataGrid.Body.Row>
-                                                return (row);                                    
-                                            }
-                                        )}
-                                    </DataGrid.Body>
-                                </DataGrid>
-                            </Tab>;
-                        return result;
-                    })}
-                </Tabs>
+                <Tab.Container id="tabActivities" activeKey={this.state.activeTab} onSelect={this.onSelectTab}>
+                    <Row>
+                        <Col sm={12}>
+                            <Nav variant="pills" className="flex-row">
+                                {this.state.dataProvider.map(function(items, index){
+                                    return <Nav.Item key={index} ><Nav.Link eventKey={index}>{JsNx.at(items, 0).activityName}</Nav.Link></Nav.Item>;
+                                })}
+                            </Nav>
+                        </Col>
+                    </Row>
+                    <Row>
+                        <Col sm={12}>
+                            <Tab.Content>
+                                {this.state.dataProvider.map(function(items, index){
+                                    let datagrid = 
+                                    <DataGrid orderBy={true}>
+                                        <DataGrid.Header>
+                                            <DataGrid.Header.Row>
+                                                <DataGrid.Header.Cell style={{width: 80}}>{"#"}</DataGrid.Header.Cell>
+                                                <DataGrid.Header.Cell >{"Titre de la note"}</DataGrid.Header.Cell>
+                                                <DataGrid.Header.Cell style={{width: 110}}>{"Élève"}</DataGrid.Header.Cell>
+                                                <DataGrid.Header.Cell style={{width: 140}}>{"Enseignant"}</DataGrid.Header.Cell>
+                                                <DataGrid.Header.Cell  style={{width: 120}}></DataGrid.Header.Cell>
+                                            </DataGrid.Header.Row>
+                                        </DataGrid.Header>
+                                        <DataGrid.Body>
+                                            {items.map((item, index2) => {
+                                                    let row = 
+                                                        <DataGrid.Body.Row key={index2} onDbClick={() => that.onEdit(item)}>
+                                                            <DataGrid.Body.Cell>{index2 + 1}</DataGrid.Body.Cell>
+                                                            <DataGrid.Body.Cell>{item.noteTitle}</DataGrid.Body.Cell>
+                                                            <DataGrid.Body.Cell alert={(item.note.length > 0 ? 'success' : 'warning')} style={{textAlign: "center"}}>
+                                                                {(item.note.length > 0 ? <FontAwesomeIcon icon={faCheckSquare}/> : null)}
+                                                            </DataGrid.Body.Cell>
+                                                            <DataGrid.Body.Cell alert={(item.feedback.length > 0 ? 'success' : 'warning')}  style={{textAlign: "center"}}>
+                                                                {(item.feedback.length > 0 ? <FontAwesomeIcon icon={faCheckSquare}/> : null)}
+                                                            </DataGrid.Body.Cell>
+                                                            <DataGrid.Body.Cell>
+                                                                <DropdownButton size="sm" title={<span><FontAwesomeIcon icon={faBars}/>{" Actions"}</span>}>
+                                                                    <Dropdown.Item onClick={() => that.onEdit(item)}><FontAwesomeIcon icon={faPencilAlt}/>{" Modifier"}</Dropdown.Item>
+                                                                </DropdownButton>
+                                                            </DataGrid.Body.Cell>
+                                                        </DataGrid.Body.Row>
+                                                    return (row);                                    
+                                                }
+                                            )}
+                                        </DataGrid.Body>
+                                    </DataGrid>
+                                    return <Tab.Pane key={index} eventKey={index}>{datagrid}</Tab.Pane>;
+                                })}
+                            </Tab.Content>
+                        </Col>
+                    </Row>
+                </Tab.Container>
                 
                 {this.state.personalNote !== null && 
                             <PersonalNote userId={this.props.userId} personalNoteId={this.state.personalNote.personalNoteId} cmId={this.state.personalNote.cmId} onClose={this.onClose}
