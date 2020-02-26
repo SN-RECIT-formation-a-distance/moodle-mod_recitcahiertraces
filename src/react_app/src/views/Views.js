@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import {ButtonGroup, Button, Form, Col, Tabs, Tab, DropdownButton, Dropdown, Modal, Collapse, Card, Row, Nav} from 'react-bootstrap';
 import {faArrowLeft, faArrowRight, faPencilAlt, faPlusCircle, faWrench, faTrashAlt, faCopy, faBars, faGripVertical, faCheckSquare} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {ComboBox, FeedbackCtrl, DataGrid, RichEditor} from '../libs/components/Components';
+import {ComboBox, FeedbackCtrl, DataGrid, RichEditor, InputNumber} from '../libs/components/Components';
 import Utils, {UtilsMoodle, JsNx} from '../libs/utils/Utils';
 import {$glVars} from '../common/common';
 
@@ -269,6 +269,12 @@ export class NoteForm extends Component
                                         <Form.Control type="text" required value={data.noteTitle} name="noteTitle" onChange={this.onDataChange}/>
                                     </Form.Group>
                                 </Form.Row>
+                                <Form.Row>
+                                    <Form.Group as={Col}>
+                                        <Form.Label>{"Position"}</Form.Label>
+                                        <InputNumber  value={data.slot} name="slot" min={0} onChange={this.onDataChange}/>
+                                    </Form.Group>
+                                </Form.Row>
                             </Tab>
                             <Tab eventKey={1} title="Modèle de note"  style={styleTab}>
                                 <Form.Row>
@@ -518,7 +524,7 @@ export class EditionMode extends Component{
                                 let row = 
                                     <DataGrid.Body.RowDraggable key={index} data={item} onDbClick={() => this.onEdit(item.ccCmId)} onDrag={this.onDragRow} onDrop={this.onDropRow}>
                                         <DataGrid.Body.Cell><FontAwesomeIcon icon={faGripVertical} title="Déplacer l'item"/></DataGrid.Body.Cell>
-                                        <DataGrid.Body.Cell>{(index + 1)}</DataGrid.Body.Cell>
+                                        <DataGrid.Body.Cell>{item.slot}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell>{item.noteTitle}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell>{item.intCode}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell>
