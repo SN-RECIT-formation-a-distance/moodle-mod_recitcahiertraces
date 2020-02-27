@@ -23,7 +23,7 @@
  */
 
 defined('MOODLE_INTERNAL') || die;
-require_once($CFG->dirroot . "/local/recitcommon/php/PersistCtrl.php");
+require_once($CFG->dirroot . "/local/recitcommon/php/PersistCtrlCahierTraces.php");
 
  /**
  * Define the complete recitcahiercanada structure for backup, with file and id annotations
@@ -36,7 +36,7 @@ class backup_recitcahiercanada_activity_structure_step extends backup_activity_s
         // To know if we are including userinfo.
         //$userinfo = $this->get_setting_value('userinfo');
 
-        PersistCtrl::getInstance($DB, $USER)->createBackupViews();
+        CahierTracesPersistCtrl::getInstance($DB, $USER)->createBackupViews();
 
         // Define each element separated
         $recitcahiercanada = new backup_nested_element('recitcahiercanada', array('id'), array(
@@ -61,8 +61,8 @@ class backup_recitcahiercanada_activity_structure_step extends backup_activity_s
         //$recitcahiercanada->annotate_ids('question', 'questionid');
         
         // Define file annotations
-        $recitcahiercanada->annotate_files('mod_recitcahiercanada', 'intro', null); // This file area hasn't itemid
-        $recitcc_cm_notes->annotate_files('vw_recitcc_cm_notes', 'templatenote', null); // This file area hasn't itemid
+        $recitcahiercanada->annotate_files('mod_recitcahiercanada', 'intro', null); 
+        $recitcc_cm_notes->annotate_files('vw_recitcc_cm_notes', 'templatenote', null); 
        // $mdl_recitcc_user_notes->annotate_files('mdl_recitcc_user_notes', 'note', null); // This file area hasn't itemid
        // $mdl_recitcc_user_notes->annotate_files('mdl_recitcc_user_notes', 'feedback', null); // This file area hasn't itemid       
 

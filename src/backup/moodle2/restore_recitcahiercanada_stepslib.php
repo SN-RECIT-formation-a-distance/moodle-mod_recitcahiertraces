@@ -25,7 +25,7 @@
  * Define all the restore steps that will be used by the restore_recitcahiercanada_activity_task
  */
 
-require_once($CFG->dirroot . "/local/recitcommon/php/PersistCtrl.php");
+require_once($CFG->dirroot . "/local/recitcommon/php/PersistCtrlCahierTraces.php");
 
 /**
  * Structure step to restore one recitcahiercanada activity
@@ -69,7 +69,7 @@ class restore_recitcahiercanada_activity_structure_step extends restore_activity
         $oldid = $data->id;
         
         $data->ccid = $this->get_mappingid('recitcahiercanada', $data->ccid);
-        $data->cmid = PersistCtrl::getInstance($DB, $USER)->getCmIdFromIndexPos($data->ccid, $data->cmindexpos);
+        $data->cmid = CahierTracesPersistCtrl::getInstance($DB, $USER)->getCmIdFromIndexPos($data->ccid, $data->cmindexpos);
 
         if($data->cmid > 0){
             $newitemid = $DB->insert_record('recitcc_cm_notes', $data); // insert the recitcc_cm_notes record
@@ -78,9 +78,9 @@ class restore_recitcahiercanada_activity_structure_step extends restore_activity
         
         /*
         // get the new courseModuleId according to their position in the section. To find out the section, it uses the previous ccId
-        $oldSectionCmSeq = PersistCtrl::getInstance($DB, $USER)->getCmSequenceFromSection($data->ccid);
+        $oldSectionCmSeq = CahierTracesPersistCtrl::getInstance($DB, $USER)->getCmSequenceFromSection($data->ccid);
         $data->ccid = $this->get_mappingid('recitcahiercanada', $data->ccid);
-        $newSectionCmSeq = PersistCtrl::getInstance($DB, $USER)->getCmSequenceFromSection($data->ccid);
+        $newSectionCmSeq = CahierTracesPersistCtrl::getInstance($DB, $USER)->getCmSequenceFromSection($data->ccid);
 
         // both the sequences must have be identical because it is a course backup, so we can use the index to look for the new cmId
         $key = array_search((string) $data->cmid, $oldSectionCmSeq->sequence);
