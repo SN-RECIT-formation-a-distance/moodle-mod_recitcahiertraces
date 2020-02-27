@@ -23,7 +23,7 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once($CFG->dirroot . "/local/recitcommon/php/PersistCtrl.php");
+require_once($CFG->dirroot . "/local/recitcommon/php/PersistCtrlCahierTraces.php");
 require_once($CFG->dirroot . "/local/recitcommon/php/Utils.php");
 
 /**
@@ -94,7 +94,7 @@ function recitcahiercanada_delete_instance($id) {
 
     $DB->delete_records('recitcahiercanada', array('id'=>$recitcahiercanada->id));*/
 
-    return PersistCtrl::getInstance($DB, $USER)->removeCcInstance($id);
+    return CahierTracesPersistCtrl::getInstance($DB, $USER)->removeCcInstance($id);
 }
 
 
