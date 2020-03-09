@@ -45,3 +45,4 @@ $string['full_name'] = 'Nom complet';
 $string['email'] = 'Courriel';
 $string['tags'] = 'Tags';
 $string['typeToSearch'] = 'Tapez pour rechercher...';
+$string['messageprovider:note_updated'] = 'Notification du Cahier de Traces';

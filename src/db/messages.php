@@ -15,19 +15,22 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Defines message providers (types of messages being sent)
  *
- * @package   mod_recitcahiercanada
- * @copyright 2019 RÉCIT FAD
+ * @package mod_recitcahiercanada
+ * @copyright 2019 RÉCIT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2020022902;       // The current module version (Date: YYYYMMDDXX)
-$plugin->requires  = 2018050800;    // Requires this Moodle version
-$plugin->component = 'mod_recitcahiercanada';        // Full name of the plugin (used for diagnostics)
-$plugin->cron      = 0;
-$plugin->dependencies = [                                                                                                           
-    'local_recitcommon' => '2020022900'
-];
-$plugin->release = 'R5-2020022903'; 
-$plugin->maturity = MATURITY_BETA; // MATURITY_ALPHA, MATURITY_BETA, MATURITY_RC or MATURITY_STABLE
+$messageproviders = array (
+     // Notify teacher that a student has submitted a note
+     'note_updated' => array (
+        'defaults' => [
+            'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_LOGGEDIN + MESSAGE_DEFAULT_LOGGEDOFF,
+            'email' => MESSAGE_DISALLOWED
+        ],
+         // no capability means that the notifications are available to all users
+        //'capability'  => 'mod/recitcahiercanada:emailnotifysubmission'
+    ),
+
+);
