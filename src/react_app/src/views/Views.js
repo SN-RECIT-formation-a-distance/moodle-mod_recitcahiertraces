@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import {ButtonGroup, Button, Form, Col, Tabs, Tab, DropdownButton, Dropdown, Modal, Collapse, Card, Row, Nav} from 'react-bootstrap';
 import {faArrowLeft, faArrowRight, faPencilAlt, faPlusCircle, faWrench, faTrashAlt, faCopy, faBars, faGripVertical, faCheckSquare} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {ComboBox, FeedbackCtrl, DataGrid, RichEditor, InputNumber} from '../libs/components/Components';
+import {ComboBox, FeedbackCtrl, DataGrid, RichEditor, InputNumber, ToggleButtons} from '../libs/components/Components';
 import Utils, {UtilsMoodle, JsNx} from '../libs/utils/Utils';
 import {$glVars} from '../common/common';
 
@@ -275,6 +275,16 @@ export class NoteForm extends Component
                                         <InputNumber  value={data.slot} name="slot" min={0} onChange={this.onDataChange}/>
                                     </Form.Group>
                                 </Form.Row>
+                                <Form.Row>
+                                    <Form.Group as={Col}>
+                                        <Form.Label>{"Notifier l'enseignant lors d'une mise à jour"}</Form.Label>
+                                        <ToggleButtons name="notifyTeacher" defaultValue={[data.notifyTeacher]} onChange={this.onDataChange} 
+                                                options={[
+                                                    {value: 1, text:"Oui"},
+                                                    {value: 0, text:"Non"}
+                                                ]}/>
+                                    </Form.Group>
+                                </Form.Row>
                             </Tab>
                             <Tab eventKey={1} title="Modèle de note"  style={styleTab}>
                                 <Form.Row>
@@ -339,6 +349,9 @@ export class NoteForm extends Component
         // if the activity has changed then it restart the slot
         if(event.target.name === "cmId"){
             data.slot = 0;
+        }
+        else if(event.target.name === "notifyTeacher"){
+            data[event.target.name] = data[event.target.name].pop();
         }
 
         this.setState({data: data})
@@ -687,7 +700,7 @@ export class PersonalNote extends Component{
 
         // it is a student?
         if(this.state.mode === "s"){
-            $glVars.editorMoodle.setValue(data.note);       
+            $glVars.editorMoodle.setValue(data.note.text);       
             student = <div ref={this.editorRef}></div>;
             teacher = <div style={styleText} dangerouslySetInnerHTML={{__html: data.feedback}}></div>;
         }
@@ -695,7 +708,7 @@ export class PersonalNote extends Component{
         else if(this.state.mode === "t"){
             $glVars.editorMoodle.setValue(data.feedback);       
             teacher = <div ref={this.editorRef}></div>;
-            student =  <div style={styleText} dangerouslySetInnerHTML={{__html: data.note}}></div>;
+            student =  <div style={styleText} dangerouslySetInnerHTML={{__html: data.note.text}}></div>;
             suggestedNote = <div style={styleText} dangerouslySetInnerHTML={{__html: data.suggestedNote}}></div>;
         }
         else{
@@ -903,7 +916,7 @@ export class Notebook extends Component{
                         <Col sm={12}>
                             <Nav variant="pills" className="flex-row">
                                 {this.state.dataProvider.map(function(items, index){
-                                    return <Nav.Item key={index} ><Nav.Link eventKey={index}>{JsNx.at(items, 0).activityName}</Nav.Link></Nav.Item>;
+                                    return <Nav.Item key={index} style={{flexGrow: 1}}><Nav.Link eventKey={index}>{JsNx.at(items, 0).activityName}</Nav.Link></Nav.Item>;
                                 })}
                             </Nav>
                         </Col>

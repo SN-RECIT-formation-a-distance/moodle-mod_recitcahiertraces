@@ -62,5 +62,31 @@ function xmldb_recitcahiercanada_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2020020100, 'mod', 'recitcahiercanada');
     }
 
+    // Add a new column notifyTeacher
+    if ($oldversion < 2020022904) {
+        // Define field jsoncontent to be added to filter_wiris_formulas.
+        $table = new xmldb_table('recitcc_cm_notes');
+
+        /**
+         * Creates one new xmldb_field
+         * @param string $name of field
+         * @param int $type XMLDB_TYPE_INTEGER, XMLDB_TYPE_NUMBER, XMLDB_TYPE_CHAR, XMLDB_TYPE_TEXT, XMLDB_TYPE_BINARY
+         * @param string $precision length for integers and chars, two-comma separated numbers for numbers
+         * @param bool $unsigned XMLDB_UNSIGNED or null (or false)
+         * @param bool $notnull XMLDB_NOTNULL or null (or false)
+         * @param bool $sequence XMLDB_SEQUENCE or null (or false)
+         * @param mixed $default meaningful default o null (or false)
+         * @param xmldb_object $previous
+         */
+        $field = new xmldb_field('notifyteacher', XMLDB_TYPE_INTEGER, 4, XMLDB_UNSIGNED, XMLDB_NOTNULL, null, 0, 'teachertip');
+
+        // Conditionally launch add field jsoncontent.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_plugin_savepoint(true, 2020022904, 'mod', 'recitcahiercanada');
+    }
+
     return true;
 }
