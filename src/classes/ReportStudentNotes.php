@@ -59,7 +59,7 @@ $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahie
                 echo sprintf('<footer class="blockquote-footer">%s: %s</footer>',  get_string('timestamp', 'mod_recitcahiercanada'), $note->lastUpdateFormat());
                 echo '</blockquote>';
                 
-                echo "{$note->note}";
+                echo "{$note->note->text}";
                 
                 if($showFeedback){
                     echo sprintf('<div class="alert alert-primary" role="alert" style="margin-top: 15px;"><strong>%s:</strong><br/>%s</div>', get_string('teacherFeedback', 'mod_recitcahiercanada'), $note->feedback);

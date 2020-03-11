@@ -76,7 +76,9 @@ class RecitCahierCanadaView
         echo sprintf("<div id='recit_cahiertraces' data-student-id='%ld' data-roles='%s'></div>", $studentId, implode(",", $roles));
         
         $context = context_course::instance($this->course->id);        
-        echo Utils::createEditorHtml(false, "recitCCEditorContainer", "recitCCEditor", "", 15, $context);
+        echo Utils::createEditorHtml(false, "recitCCEditorContainer1", "recitCCEditor1", "", 15, $context, 0, 0);
+        echo Utils::createEditorHtml(false, "recitCCEditorContainer2", "recitCCEditor2", "", 15, $context, 0, 0);
+        echo Utils::createEditorHtml(false, "recitCCEditorContainer3", "recitCCEditor3", "", 15, $context, 0, 0);
         
         //echo Utils::createTagsForm($this->db, $this->cm->id);
         

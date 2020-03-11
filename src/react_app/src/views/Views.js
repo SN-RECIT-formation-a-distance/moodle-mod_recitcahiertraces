@@ -1,19 +1,25 @@
 import React, { Component } from 'react';
-import {ButtonGroup, Button, Form, Col, Tabs, Tab, DropdownButton, Dropdown, Modal, Collapse, Card, Row, Nav} from 'react-bootstrap';
-import {faArrowLeft, faArrowRight, faPencilAlt, faPlusCircle, faWrench, faTrashAlt, faCopy, faBars, faGripVertical, faCheckSquare} from '@fortawesome/free-solid-svg-icons';
+import {ButtonGroup, Button, Form, Col, Tabs, Tab, DropdownButton, Dropdown, Modal, Collapse, Card, Row, Nav, OverlayTrigger, Popover} from 'react-bootstrap';
+import {faArrowLeft, faArrowRight, faPencilAlt, faPlusCircle, faWrench, faTrashAlt, faCopy, faBars, faGripVertical, faCheckSquare, faInfo} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {ComboBox, FeedbackCtrl, DataGrid, RichEditor, InputNumber, ToggleButtons} from '../libs/components/Components';
 import Utils, {UtilsMoodle, JsNx} from '../libs/utils/Utils';
-import {$glVars} from '../common/common';
+import {$glVars, EditorMoodle} from '../common/common';
 
 class BtnModeEdition extends Component{
     static defaultProps = {
         variant: "",
-        text: ""
+        text: "",
+        children: null
     };
 
     render(){
-        return <ButtonGroup style={{textAlign: "right", display: "block"}}><Button variant={this.props.variant} onClick={this.props.onClick}><FontAwesomeIcon icon={faWrench}/>{" " + this.props.text}</Button></ButtonGroup>;
+        return <div style={{display: "flex", justifyContent: "flex-end"}}>                    
+                    {this.props.children}
+                    <ButtonGroup>
+                        <Button variant={this.props.variant} onClick={this.props.onClick}><FontAwesomeIcon icon={faWrench}/>{" " + this.props.text}</Button>
+                    </ButtonGroup>
+                </div>;
     }
 }
 
@@ -36,11 +42,27 @@ export class TeacherView extends Component {
     }
 
     render() {       
+        const popover = (
+            <Popover id="popover-basic">
+              <Popover.Title as="h3">Code d'intégration</Popover.Title>
+              <Popover.Content>
+              Voici des variables extras pour le code d'intégration:<br/><br/>
+              <strong>color:</strong> code hexadécimal de la couleur du titre de la note<br/>
+              <strong>btnSaveVariant:</strong> style de bouton Bootstrap<br/>
+            <strong>btnResetVariant:</strong> style de bouton Bootstrap
+              </Popover.Content>
+            </Popover>
+          );
+          
         let main =
             <div>
                 {this.state.modeEdition ? 
                     <div>
-                        <BtnModeEdition variant="danger" onClick={this.onModeEditionClick} text={"Désactiver le mode d'édition"}></BtnModeEdition>
+                        <BtnModeEdition variant="danger" onClick={this.onModeEditionClick} text={"Désactiver le mode d'édition"}>
+                            <OverlayTrigger  placement="left" delay={{ show: 250, hide: 400 }} overlay={popover}>                                
+                                <Button  variant="primary"  style={{marginRight: 3}}><FontAwesomeIcon icon={faInfo}/></Button>
+                            </OverlayTrigger>
+                        </BtnModeEdition>
                         <EditionMode/> 
                     </div>
                 : 
@@ -230,8 +252,13 @@ export class NoteForm extends Component
             }
         };
 
-        this.editorRef = React.createRef();
         this.formRef = React.createRef();
+        this.attoTemplateNoteRef = React.createRef();
+        this.attoSuggestedNoteRef = React.createRef();
+        this.attoTeacherTipRef = React.createRef();
+        this.attoTemplateNote = new EditorMoodle('recitCCEditorContainer1');
+        this.attoSuggestedNote = new EditorMoodle('recitCCEditorContainer2');
+        this.attoTeacherTip = new EditorMoodle('recitCCEditorContainer3');
     }
 
     componentDidMount(){
@@ -239,7 +266,9 @@ export class NoteForm extends Component
     }  
 
     componentWillUnmount(){
-        $glVars.editorMoodle.close();
+        this.attoTemplateNote.close();
+        this.attoSuggestedNote.close();
+        this.attoTeacherTip.close();
     }
 
     render(){
@@ -289,21 +318,21 @@ export class NoteForm extends Component
                             <Tab eventKey={1} title="Modèle de note"  style={styleTab}>
                                 <Form.Row>
                                     <Form.Group as={Col}>
-                                        <div ref={this.editorRef}></div>
+                                        <div ref={this.attoTemplateNoteRef}></div>
                                     </Form.Group>
                                 </Form.Row>
                             </Tab>
                             <Tab eventKey={2} title="Réponse suggérée"  style={styleTab}>
                                 <Form.Row>
                                     <Form.Group as={Col}>
-                                    <RichEditor nbRows={10} name="suggestedNote" value={data.suggestedNote} onChange={this.onDataChange}/>
+                                        <div ref={this.attoSuggestedNoteRef}></div>
                                     </Form.Group>
                                 </Form.Row>
                             </Tab>
                             <Tab eventKey={3} title="Rétroaction automatique"  style={styleTab}> 
                                 <Form.Row>
                                     <Form.Group as={Col}>
-                                    <RichEditor nbRows={10} name="teacherTip" value={data.teacherTip} onChange={this.onDataChange}/>
+                                        <div ref={this.attoTeacherTipRef}></div>
                                     </Form.Group>
                                 </Form.Row>
                             </Tab>
@@ -315,12 +344,7 @@ export class NoteForm extends Component
                     <Button variant="success"  onClick={this.onSubmit}>{"Enregistrer"}</Button>
                 </Modal.Footer>
             </Modal>;       
-/*<Form.Row>
-                            <Form.Group as={Col}>
-                                <Form.Label>{"Tags"}</Form.Label>
-                                <Form.Control type="text" value={data.tags} name="tags" onChange={this.onDataChange}/>
-                            </Form.Group>
-                        </Form.Row>*/
+
         return (main);
     }
     
@@ -328,14 +352,20 @@ export class NoteForm extends Component
         this.setState({activeTab: eventKey});
     }
 
-    componentDidUpdate(){
-        if(this.editorRef.current !== null){
-            $glVars.editorMoodle.show();        
-            $glVars.editorMoodle.setValue(this.state.data.templateNote);       
-            if(!this.editorRef.current.hasChildNodes()){
-                this.editorRef.current.appendChild($glVars.editorMoodle.dom);   
+    updateAtto(instance, ref, value){
+        if(ref.current !== null){
+            instance.show();        
+            instance.setValue(value);       
+            if(!ref.current.hasChildNodes()){
+                ref.current.appendChild(instance.dom);   
             }
         }
+    }
+
+    componentDidUpdate(){
+        this.updateAtto(this.attoTemplateNote, this.attoTemplateNoteRef, this.state.data.templateNote);
+        this.updateAtto(this.attoSuggestedNote, this.attoSuggestedNoteRef, this.state.data.suggestedNote);
+        this.updateAtto(this.attoTeacherTip, this.attoTeacherTipRef, this.state.data.teacherTip);
     }
 
     onClose(){
@@ -398,7 +428,9 @@ export class NoteForm extends Component
 
     onSubmit(){
         let data = this.state.data;
-        data.templateNote = $glVars.editorMoodle.getValue();
+        data.templateNote = this.attoTemplateNote.getValue();
+        data.suggestedNote = this.attoSuggestedNote.getValue();
+        data.teacherTip = this.attoTeacherTip.getValue();
 
         if (this.formRef.current.checkValidity() === false) {
             this.setState({formValidated: true, data:data});            
@@ -519,7 +551,7 @@ export class EditionMode extends Component{
                     </Form.Row>
                 </Form>
                 <ButtonGroup>
-                    <Button variant="primary" disabled={this.state.ccCm === null} onClick={this.onAdd}><FontAwesomeIcon icon={faPlusCircle}/>{" Ajouter une nouvelle note"}</Button>
+                    <Button variant="primary" disabled={this.state.ccCm === null} onClick={this.onAdd}><FontAwesomeIcon icon={faPlusCircle}/>{" Ajouter une nouvelle note"}</Button>                    
                 </ButtonGroup>
                 <br/><br/>
                 <DataGrid orderBy={true}>
@@ -653,7 +685,8 @@ export class PersonalNote extends Component{
         }
         this.state = {data: null, dropdownLists: null, mode: mode, collapse: {note: true, suggestedNote: false, feedback: true}};
 
-        this.editorRef = React.createRef();
+        this.attoRef = React.createRef();
+        this.atto = new EditorMoodle('recitCCEditorContainer1');
     }
 
     componentDidMount(){
@@ -661,7 +694,7 @@ export class PersonalNote extends Component{
     }  
 
     componentWillUnmount(){
-        $glVars.editorMoodle.close();
+        this.atto.close();
     }
 
     getData(){
@@ -700,14 +733,14 @@ export class PersonalNote extends Component{
 
         // it is a student?
         if(this.state.mode === "s"){
-            $glVars.editorMoodle.setValue(data.note.text);       
-            student = <div ref={this.editorRef}></div>;
+            this.atto.setValue(data.note.text);       
+            student = <div ref={this.attoRef}></div>;
             teacher = <div style={styleText} dangerouslySetInnerHTML={{__html: data.feedback}}></div>;
         }
         // it is a teacher
         else if(this.state.mode === "t"){
-            $glVars.editorMoodle.setValue(data.feedback);       
-            teacher = <div ref={this.editorRef}></div>;
+            this.atto.setValue(data.feedback);       
+            teacher = <div ref={this.attoRef}></div>;
             student =  <div style={styleText} dangerouslySetInnerHTML={{__html: data.note.text}}></div>;
             suggestedNote = <div style={styleText} dangerouslySetInnerHTML={{__html: data.suggestedNote}}></div>;
         }
@@ -758,40 +791,14 @@ export class PersonalNote extends Component{
                 </Modal.Footer>
             </Modal>;       
 
-/* <Accordion defaultActiveKey={0}>
-                        <Card>
-                            <Card.Header>
-                                <Accordion.Toggle as={Button} variant="link"eventKey={0}>{"Note de l'élève"}</Accordion.Toggle>
-                            </Card.Header>
-                            <Accordion.Collapse eventKey={0}>
-                                <Card.Body style={styleRow}>{student}</Card.Body>
-                            </Accordion.Collapse>
-                        </Card>
-                        <Card>
-                            <Card.Header>
-                                <Accordion.Toggle as={Button} variant="link" eventKey={1}>{"Réponse suggérée"}</Accordion.Toggle>
-                            </Card.Header>
-                            <Accordion.Collapse eventKey={1}>
-                                <Card.Body>{<div style={styleText} dangerouslySetInnerHTML={{__html: data.suggestedNote}}></div>}</Card.Body>
-                            </Accordion.Collapse>
-                        </Card>
-                        <Card>
-                            <Card.Header>
-                                <Accordion.Toggle as={Button} variant="link" eventKey={2}>{"Rétroaction de l'enseignant"}</Accordion.Toggle>
-                            </Card.Header>
-                            <Accordion.Collapse eventKey={2}>
-                                <Card.Body>{teacher}</Card.Body>
-                            </Accordion.Collapse>
-                        </Card>
-                    </Accordion>*/
         return (main);
     }
 
     componentDidUpdate(){
-        if(this.editorRef.current !== null){
-            $glVars.editorMoodle.show();        
-            if(!this.editorRef.current.hasChildNodes()){
-                this.editorRef.current.appendChild($glVars.editorMoodle.dom);   
+        if(this.attoRef.current !== null){
+            this.atto.show();        
+            if(!this.attoRef.current.hasChildNodes()){
+                this.attoRef.current.appendChild(this.atto.dom);   
             }
         }
     }
@@ -801,6 +808,7 @@ export class PersonalNote extends Component{
         data[name] = !data[name];
         this.setState({collapse: data});
     }
+
     onClose(){
         this.props.onClose();
     }
@@ -814,11 +822,11 @@ export class PersonalNote extends Component{
     onSave(){
         let data = JsNx.clone(this.state.data);
         if(this.state.mode === "s"){
-            data.note = $glVars.editorMoodle.getValue();
+            data.note.text = this.atto.getValue();
         }
         // it is a teacher
         else if(this.state.mode === "t"){
-            data.feedback = $glVars.editorMoodle.getValue();
+            data.feedback = this.atto.getValue();
         }        
 
         data.userId = this.props.userId;

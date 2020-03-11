@@ -175,7 +175,6 @@ export const $glVars = {
     signedUser: {userId: 0, roles: []},
     feedback: new FeedbackCtrl(),
     i18n: new I18n(),
-    webApi: new AppWebApi(),
-    editorMoodle: new EditorMoodle()
+    webApi: new AppWebApi()
   //cookies: new AppCookies()
 }

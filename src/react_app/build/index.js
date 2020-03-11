@@ -79853,8 +79853,7 @@ var $glVars = {
   },
   feedback: new _Feedback.FeedbackCtrl(),
   i18n: new _Utils.I18n(),
-  webApi: new _AppWebApi.AppWebApi(),
-  editorMoodle: new EditorMoodle() //cookies: new AppCookies()
+  webApi: new _AppWebApi.AppWebApi() //cookies: new AppCookies()
 
 };
 exports.$glVars = $glVars;
@@ -79916,17 +79915,17 @@ function (_Component) {
   _createClass(BtnModeEdition, [{
     key: "render",
     value: function render() {
-      return _react.default.createElement(_reactBootstrap.ButtonGroup, {
+      return _react.default.createElement("div", {
         style: {
-          textAlign: "right",
-          display: "block"
+          display: "flex",
+          justifyContent: "flex-end"
         }
-      }, _react.default.createElement(_reactBootstrap.Button, {
+      }, this.props.children, _react.default.createElement(_reactBootstrap.ButtonGroup, null, _react.default.createElement(_reactBootstrap.Button, {
         variant: this.props.variant,
         onClick: this.props.onClick
       }, _react.default.createElement(_reactFontawesome.FontAwesomeIcon, {
         icon: _freeSolidSvgIcons.faWrench
-      }), " " + this.props.text));
+      }), " " + this.props.text)));
     }
   }]);
 
@@ -79935,7 +79934,8 @@ function (_Component) {
 
 BtnModeEdition.defaultProps = {
   variant: "",
-  text: ""
+  text: "",
+  children: null
 };
 
 var TeacherView =
@@ -79971,11 +79971,31 @@ function (_Component2) {
   }, {
     key: "render",
     value: function render() {
+      var popover = _react.default.createElement(_reactBootstrap.Popover, {
+        id: "popover-basic"
+      }, _react.default.createElement(_reactBootstrap.Popover.Title, {
+        as: "h3"
+      }, "Code d'int\xE9gration"), _react.default.createElement(_reactBootstrap.Popover.Content, null, "Voici des variables extras pour le code d'int\xE9gration:", _react.default.createElement("br", null), _react.default.createElement("br", null), _react.default.createElement("strong", null, "color:"), " code hexad\xE9cimal de la couleur du titre de la note", _react.default.createElement("br", null), _react.default.createElement("strong", null, "btnSaveVariant:"), " style de bouton Bootstrap", _react.default.createElement("br", null), _react.default.createElement("strong", null, "btnResetVariant:"), " style de bouton Bootstrap"));
+
       var main = _react.default.createElement("div", null, this.state.modeEdition ? _react.default.createElement("div", null, _react.default.createElement(BtnModeEdition, {
         variant: "danger",
         onClick: this.onModeEditionClick,
         text: "Désactiver le mode d'édition"
-      }), _react.default.createElement(EditionMode, null)) : _react.default.createElement("div", null, _react.default.createElement(BtnModeEdition, {
+      }, _react.default.createElement(_reactBootstrap.OverlayTrigger, {
+        placement: "left",
+        delay: {
+          show: 250,
+          hide: 400
+        },
+        overlay: popover
+      }, _react.default.createElement(_reactBootstrap.Button, {
+        variant: "primary",
+        style: {
+          marginRight: 3
+        }
+      }, _react.default.createElement(_reactFontawesome.FontAwesomeIcon, {
+        icon: _freeSolidSvgIcons.faInfo
+      })))), _react.default.createElement(EditionMode, null)) : _react.default.createElement("div", null, _react.default.createElement(BtnModeEdition, {
         variant: "warning",
         onClick: this.onModeEditionClick,
         text: "Activer le mode d'édition"
@@ -80302,8 +80322,13 @@ function (_Component5) {
         activityList: []
       }
     };
-    _this5.editorRef = _react.default.createRef();
     _this5.formRef = _react.default.createRef();
+    _this5.attoTemplateNoteRef = _react.default.createRef();
+    _this5.attoSuggestedNoteRef = _react.default.createRef();
+    _this5.attoTeacherTipRef = _react.default.createRef();
+    _this5.attoTemplateNote = new _common.EditorMoodle('recitCCEditorContainer1');
+    _this5.attoSuggestedNote = new _common.EditorMoodle('recitCCEditorContainer2');
+    _this5.attoTeacherTip = new _common.EditorMoodle('recitCCEditorContainer3');
     return _this5;
   }
 
@@ -80315,7 +80340,9 @@ function (_Component5) {
   }, {
     key: "componentWillUnmount",
     value: function componentWillUnmount() {
-      _common.$glVars.editorMoodle.close();
+      this.attoTemplateNote.close();
+      this.attoSuggestedNote.close();
+      this.attoTeacherTip.close();
     }
   }, {
     key: "render",
@@ -80396,29 +80423,23 @@ function (_Component5) {
       }, _react.default.createElement(_reactBootstrap.Form.Row, null, _react.default.createElement(_reactBootstrap.Form.Group, {
         as: _reactBootstrap.Col
       }, _react.default.createElement("div", {
-        ref: this.editorRef
+        ref: this.attoTemplateNoteRef
       })))), _react.default.createElement(_reactBootstrap.Tab, {
         eventKey: 2,
         title: "R\xE9ponse sugg\xE9r\xE9e",
         style: styleTab
       }, _react.default.createElement(_reactBootstrap.Form.Row, null, _react.default.createElement(_reactBootstrap.Form.Group, {
         as: _reactBootstrap.Col
-      }, _react.default.createElement(_Components.RichEditor, {
-        nbRows: 10,
-        name: "suggestedNote",
-        value: data.suggestedNote,
-        onChange: this.onDataChange
+      }, _react.default.createElement("div", {
+        ref: this.attoSuggestedNoteRef
       })))), _react.default.createElement(_reactBootstrap.Tab, {
         eventKey: 3,
         title: "R\xE9troaction automatique",
         style: styleTab
       }, _react.default.createElement(_reactBootstrap.Form.Row, null, _react.default.createElement(_reactBootstrap.Form.Group, {
         as: _reactBootstrap.Col
-      }, _react.default.createElement(_Components.RichEditor, {
-        nbRows: 10,
-        name: "teacherTip",
-        value: data.teacherTip,
-        onChange: this.onDataChange
+      }, _react.default.createElement("div", {
+        ref: this.attoTeacherTipRef
       }))))))), _react.default.createElement(_reactBootstrap.Modal.Footer, null, _react.default.createElement(_reactBootstrap.Button, {
         variant: "secondary",
         onClick: this.onClose
@@ -80426,13 +80447,6 @@ function (_Component5) {
         variant: "success",
         onClick: this.onSubmit
       }, "Enregistrer")));
-      /*<Form.Row>
-                                  <Form.Group as={Col}>
-                                      <Form.Label>{"Tags"}</Form.Label>
-                                      <Form.Control type="text" value={data.tags} name="tags" onChange={this.onDataChange}/>
-                                  </Form.Group>
-                              </Form.Row>*/
-
 
       return main;
     }
@@ -80444,17 +80458,23 @@ function (_Component5) {
       });
     }
   }, {
-    key: "componentDidUpdate",
-    value: function componentDidUpdate() {
-      if (this.editorRef.current !== null) {
-        _common.$glVars.editorMoodle.show();
+    key: "updateAtto",
+    value: function updateAtto(instance, ref, value) {
+      if (ref.current !== null) {
+        instance.show();
+        instance.setValue(value);
 
-        _common.$glVars.editorMoodle.setValue(this.state.data.templateNote);
-
-        if (!this.editorRef.current.hasChildNodes()) {
-          this.editorRef.current.appendChild(_common.$glVars.editorMoodle.dom);
+        if (!ref.current.hasChildNodes()) {
+          ref.current.appendChild(instance.dom);
         }
       }
+    }
+  }, {
+    key: "componentDidUpdate",
+    value: function componentDidUpdate() {
+      this.updateAtto(this.attoTemplateNote, this.attoTemplateNoteRef, this.state.data.templateNote);
+      this.updateAtto(this.attoSuggestedNote, this.attoSuggestedNoteRef, this.state.data.suggestedNote);
+      this.updateAtto(this.attoTeacherTip, this.attoTeacherTipRef, this.state.data.teacherTip);
     }
   }, {
     key: "onClose",
@@ -80577,7 +80597,9 @@ function (_Component5) {
     key: "onSubmit",
     value: function onSubmit() {
       var data = this.state.data;
-      data.templateNote = _common.$glVars.editorMoodle.getValue();
+      data.templateNote = this.attoTemplateNote.getValue();
+      data.suggestedNote = this.attoSuggestedNote.getValue();
+      data.teacherTip = this.attoTeacherTip.getValue();
 
       if (this.formRef.current.checkValidity() === false) {
         this.setState({
@@ -80960,7 +80982,8 @@ function (_Component7) {
         feedback: true
       }
     };
-    _this9.editorRef = _react.default.createRef();
+    _this9.attoRef = _react.default.createRef();
+    _this9.atto = new _common.EditorMoodle('recitCCEditorContainer1');
     return _this9;
   }
 
@@ -80972,7 +80995,7 @@ function (_Component7) {
   }, {
     key: "componentWillUnmount",
     value: function componentWillUnmount() {
-      _common.$glVars.editorMoodle.close();
+      this.atto.close();
     }
   }, {
     key: "getData",
@@ -81027,10 +81050,9 @@ function (_Component7) {
       }; // it is a student?
 
       if (this.state.mode === "s") {
-        _common.$glVars.editorMoodle.setValue(data.note.text);
-
+        this.atto.setValue(data.note.text);
         student = _react.default.createElement("div", {
-          ref: this.editorRef
+          ref: this.attoRef
         });
         teacher = _react.default.createElement("div", {
           style: styleText,
@@ -81040,10 +81062,9 @@ function (_Component7) {
         });
       } // it is a teacher
       else if (this.state.mode === "t") {
-          _common.$glVars.editorMoodle.setValue(data.feedback);
-
+          this.atto.setValue(data.feedback);
           teacher = _react.default.createElement("div", {
-            ref: this.editorRef
+            ref: this.attoRef
           });
           student = _react.default.createElement("div", {
             style: styleText,
@@ -81103,44 +81124,17 @@ function (_Component7) {
         variant: "success",
         onClick: this.onSave
       }, "Enregistrer")));
-      /* <Accordion defaultActiveKey={0}>
-                              <Card>
-                                  <Card.Header>
-                                      <Accordion.Toggle as={Button} variant="link"eventKey={0}>{"Note de l'élève"}</Accordion.Toggle>
-                                  </Card.Header>
-                                  <Accordion.Collapse eventKey={0}>
-                                      <Card.Body style={styleRow}>{student}</Card.Body>
-                                  </Accordion.Collapse>
-                              </Card>
-                              <Card>
-                                  <Card.Header>
-                                      <Accordion.Toggle as={Button} variant="link" eventKey={1}>{"Réponse suggérée"}</Accordion.Toggle>
-                                  </Card.Header>
-                                  <Accordion.Collapse eventKey={1}>
-                                      <Card.Body>{<div style={styleText} dangerouslySetInnerHTML={{__html: data.suggestedNote}}></div>}</Card.Body>
-                                  </Accordion.Collapse>
-                              </Card>
-                              <Card>
-                                  <Card.Header>
-                                      <Accordion.Toggle as={Button} variant="link" eventKey={2}>{"Rétroaction de l'enseignant"}</Accordion.Toggle>
-                                  </Card.Header>
-                                  <Accordion.Collapse eventKey={2}>
-                                      <Card.Body>{teacher}</Card.Body>
-                                  </Accordion.Collapse>
-                              </Card>
-                          </Accordion>*/
-
 
       return main;
     }
   }, {
     key: "componentDidUpdate",
     value: function componentDidUpdate() {
-      if (this.editorRef.current !== null) {
-        _common.$glVars.editorMoodle.show();
+      if (this.attoRef.current !== null) {
+        this.atto.show();
 
-        if (!this.editorRef.current.hasChildNodes()) {
-          this.editorRef.current.appendChild(_common.$glVars.editorMoodle.dom);
+        if (!this.attoRef.current.hasChildNodes()) {
+          this.attoRef.current.appendChild(this.atto.dom);
         }
       }
     }
@@ -81173,10 +81167,10 @@ function (_Component7) {
       var data = _Utils.JsNx.clone(this.state.data);
 
       if (this.state.mode === "s") {
-        data.note = _common.$glVars.editorMoodle.getValue();
+        data.note.text = this.atto.getValue();
       } // it is a teacher
       else if (this.state.mode === "t") {
-          data.feedback = _common.$glVars.editorMoodle.getValue();
+          data.feedback = this.atto.getValue();
         }
 
       data.userId = this.props.userId;
@@ -81531,8 +81525,7 @@ function (_Component) {
   _createClass(App, [{
     key: "componentDidMount",
     value: function componentDidMount() {
-      _common.$glVars.feedback.addObserver("App", this.onFeedback); //$glVars.editorMoodle = new EditorMoodle(); // be sure that the Atto Editor is already loaded
-
+      _common.$glVars.feedback.addObserver("App", this.onFeedback);
     }
   }, {
     key: "componentWillUnmount",
@@ -81625,7 +81618,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53708" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "59094" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
