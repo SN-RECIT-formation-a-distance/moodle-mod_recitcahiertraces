@@ -950,8 +950,8 @@ export class Notebook extends Component{
                                                         <DataGrid.Body.Row key={index2} onDbClick={() => that.onEdit(item)}>
                                                             <DataGrid.Body.Cell>{index2 + 1}</DataGrid.Body.Cell>
                                                             <DataGrid.Body.Cell>{item.noteTitle}</DataGrid.Body.Cell>
-                                                            <DataGrid.Body.Cell alert={(item.note.length > 0 ? 'success' : 'warning')} style={{textAlign: "center"}}>
-                                                                {(item.note.length > 0 ? <FontAwesomeIcon icon={faCheckSquare}/> : null)}
+                                                            <DataGrid.Body.Cell alert={(item.note.text.length > 0 ? 'success' : 'warning')} style={{textAlign: "center"}}>
+                                                                {(item.note.text.length > 0 ? <FontAwesomeIcon icon={faCheckSquare}/> : null)}
                                                             </DataGrid.Body.Cell>
                                                             <DataGrid.Body.Cell alert={(item.feedback.length > 0 ? 'success' : 'warning')}  style={{textAlign: "center"}}>
                                                                 {(item.feedback.length > 0 ? <FontAwesomeIcon icon={faCheckSquare}/> : null)}
