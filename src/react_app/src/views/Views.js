@@ -3,7 +3,7 @@ import {ButtonGroup, Button, Form, Col, Tabs, Tab, DropdownButton, Dropdown, Mod
 import {faArrowLeft, faArrowRight, faPencilAlt, faPlusCircle, faWrench, faTrashAlt, faCopy, faBars, faGripVertical, faCheckSquare, faInfo} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {ComboBox, FeedbackCtrl, DataGrid, RichEditor, InputNumber, ToggleButtons} from '../libs/components/Components';
-import Utils, {UtilsMoodle, JsNx} from '../libs/utils/Utils';
+import {UtilsMoodle, JsNx} from '../libs/utils/Utils';
 import {$glVars, EditorMoodle} from '../common/common';
 
 class BtnModeEdition extends Component{
@@ -84,13 +84,12 @@ export class TeacherView extends Component {
                     $glVars.feedback.showError($glVars.i18n.tags.appName, $glVars.i18n.tags.msgCCSeqPos);
                 }
             }
-            let params = Utils.getUrlVars();
-            $glVars.webApi.checkCCSeqPos(params.id, callback);    
+            $glVars.webApi.checkCCSeqPos($glVars.urlParams.id, callback);    
         }
     }
 
     onModeEditionClick(event){
-      this.setState({modeEdition: !this.state.modeEdition});
+      this.setState({modeEdition: !this.state.modeEdition, selectedUserId: 0});
     }
 
     onSelectUser(userId){
@@ -122,6 +121,8 @@ export class GroupUserSelect extends Component{
         this.onSelectUser = this.onSelectUser.bind(this);
         this.onPrevious = this.onPrevious.bind(this);
         this.onNext = this.onNext.bind(this);
+        this.getData = this.getData.bind(this);
+        this.getDataResult = this.getDataResult.bind(this);
 
         this.state = {selectedUserIndex: -1, selectedGroupId: -1, groupList:[], userList: []};
     }
@@ -131,33 +132,38 @@ export class GroupUserSelect extends Component{
     }
     
     getData(){
-        let that = this;
+        $glVars.webApi.getEnrolledUserList($glVars.urlParams.id, this.getDataResult);
+    }
 
-        let callback = function(result){
-            if(!result.success){
-                FeedbackCtrl.instance.showError($glVars.i18n.appName, result.msg);
-                return;
-            }
-            
-            let groupList = [];
-            let userList = [];
-            for(let group of result.data){
-                groupList.push({text: group[0].groupName, value: group[0].groupId, data: group});
-                for(let user of group){
-                    if(JsNx.getItem(userList, "value", user.userId, null) === null){
-                        userList.push({text: user.userName, value: user.userId, data: user});
-                    }
+    getDataResult(result){
+        if(!result.success){
+            FeedbackCtrl.instance.showError($glVars.i18n.appName, result.msg);
+            return;
+        }
+        
+        let groupList = [];
+        let userList = [];
+        for(let group of result.data){
+            groupList.push({text: group[0].groupName, value: group[0].groupId, data: group});
+            for(let user of group){
+                if(JsNx.getItem(userList, "value", user.userId, null) === null){
+                    userList.push({text: user.userName, value: user.userId, data: user});
                 }
             }
-
-            groupList.sort((a, b) => { return ('' + a.text).localeCompare(b.text);})
-            userList.sort((a, b) => { return ('' + a.text).localeCompare(b.text);})
-            
-            that.setState({groupList: groupList, userList: userList});
         }
 
-        let params = Utils.getUrlVars();
-        $glVars.webApi.getEnrolledUserList(params.id, callback);
+        groupList.sort((a, b) => { return ('' + a.text).localeCompare(b.text);})
+        userList.sort((a, b) => { return ('' + a.text).localeCompare(b.text);})
+
+        if(!$glVars.urlParams.loaded){
+            this.setState(
+                {groupList: groupList, userList: userList, selectedUserIndex: JsNx.getItemIndex(userList, 'value', $glVars.urlParams.userId)}, 
+                () => this.props.onSelectUser($glVars.urlParams.userId)
+            );
+        }
+        else{
+            this.setState({groupList: groupList, userList: userList});
+        }
     }
 
     render(){
@@ -172,6 +178,7 @@ export class GroupUserSelect extends Component{
 
         let value = "";
         //if(userList.nxExists(this.state.selectedUserIndex)){
+            
         if(JsNx.exists(userList, this.state.selectedUserIndex)){
             value = userList[this.state.selectedUserIndex].value;
         }
@@ -513,8 +520,7 @@ export class EditionMode extends Component{
             that.setState({cmList: cmList});
         }
 
-        let params = Utils.getUrlVars();
-        $glVars.webApi.getSectionCmList(params.id, callback);
+        $glVars.webApi.getSectionCmList($glVars.urlParams.id, callback);
     }
 
     getData2(){
@@ -859,11 +865,11 @@ export class Notebook extends Component{
 
         this.onSelectTab = this.onSelectTab.bind(this);
         this.getData = this.getData.bind(this);
+        this.getDataResult = this.getDataResult.bind(this);
         this.onEdit = this.onEdit.bind(this);
         this.onClose = this.onClose.bind(this);
 
-        let params = Utils.getUrlVars();
-        this.state = {dataProvider: [], activeTab: 0, personalNote: null, cmId: params.id};
+        this.state = {dataProvider: [], activeTab: 0, personalNote: null, cmId: $glVars.urlParams.id};
     }
     
     componentDidMount(){
@@ -885,23 +891,38 @@ export class Notebook extends Component{
     }
 
     getData(){
-        let that = this;
-
-        let callback = function(result){
-            if(!result.success){
-                FeedbackCtrl.instance.showError($glVars.i18n.appName, result.msg);
-                return;
-            }
-            
-            that.setState({dataProvider: result.data});
-        }
-
         if(this.props.userId === 0){
             this.setState({dataProvider: []});
             return;
         }
+        
+        $glVars.webApi.getPersonalNotes(this.state.cmId, this.props.userId, this.getDataResult);
+    }
 
-        $glVars.webApi.getPersonalNotes(this.state.cmId, this.props.userId, callback);
+    getDataResult(result){
+        if(!result.success){
+            FeedbackCtrl.instance.showError($glVars.i18n.appName, result.msg);
+            return;
+        }
+
+        // If the user is trying to load automatically some note by URL
+        if(!$glVars.urlParams.loaded){
+            let item = null;
+            for(let activity of result.data){
+                for(let note of activity){
+                    if((note.ccCmId === $glVars.urlParams.ccCmId) && (note.cmId === $glVars.urlParams.cmId)){
+                        item = note;
+                    }
+                }
+            }
+
+            $glVars.urlParams.loaded = true;
+
+            this.setState({dataProvider: result.data}, () => this.onEdit(item));
+        }
+        else{
+            this.setState({dataProvider: result.data});
+        }
     }
 
     getPrintLink(showFeedback){

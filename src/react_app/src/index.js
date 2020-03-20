@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import {faSync} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {VisualFeedback, Loading} from "./libs/components/Components";
-import {UtilsMoodle} from "./libs/utils/Utils";
+import Utils, {UtilsMoodle} from "./libs/utils/Utils";
 import {TeacherView, StudentView} from "./views/Views";
 import {$glVars, AttoEditor} from "./common/common";
 //import "./libs/utils/JsExtension";
@@ -21,6 +21,11 @@ class App extends Component {
         this.onFeedback = this.onFeedback.bind(this);
 
         $glVars.signedUser = this.props.signedUser;
+        $glVars.urlParams = Utils.getUrlVars();
+        $glVars.urlParams.id = parseInt($glVars.urlParams.id, 10) || 0;
+        $glVars.urlParams.ccCmId = parseInt($glVars.urlParams.ccCmId, 10) || 0;
+        $glVars.urlParams.cmId = parseInt($glVars.urlParams.cmId, 10) || 0;
+        $glVars.urlParams.userId = parseInt($glVars.urlParams.userId, 10) || 0;
 
         let mode = (UtilsMoodle.checkRoles($glVars.signedUser.roles, UtilsMoodle.rolesL2) ? 't' : 's');
 
