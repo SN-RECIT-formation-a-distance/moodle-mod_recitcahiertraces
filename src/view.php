@@ -61,6 +61,7 @@ class RecitCahierCanadaView
     public function display(){
         $this->page->set_cm($this->cm);
         $this->page->set_url('/mod/recitcahiercanada/view.php', array('id' => $this->cm->id));
+        $this->page->set_pagelayout('incourse');
         $this->page->set_title($this->course->shortname.': '.$this->cm->name);
         $this->page->set_heading($this->course->fullname);
         $this->page->requires->css(new moodle_url('./react_app/build/index.css'), true);
