@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import {ButtonGroup, Button, Form, Col, Tabs, Tab, DropdownButton, Dropdown, Modal, Collapse, Card, Row, Nav, OverlayTrigger, Popover} from 'react-bootstrap';
-import {faArrowLeft, faArrowRight, faPencilAlt, faPlusCircle, faWrench, faTrashAlt, faCopy, faBars, faGripVertical, faCheckSquare, faInfo} from '@fortawesome/free-solid-svg-icons';
+import {faArrowLeft, faArrowRight, faPencilAlt, faPlusCircle, faWrench, faTrashAlt, faCopy, faBars, faGripVertical, faCheckSquare, faInfo, faEye} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {ComboBox, FeedbackCtrl, DataGrid, RichEditor, InputNumber, ToggleButtons} from '../libs/components/Components';
 import {UtilsMoodle, JsNx} from '../libs/utils/Utils';
@@ -970,7 +970,7 @@ export class Notebook extends Component{
                                                     let row = 
                                                         <DataGrid.Body.Row key={index2} onDbClick={() => that.onEdit(item)}>
                                                             <DataGrid.Body.Cell>{index2 + 1}</DataGrid.Body.Cell>
-                                                            <DataGrid.Body.Cell>{item.noteTitle}</DataGrid.Body.Cell>
+                                                            <DataGrid.Body.Cell><FontAwesomeIcon icon={faEye}/>{` ${item.noteTitle}`}</DataGrid.Body.Cell>
                                                             <DataGrid.Body.Cell alert={(item.note.text.length > 0 ? 'success' : 'warning')} style={{textAlign: "center"}}>
                                                                 {(item.note.text.length > 0 ? <FontAwesomeIcon icon={faCheckSquare}/> : null)}
                                                             </DataGrid.Body.Cell>
