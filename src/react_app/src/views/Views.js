@@ -581,7 +581,7 @@ export class EditionMode extends Component{
                                         <DataGrid.Body.Cell>
                                             <DropdownButton size="sm" title={<span><FontAwesomeIcon icon={faBars}/>{" Actions"}</span>}>
                                                 <Dropdown.Item onClick={() => this.onEdit(item.ccCmId)}><FontAwesomeIcon icon={faPencilAlt}/>{" Modifier"}</Dropdown.Item>
-                                                <Dropdown.Item onClick={() => this.onRemove(item.ccCmId)}><FontAwesomeIcon icon={faTrashAlt}/>{" Supprimer"}</Dropdown.Item>
+                                                <Dropdown.Item onClick={() => this.onRemove(item)}><FontAwesomeIcon icon={faTrashAlt}/>{" Supprimer"}</Dropdown.Item>
                                                 <Dropdown.Item onClick={() => this.onCopyIC(item.intCode)}><FontAwesomeIcon icon={faCopy}/>{" Code d'intégration"}</Dropdown.Item>
                                             </DropdownButton>
                                         </DataGrid.Body.Cell>
@@ -624,7 +624,7 @@ export class EditionMode extends Component{
         this.setState({ccCmId: ccCmId});
     }
     
-    onRemove(ccCmId){
+    onRemove(item){
         let callback = function(result){
             if(result.success){
                 $glVars.feedback.showInfo($glVars.i18n.tags.appName, $glVars.i18n.tags.msgSuccess, 3);
@@ -635,7 +635,7 @@ export class EditionMode extends Component{
         }
 
         if(window.confirm($glVars.i18n.tags.msgConfirmDeletion)){
-            $glVars.webApi.removeCcCmNote(ccCmId, callback);
+            $glVars.webApi.removeCcCmNote(item.ccCmId, item.cmId, callback);
         }
     }
 

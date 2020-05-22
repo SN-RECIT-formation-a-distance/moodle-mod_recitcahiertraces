@@ -31,7 +31,7 @@ $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahie
 <html>
 <head>
     <title><?php echo $pageTitle; ?></title>    
-    <link rel="stylesheet" type="text/css" href="../react_app/build/index.css">
+    <link rel="stylesheet" type="text/css" href="../react_app/node_modules/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="<?php echo $CFG->wwwroot . "/local/recitcommon/css/report.css"; ?>">
     <link rel="icon" href="../pix/icon.png?v=2"  />
 </head>
@@ -61,7 +61,7 @@ $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahie
                 
                 echo "{$note->note->text}";
                 
-                if($showFeedback){
+                if(($showFeedback) && (strlen($note->feedback) > 0)){
                     echo sprintf('<div class="alert alert-primary" role="alert" style="margin-top: 15px;"><strong>%s:</strong><br/>%s</div>', get_string('teacherFeedback', 'mod_recitcahiercanada'), $note->feedback);
                 }
                 

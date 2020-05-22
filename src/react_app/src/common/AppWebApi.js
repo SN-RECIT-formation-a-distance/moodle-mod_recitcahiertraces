@@ -91,7 +91,7 @@ export class AppWebApi extends WebApi
         this.post(this.gateway, options, onSuccessTmp);
     }
 
-    removeCcCmNote(ccCmId, onSuccess){
+    removeCcCmNote(ccCmId, cmId, onSuccess){
         let that = this;
         let onSuccessTmp = function(result){     
             onSuccess(result);
@@ -100,7 +100,7 @@ export class AppWebApi extends WebApi
             }
         };
 
-        let options = {ccCmId: ccCmId, service: "removeCcCmNote"};
+        let options = {ccCmId: ccCmId, cmId: cmId, service: "removeCcCmNote"};
         this.post(this.gateway, options, onSuccessTmp);
     }
 
