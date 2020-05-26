@@ -9,7 +9,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {VisualFeedback, Loading} from "./libs/components/Components";
 import Utils, {UtilsMoodle} from "./libs/utils/Utils";
 import {TeacherView, StudentView} from "./views/Views";
-import {$glVars, AttoEditor} from "./common/common";
+import {$glVars} from "./common/common";
 //import "./libs/utils/JsExtension";
 export * from "./common/i18n";
  

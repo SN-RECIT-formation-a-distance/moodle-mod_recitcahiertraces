@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import {ButtonGroup, Button, Form, Col, Tabs, Tab, DropdownButton, Dropdown, Modal, Collapse, Card, Row, Nav, OverlayTrigger, Popover} from 'react-bootstrap';
 import {faArrowLeft, faArrowRight, faPencilAlt, faPlusCircle, faWrench, faTrashAlt, faCopy, faBars, faGripVertical, faCheckSquare, faInfo, faEye} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {ComboBox, FeedbackCtrl, DataGrid, RichEditor, InputNumber, ToggleButtons} from '../libs/components/Components';
+import {ComboBox, FeedbackCtrl, DataGrid, InputNumber, ToggleButtons} from '../libs/components/Components';
 import {UtilsMoodle, JsNx} from '../libs/utils/Utils';
 import {$glVars, EditorMoodle} from '../common/common';
 
@@ -42,7 +42,7 @@ export class TeacherView extends Component {
     }
 
     render() {       
-        const popover = (
+       /* const popover = (
             <Popover id="popover-basic">
               <Popover.Title as="h3">Code d'intégration</Popover.Title>
               <Popover.Content>
@@ -54,14 +54,16 @@ export class TeacherView extends Component {
             </Popover>
           );
           
+            <OverlayTrigger  placement="left" delay={{ show: 250, hide: 400 }} overlay={popover}>                                
+                <Button  variant="primary"  style={{marginRight: 3}}><FontAwesomeIcon icon={faInfo}/></Button>
+            </OverlayTrigger>*/
+
         let main =
             <div>
                 {this.state.modeEdition ? 
                     <div>
                         <BtnModeEdition variant="danger" onClick={this.onModeEditionClick} text={"Désactiver le mode d'édition"}>
-                            <OverlayTrigger  placement="left" delay={{ show: 250, hide: 400 }} overlay={popover}>                                
-                                <Button  variant="primary"  style={{marginRight: 3}}><FontAwesomeIcon icon={faInfo}/></Button>
-                            </OverlayTrigger>
+                            
                         </BtnModeEdition>
                         <EditionMode/> 
                     </div>

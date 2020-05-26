@@ -81,30 +81,6 @@ class RecitCahierCanadaView
         echo Utils::createEditorHtml(false, "recitCCEditorContainer2", "recitCCEditor2", "", 15, $context, 0, 0);
         echo Utils::createEditorHtml(false, "recitCCEditorContainer3", "recitCCEditor3", "", 15, $context, 0, 0);
         
-        //echo Utils::createTagsForm($this->db, $this->cm->id);
-        
-        /*
-        echo "<div id='recitCTEditorContainer'></div>";
-
-        $modules = array('moodle-editor_atto-editor');
-        // Note <> is a safe separator, because it will not appear in the output of s().
-        $pagehash = sha1($this->page->url . '<>' . s(''));
-        
-        $params = array(
-            'elementid' => "recitCTEditorContainer",
-            'content_css' =>  $this->page->theme->editor_css_url()->out(false),
-            'contextid' => $context->id,
-            'autosaveEnabled' => false,
-            'autosaveFrequency' => 0,
-            'language' => "fr_ca",
-            'directionality' => get_string('thisdirection', 'langconfig'),
-            'filepickeroptions' => array(),
-            'plugins' => array(),
-            'pageHash' => $pagehash,
-        );
-
-        $this->page->requires->yui_module($modules, 'Y.M.editor_atto.Editor.init', array($params));*/
-
         echo $this->output->footer();
     }
 }
