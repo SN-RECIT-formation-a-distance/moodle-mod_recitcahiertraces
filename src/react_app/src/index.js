@@ -4,7 +4,7 @@ import ReactDOM from "react-dom";
  *  il ne faut pas charger le bootstrap de base car il est déjà chargé dans le thème
  * //import 'bootstrap/dist/css/bootstrap.min.css';  
  **************************************************************************************/ 
-import {faSync} from '@fortawesome/free-solid-svg-icons';
+import {faSpinner} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {VisualFeedback, Loading} from "./libs/components/Components";
 import Utils, {UtilsMoodle} from "./libs/utils/Utils";
@@ -50,7 +50,7 @@ class App extends Component {
                 {$glVars.feedback.msg.map((item, index) => {  
                     return (<VisualFeedback key={index} id={index} msg={item.msg} type={item.type} title={item.title} timeout={item.timeout}/>);                                    
                 })}
-                <Loading webApi={$glVars.webApi}><FontAwesomeIcon icon={faSync} spin/></Loading>
+                <Loading webApi={$glVars.webApi}><FontAwesomeIcon icon={faSpinner} spin/></Loading>
             </div>
 
         return (main);

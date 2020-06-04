@@ -942,16 +942,19 @@ export class Notebook extends Component{
                     <a href={this.getPrintLink(1)} target="_blank">{"Imprimer des notes + Rétroaction"}</a>
                 </div>
 
+                <hr/>
+
                 <Tab.Container id="tabActivities" activeKey={this.state.activeTab} onSelect={this.onSelectTab}>
                     <Row>
                         <Col sm={12}>
                             <Nav variant="pills" className="flex-row">
                                 {this.state.dataProvider.map(function(items, index){
-                                    return <Nav.Item key={index} style={{flexGrow: 1}}><Nav.Link eventKey={index}>{JsNx.at(items, 0).activityName}</Nav.Link></Nav.Item>;
+                                    return <Nav.Item key={index} ><Nav.Link eventKey={index}>{JsNx.at(items, 0).activityName}</Nav.Link></Nav.Item>;
                                 })}
                             </Nav>
                         </Col>
                     </Row>
+                    <br/>
                     <Row>
                         <Col sm={12}>
                             <Tab.Content>
@@ -962,8 +965,8 @@ export class Notebook extends Component{
                                             <DataGrid.Header.Row>
                                                 <DataGrid.Header.Cell style={{width: 80}}>{"#"}</DataGrid.Header.Cell>
                                                 <DataGrid.Header.Cell >{"Titre de la note"}</DataGrid.Header.Cell>
-                                                <DataGrid.Header.Cell style={{width: 110}}>{"Élève"}</DataGrid.Header.Cell>
-                                                <DataGrid.Header.Cell style={{width: 140}}>{"Enseignant"}</DataGrid.Header.Cell>
+                                                <DataGrid.Header.Cell style={{width: 300}}>{"Note"}</DataGrid.Header.Cell>
+                                                <DataGrid.Header.Cell style={{width: 300}}>{"Rétroaction"}</DataGrid.Header.Cell>
                                                 <DataGrid.Header.Cell  style={{width: 120}}></DataGrid.Header.Cell>
                                             </DataGrid.Header.Row>
                                         </DataGrid.Header>
@@ -973,12 +976,8 @@ export class Notebook extends Component{
                                                         <DataGrid.Body.Row key={index2} onDbClick={() => that.onEdit(item)}>
                                                             <DataGrid.Body.Cell>{index2 + 1}</DataGrid.Body.Cell>
                                                             <DataGrid.Body.Cell><FontAwesomeIcon icon={faEye}/>{` ${item.noteTitle}`}</DataGrid.Body.Cell>
-                                                            <DataGrid.Body.Cell alert={(item.note.text.length > 0 ? 'success' : 'warning')} style={{textAlign: "center"}}>
-                                                                {(item.note.text.length > 0 ? <FontAwesomeIcon icon={faCheckSquare}/> : null)}
-                                                            </DataGrid.Body.Cell>
-                                                            <DataGrid.Body.Cell alert={(item.feedback.length > 0 ? 'success' : 'warning')}  style={{textAlign: "center"}}>
-                                                                {(item.feedback.length > 0 ? <FontAwesomeIcon icon={faCheckSquare}/> : null)}
-                                                            </DataGrid.Body.Cell>
+                                                            <DataGrid.Body.Cell>{that.formatText(item.note.text)}</DataGrid.Body.Cell>
+                                                            <DataGrid.Body.Cell>{that.formatText(item.feedback)}</DataGrid.Body.Cell>
                                                             <DataGrid.Body.Cell>
                                                                 <DropdownButton size="sm" title={<span><FontAwesomeIcon icon={faBars}/>{" Actions"}</span>}>
                                                                     <Dropdown.Item onClick={() => that.onEdit(item)}><FontAwesomeIcon icon={faPencilAlt}/>{" Modifier"}</Dropdown.Item>
@@ -1003,6 +1002,15 @@ export class Notebook extends Component{
             </div>;
 
         return (main);
+    }
+
+    formatText(text){
+        let tmp = document.createElement("div");
+        tmp.innerHTML = text;
+        
+        text = tmp.textContent || tmp.innerText || ""; // Retrieve the text property of the element (cross-browser support)
+
+        return (text.length > 50 ? `${text.substr(0, 50)}...` : text);
     }
 
     onEdit(item){
