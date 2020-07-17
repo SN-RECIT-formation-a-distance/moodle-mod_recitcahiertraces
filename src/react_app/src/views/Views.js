@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
-import {ButtonGroup, Button, Form, Col, Tabs, Tab, DropdownButton, Dropdown, Modal, Collapse, Card, Row, Nav, OverlayTrigger, Popover} from 'react-bootstrap';
-import {faArrowLeft, faArrowRight, faPencilAlt, faPlusCircle, faWrench, faTrashAlt, faCopy, faBars, faGripVertical, faCheckSquare, faInfo, faEye} from '@fortawesome/free-solid-svg-icons';
+import {ButtonGroup, Button, Form, Col, Tabs, Tab, DropdownButton, Dropdown, Modal, Collapse, Card, Row, Nav} from 'react-bootstrap';
+import {faArrowLeft, faArrowRight, faPencilAlt, faPlusCircle, faWrench, faTrashAlt, faCopy, faBars, faGripVertical, faEye} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {ComboBox, FeedbackCtrl, DataGrid, InputNumber, ToggleButtons} from '../libs/components/Components';
 import {UtilsMoodle, JsNx} from '../libs/utils/Utils';
-import {$glVars, EditorMoodle} from '../common/common';
+import {EditorDecorator} from '../libs/utils/EditorDecorator';
+import {$glVars} from '../common/common';
 
 class BtnModeEdition extends Component{
     static defaultProps = {
@@ -262,12 +263,12 @@ export class NoteForm extends Component
         };
 
         this.formRef = React.createRef();
-        this.attoTemplateNoteRef = React.createRef();
-        this.attoSuggestedNoteRef = React.createRef();
-        this.attoTeacherTipRef = React.createRef();
-        this.attoTemplateNote = new EditorMoodle('recitCCEditorContainer1');
-        this.attoSuggestedNote = new EditorMoodle('recitCCEditorContainer2');
-        this.attoTeacherTip = new EditorMoodle('recitCCEditorContainer3');
+        this.editorTemplateNoteRef = React.createRef();
+        this.editorSuggestedNoteRef = React.createRef();
+        this.editorTeacherTipRef = React.createRef();
+        this.editorTemplateNote = new EditorDecorator('recit_cahiertraces_editor_container_1');
+        this.editorSuggestedNote = new EditorDecorator('recit_cahiertraces_editor_container_2');
+        this.editorTeacherTip = new EditorDecorator('recit_cahiertraces_editor_container_3');
     }
 
     componentDidMount(){
@@ -275,9 +276,9 @@ export class NoteForm extends Component
     }  
 
     componentWillUnmount(){
-        this.attoTemplateNote.close();
-        this.attoSuggestedNote.close();
-        this.attoTeacherTip.close();
+        this.editorTemplateNote.close();
+        this.editorSuggestedNote.close();
+        this.editorTeacherTip.close();
     }
 
     render(){
@@ -327,21 +328,21 @@ export class NoteForm extends Component
                             <Tab eventKey={1} title="Modèle de note"  style={styleTab}>
                                 <Form.Row>
                                     <Form.Group as={Col}>
-                                        <div ref={this.attoTemplateNoteRef}></div>
+                                        <div ref={this.editorTemplateNoteRef}></div>
                                     </Form.Group>
                                 </Form.Row>
                             </Tab>
                             <Tab eventKey={2} title="Réponse suggérée"  style={styleTab}>
                                 <Form.Row>
                                     <Form.Group as={Col}>
-                                        <div ref={this.attoSuggestedNoteRef}></div>
+                                        <div ref={this.editorSuggestedNoteRef}></div>
                                     </Form.Group>
                                 </Form.Row>
                             </Tab>
                             <Tab eventKey={3} title="Rétroaction automatique"  style={styleTab}> 
                                 <Form.Row>
                                     <Form.Group as={Col}>
-                                        <div ref={this.attoTeacherTipRef}></div>
+                                        <div ref={this.editorTeacherTipRef}></div>
                                     </Form.Group>
                                 </Form.Row>
                             </Tab>
@@ -361,7 +362,7 @@ export class NoteForm extends Component
         this.setState({activeTab: eventKey});
     }
 
-    updateAtto(instance, ref, value){
+    updateEditor(instance, ref, value){
         if(ref.current !== null){
             instance.show();        
             instance.setValue(value);       
@@ -372,9 +373,9 @@ export class NoteForm extends Component
     }
 
     componentDidUpdate(){
-        this.updateAtto(this.attoTemplateNote, this.attoTemplateNoteRef, this.state.data.templateNote);
-        this.updateAtto(this.attoSuggestedNote, this.attoSuggestedNoteRef, this.state.data.suggestedNote);
-        this.updateAtto(this.attoTeacherTip, this.attoTeacherTipRef, this.state.data.teacherTip);
+        this.updateEditor(this.editorTemplateNote, this.editorTemplateNoteRef, this.state.data.templateNote);
+        this.updateEditor(this.editorSuggestedNote, this.editorSuggestedNoteRef, this.state.data.suggestedNote);
+        this.updateEditor(this.editorTeacherTip, this.editorTeacherTipRef, this.state.data.teacherTip);
     }
 
     onClose(){
@@ -437,9 +438,9 @@ export class NoteForm extends Component
 
     onSubmit(){
         let data = this.state.data;
-        data.templateNote = this.attoTemplateNote.getValue();
-        data.suggestedNote = this.attoSuggestedNote.getValue();
-        data.teacherTip = this.attoTeacherTip.getValue();
+        data.templateNote = this.editorTemplateNote.getValue().text;
+        data.suggestedNote = this.editorSuggestedNote.getValue().text;
+        data.teacherTip = this.editorTeacherTip.getValue().text;
 
         if (this.formRef.current.checkValidity() === false) {
             this.setState({formValidated: true, data:data});            
@@ -693,16 +694,16 @@ export class PersonalNote extends Component{
         }
         this.state = {data: null, dropdownLists: null, mode: mode, collapse: {note: true, suggestedNote: false, feedback: true}};
 
-        this.attoRef = React.createRef();
-        this.atto = new EditorMoodle('recitCCEditorContainer1');
+        this.editorRef = React.createRef();
+        this.editorDec = new EditorDecorator(`recit_cahiertraces_editor_container_1`);
     }
 
     componentDidMount(){
-        this.getData();             
+        this.getData();     
     }  
 
     componentWillUnmount(){
-        this.atto.close();
+        this.editorDec.close();
     }
 
     getData(){
@@ -741,14 +742,14 @@ export class PersonalNote extends Component{
 
         // it is a student?
         if(this.state.mode === "s"){
-            this.atto.setValue(data.note.text);       
-            student = <div ref={this.attoRef}></div>;
+            this.editorDec.setValue(data.note.text);       
+            student = <div ref={this.editorRef}></div>;
             teacher = <div style={styleText} dangerouslySetInnerHTML={{__html: data.feedback}}></div>;
         }
         // it is a teacher
         else if(this.state.mode === "t"){
-            this.atto.setValue(data.feedback);       
-            teacher = <div ref={this.attoRef}></div>;
+            this.editorDec.setValue(data.feedback);       
+            teacher = <div ref={this.editorRef}></div>;
             student =  <div style={styleText} dangerouslySetInnerHTML={{__html: data.note.text}}></div>;
             suggestedNote = <div style={styleText} dangerouslySetInnerHTML={{__html: data.suggestedNote}}></div>;
         }
@@ -803,10 +804,10 @@ export class PersonalNote extends Component{
     }
 
     componentDidUpdate(){
-        if(this.attoRef.current !== null){
-            this.atto.show();        
-            if(!this.attoRef.current.hasChildNodes()){
-                this.attoRef.current.appendChild(this.atto.dom);   
+        if(this.editorRef.current !== null){
+            this.editorDec.show();        
+            if(!this.editorRef.current.hasChildNodes()){
+                this.editorRef.current.appendChild(this.editorDec.dom);   
             }
         }
     }
@@ -830,11 +831,11 @@ export class PersonalNote extends Component{
     onSave(){
         let data = JsNx.clone(this.state.data);
         if(this.state.mode === "s"){
-            data.note.text = this.atto.getValue();
+            data.note.text = this.editorDec.getValue().text;
         }
         // it is a teacher
         else if(this.state.mode === "t"){
-            data.feedback = this.atto.getValue();
+            data.feedback = this.editorDec.getValue().text;
         }        
 
         data.userId = this.props.userId;

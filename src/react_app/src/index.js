@@ -60,17 +60,6 @@ class App extends Component {
         this.forceUpdate();
     }
 }
-/*
-let atto1 = new AttoEditor();
-
-
-let atto2 = new AttoEditor();
-
-window.setTimeout(function(){
-    atto1.setValue("gus");
-    atto2.setValue("kaw");
-}, 1000);*/
-
 
 document.addEventListener('DOMContentLoaded', function(){ 
     const domContainer = document.getElementById('recit_cahiertraces');

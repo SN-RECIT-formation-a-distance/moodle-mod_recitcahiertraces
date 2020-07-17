@@ -49,6 +49,8 @@ class RecitCahierCanadaView
     protected $user = null;
     protected $db = null;
 
+    protected $editorOption = "2"; // 1 = atto, 2 = recit editor
+
     public function __construct($page, $course, $cm, $output, $user, $db){
         $this->page = $page;
         $this->course = $course;
@@ -66,6 +68,12 @@ class RecitCahierCanadaView
         $this->page->set_heading($this->course->fullname);
         $this->page->requires->css(new moodle_url('./react_app/build/index.css'), true);
         $this->page->requires->js(new moodle_url('./react_app/build/index.js'), true);
+
+        if($this->editorOption == "2"){
+            $this->page->requires->css(new moodle_url("{$CFG->wwwroot}/local/recitcommon/js/recit_rich_editor/index.css"), true);
+            $this->page->requires->js(new moodle_url("{$CFG->wwwroot}/local/recitcommon/js/recit_rich_editor/index.js"), true);
+        }
+
         //$this->page->requires->js(new moodle_url('/lib/editor/atto/yui/build/moodle-editor_atto-editor/moodle-editor_atto-editor-min.js'), true);
 
         echo $this->output->header();
@@ -76,11 +84,22 @@ class RecitCahierCanadaView
 
         echo sprintf("<div id='recit_cahiertraces' data-student-id='%ld' data-roles='%s'></div>", $studentId, implode(",", $roles));
         
-        $context = context_course::instance($this->course->id);        
-        echo Utils::createEditorHtml(false, "recitCCEditorContainer1", "recitCCEditor1", "", 15, $context, 0, 0);
-        echo Utils::createEditorHtml(false, "recitCCEditorContainer2", "recitCCEditor2", "", 15, $context, 0, 0);
-        echo Utils::createEditorHtml(false, "recitCCEditorContainer3", "recitCCEditor3", "", 15, $context, 0, 0);
+        
+        echo $this->getEditorOption("recit_cahiertraces_editor", 1);        
+        echo $this->getEditorOption("recit_cahiertraces_editor", 2);
+        echo $this->getEditorOption("recit_cahiertraces_editor", 3);
         
         echo $this->output->footer();
+    }
+
+    protected function getEditorOption($name, $index){
+        $context = context_course::instance($this->course->id);
+
+        if($this->editorOption == "2"){
+            return "<div id='{$name}_container_{$index}' data-recit-rich-editor='placeholder' data-format='recit_rich_editor' style='display: none;'></div>";
+        }
+        else{
+            return Utils::createEditorHtml(false, "{$name}_container_{$index}", "{$name}_{$index}", "", 15, $context, 0, 0);
+        }
     }
 }

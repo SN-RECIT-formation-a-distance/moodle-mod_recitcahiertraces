@@ -5,7 +5,7 @@ import {AppWebApi} from "./AppWebApi";
 
 export * from "./Options";
 
-export class EditorMoodle{
+/*export class EditorMoodle{
     constructor(id){
         this.id = id || "recitCCEditorContainer";
         this.dom = null;
@@ -80,7 +80,7 @@ export class EditorMoodle{
                 return "Editor: unknown format";
         }
     }
-}
+}*/
 
 export const $glVars = {
     signedUser: {userId: 0, roles: []},
