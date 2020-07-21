@@ -830,17 +830,21 @@ export class PersonalNote extends Component{
 
     onSave(){
         let data = JsNx.clone(this.state.data);
+        let flags = {mode: this.state.mode, teacherFeedbackUpdated: 0};
+
         if(this.state.mode === "s"){
             data.note.text = this.editorDec.getValue().text;
         }
         // it is a teacher
         else if(this.state.mode === "t"){
-            data.feedback = this.editorDec.getValue().text;
+            let tmp = this.editorDec.getValue().text;
+            flags.teacherFeedbackUpdated = (tmp !== data.feedback ? 1 : 0);
+            data.feedback = tmp;
         }        
 
         data.userId = this.props.userId;
         
-        $glVars.webApi.savePersonalNote(data, this.state.mode, this.onSaveResult);
+        $glVars.webApi.savePersonalNote(data, flags, this.onSaveResult);
     }
 
     onSaveResult(result){

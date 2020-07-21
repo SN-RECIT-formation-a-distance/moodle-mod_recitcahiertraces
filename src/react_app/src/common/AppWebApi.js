@@ -43,7 +43,7 @@ export class AppWebApi extends WebApi
         this.post(this.gateway, data, onSuccess);
     }
 
-    savePersonalNote(data, flag, onSuccess){
+    savePersonalNote(data, flags, onSuccess){
         let that = this;
         let onSuccessTmp = function(result){     
             onSuccess(result);
@@ -52,7 +52,7 @@ export class AppWebApi extends WebApi
             }
         };
 
-        let options = {data: data, flag: flag, service: "savePersonalNote"};
+        let options = {data: data, flags: flags, service: "savePersonalNote"};
         this.post(this.gateway, options, onSuccessTmp);
     }
 
