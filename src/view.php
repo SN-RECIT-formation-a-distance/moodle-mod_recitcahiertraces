@@ -68,6 +68,7 @@ class RecitCahierCanadaView
         $this->page->set_heading($this->course->fullname);
         $this->page->requires->css(new moodle_url('./react_app/build/index.css'), true);
         $this->page->requires->js(new moodle_url('./react_app/build/index.js'), true);
+        $this->page->requires->js(new moodle_url("{$CFG->wwwroot}/local/recitcommon/js/Components.js"), true);
 
         if($this->editorOption == "2"){
             $this->page->requires->css(new moodle_url("{$CFG->wwwroot}/local/recitcommon/js/recit_rich_editor/index.css"), true);
@@ -96,7 +97,7 @@ class RecitCahierCanadaView
         $context = context_course::instance($this->course->id);
 
         if($this->editorOption == "2"){
-            return "<div id='{$name}_container_{$index}' data-recit-rich-editor='placeholder' data-format='recit_rich_editor' style='display: none;'></div>";
+            return "<div id='{$name}_container_{$index}' data-format='recit_rich_editor' style='display: none;'></div>";
         }
         else{
             return Utils::createEditorHtml(false, "{$name}_container_{$index}", "{$name}_{$index}", "", 15, $context, 0, 0);

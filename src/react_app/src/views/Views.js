@@ -4,7 +4,6 @@ import {faArrowLeft, faArrowRight, faPencilAlt, faPlusCircle, faWrench, faTrashA
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {ComboBox, FeedbackCtrl, DataGrid, InputNumber, ToggleButtons} from '../libs/components/Components';
 import {UtilsMoodle, JsNx} from '../libs/utils/Utils';
-import {EditorDecorator} from '../libs/utils/EditorDecorator';
 import {$glVars} from '../common/common';
 
 class BtnModeEdition extends Component{
@@ -266,9 +265,9 @@ export class NoteForm extends Component
         this.editorTemplateNoteRef = React.createRef();
         this.editorSuggestedNoteRef = React.createRef();
         this.editorTeacherTipRef = React.createRef();
-        this.editorTemplateNote = new EditorDecorator('recit_cahiertraces_editor_container_1');
-        this.editorSuggestedNote = new EditorDecorator('recit_cahiertraces_editor_container_2');
-        this.editorTeacherTip = new EditorDecorator('recit_cahiertraces_editor_container_3');
+        this.editorTemplateNote = new recit.components.EditorDecorator('recit_cahiertraces_editor_container_1');
+        this.editorSuggestedNote = new recit.components.EditorDecorator('recit_cahiertraces_editor_container_2');
+        this.editorTeacherTip = new recit.components.EditorDecorator('recit_cahiertraces_editor_container_3');
     }
 
     componentDidMount(){
@@ -279,6 +278,14 @@ export class NoteForm extends Component
         this.editorTemplateNote.close();
         this.editorSuggestedNote.close();
         this.editorTeacherTip.close();
+
+        this.editorTemplateNote.dom.style.display = 'none';
+        this.editorSuggestedNote.dom.style.display = 'none';
+        this.editorTeacherTip.dom.style.display = 'none';
+
+        document.body.appendChild(this.editorTemplateNote.dom);
+        document.body.appendChild(this.editorSuggestedNote.dom);
+        document.body.appendChild(this.editorTeacherTip.dom);
     }
 
     render(){
@@ -695,7 +702,7 @@ export class PersonalNote extends Component{
         this.state = {data: null, dropdownLists: null, mode: mode, collapse: {note: true, suggestedNote: false, feedback: true}};
 
         this.editorRef = React.createRef();
-        this.editorDec = new EditorDecorator(`recit_cahiertraces_editor_container_1`);
+        this.editorDec = new recit.components.EditorDecorator(`recit_cahiertraces_editor_container_1`);
     }
 
     componentDidMount(){
@@ -704,6 +711,8 @@ export class PersonalNote extends Component{
 
     componentWillUnmount(){
         this.editorDec.close();
+        this.editorDec.dom.style.display = 'none';
+        document.body.appendChild(this.editorDec.dom);
     }
 
     getData(){
