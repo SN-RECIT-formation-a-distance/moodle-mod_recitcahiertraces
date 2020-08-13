@@ -1,5 +1,5 @@
 echo off
-set pluginPath=..\moodledev2\mod\recitcahiercanada
+set pluginPath=..\moodledev3\mod\recitcahiercanada
 
 rem remove the current link
 ..\outils\junction -d src
