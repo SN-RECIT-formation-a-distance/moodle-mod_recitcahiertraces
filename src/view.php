@@ -32,7 +32,7 @@ require_login();
 
 //$context = context_module::instance($cm->id);
 //require_capability('mod/recitcahiercanada:view', $context);
-$view = new RecitCahierCanadaView($PAGE, $course, $cm, $OUTPUT, $USER, $DB);
+$view = new RecitCahierCanadaView($PAGE, $course, $cm, $OUTPUT, $USER, $DB, $CFG);
 
 //$modeAdmin = intval(has_capability('mod/recitcahiercanada:viewadmin', context_system::instance()));
 $view->display();
@@ -48,16 +48,18 @@ class RecitCahierCanadaView
     protected $output = null;
     protected $user = null;
     protected $db = null;
+    protected $cfg = null;
 
     protected $editorOption = "2"; // 1 = atto, 2 = recit editor
 
-    public function __construct($page, $course, $cm, $output, $user, $db){
+    public function __construct($page, $course, $cm, $output, $user, $db, $cfg){
         $this->page = $page;
         $this->course = $course;
         $this->cm = $cm;
         $this->output = $output;
         $this->user = $user;
         $this->db = $db;
+        $this->cfg = $cfg;
     }
 
     public function display(){
@@ -68,11 +70,11 @@ class RecitCahierCanadaView
         $this->page->set_heading($this->course->fullname);
         $this->page->requires->css(new moodle_url('./react_app/build/index.css'), true);
         $this->page->requires->js(new moodle_url('./react_app/build/index.js'), true);
-        $this->page->requires->js(new moodle_url("{$CFG->wwwroot}/local/recitcommon/js/Components.js"), true);
+        $this->page->requires->js(new moodle_url("{$this->cfg->wwwroot}/local/recitcommon/js/Components.js"), true);
 
         if($this->editorOption == "2"){
-            $this->page->requires->css(new moodle_url("{$CFG->wwwroot}/local/recitcommon/js/recit_rich_editor/build/index.css"), true);
-            $this->page->requires->js(new moodle_url("{$CFG->wwwroot}/local/recitcommon/js/recit_rich_editor/build/index.js"), true);
+            $this->page->requires->css(new moodle_url("{$this->cfg->wwwroot}/local/recitcommon/js/recit_rich_editor/build/index.css"), true);
+            $this->page->requires->js(new moodle_url("{$this->cfg->wwwroot}/local/recitcommon/js/recit_rich_editor/build/index.js"), true);
         }
 
         //$this->page->requires->js(new moodle_url('/lib/editor/atto/yui/build/moodle-editor_atto-editor/moodle-editor_atto-editor-min.js'), true);
