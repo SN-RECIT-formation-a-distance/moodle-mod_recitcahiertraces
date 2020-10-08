@@ -50,7 +50,7 @@ class RecitCahierCanadaView
     protected $db = null;
     protected $cfg = null;
 
-    protected $editorOption = "2"; // 1 = atto, 2 = recit editor
+    protected $editorOption = "1"; // 1 = atto, 2 = recit editor
 
     public function __construct($page, $course, $cm, $output, $user, $db, $cfg){
         $this->page = $page;
