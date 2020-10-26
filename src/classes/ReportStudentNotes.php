@@ -31,42 +31,47 @@ $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahie
 <html>
 <head>
     <title><?php echo $pageTitle; ?></title>    
-    <link rel="stylesheet" type="text/css" href="../react_app/node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="<?php echo $CFG->wwwroot . "/theme/recit/style/bootstrap.css"?>">
     <link rel="stylesheet" type="text/css" href="<?php echo $CFG->wwwroot . "/local/recitcommon/css/report.css"; ?>">
     <link rel="icon" href="../pix/icon.png?v=2"  />
 </head>
 
 <body>
-    <div class='Portrait'>
+    <div class='Portrait cahier-traces-print-notes'>
         <header class='Header'>
-            <div class='Logo'><img src='../pix/recit-logo.png' alt='RECIT logo'/></div>
             <div style='flex-grow: 1'>
                 <div class='Title'><?php echo get_string('pluginname', 'mod_recitcahiercanada'); ?></div>
                 <div class='Subtitle'><?php echo sprintf("%s | %s | %s", $cahierCanada->ccName, $student->userName, $student->groupName) ; ?></div>
             </div>
+            <div class='Logo'><img src='../pix/recit-logo.png' alt='RECIT logo'/></div>
         </header>
     <?php 
         foreach($personalNotes as $notes){
             
             $note = current($notes);
-            echo '<div class="card" style="margin-bottom: 20px">';
-            echo sprintf("<div class='card-header'>%s: %s</div>", get_string('activity', 'mod_recitcahiercanada'), $note->activityName);
+            echo '<div class="activity-container">';
+
+            echo sprintf("<h4 class='activity-name'>%s: %s</h4>", get_string('activity', 'mod_recitcahiercanada'), $note->activityName);
+
             foreach($notes as $note){
                 // overflow = hidden for the notes that overflow the page dimensions
-                echo "<div class='card-body' style='overflow: hidden;'>";
-                echo sprintf("<h5 class='card-title'>%s</h5>", $note->noteTitle);
+                echo "<div class='note-container'>";
+                echo sprintf("<h5 class='text-muted note-title'>%s: %s</h5>",  get_string('note', 'mod_recitcahiercanada'), $note->noteTitle);
+                
+                echo sprintf("<div class='alert alert-secondary student-note'>%s</div>", $note->note->text);
+
                 echo '<blockquote class="blockquote mb-0">';
-                echo sprintf('<footer class="blockquote-footer">%s: %s</footer>',  get_string('timestamp', 'mod_recitcahiercanada'), $note->lastUpdateFormat());
+                echo sprintf('<span class="blockquote-footer">%s: %s</span>',  get_string('timestamp', 'mod_recitcahiercanada'), $note->lastUpdateFormat());
                 echo '</blockquote>';
                 
-                echo "{$note->note->text}";
-                
                 if(($showFeedback) && (strlen($note->feedback) > 0)){
-                    echo sprintf('<div class="alert alert-primary" role="alert" style="margin-top: 15px;"><strong>%s:</strong><br/>%s</div>', get_string('teacherFeedback', 'mod_recitcahiercanada'), $note->feedback);
+                    echo sprintf('<div class="alert alert-primary teacher-feedback" role="alert"><strong>%s:</strong><br/>%s</div>', get_string('teacherFeedback', 'mod_recitcahiercanada'), $note->feedback);
                 }
                 
                 echo "</div>";
             }
+            echo "<hr/>";
+
             echo "</div>";
         }
     ?>
