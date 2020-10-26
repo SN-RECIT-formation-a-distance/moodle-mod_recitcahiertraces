@@ -203,6 +203,34 @@ class PersonalNoteForm extends Component{
     }
 }
 
+/**
+ * Ce modal est nécessaire, car le Bootstrap Modal ne marche pas avec les menus déroulants de Atto
+ */
+class ModalTmp extends Component{
+    static defaultProps = {        
+        header: null,
+        body: null,
+        footer: null,
+        onClose: null
+    };
+
+    render(){
+        let main = 
+            <div style={{position: "fixed", top: 0, backgroundColor: "rgba(0,0,0,0.5)", left: 0, bottom: 0, right: 0, zIndex: 1040, overflowX: 'hidden', overflowY: 'auto'}}>
+                <div style={{width: "75%", margin: "1.75rem auto", backgroundColor: "#FFF"}}>
+                    <div className="modal-header">
+                        <h4 className="text-truncate">{this.props.header}</h4>
+                        <button type="button" className="close" onClick={this.props.onClose}><span aria-hidden="true">×</span><span className="sr-only">Close</span></button>
+                    </div>
+                    <div className="modal-body">{this.props.body}</div>
+                    <div className="modal-footer">{this.props.footer}</div>
+                </div>
+            </div>;
+
+        return main;
+    }
+}
+
 class ModalPersonalNote extends Component{
     static defaultProps = {        
         userId: 0,
@@ -223,20 +251,17 @@ class ModalPersonalNote extends Component{
     }
 
     render(){
-        let main =
-            <Modal show={true} onHide={this.onClose} backdrop="static" size="xl">
-                <Modal.Header closeButton>
-                    <Modal.Title>{`Note: ${this.props.noteTitle}`}</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>      
-                    <PersonalNoteForm userId={this.props.userId} cmId={this.props.cmId} setOnSave={this.setOnSave}
-                                    noteTitle={this.props.noteTitle} ccCmId={this.props.ccCmId}/>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={this.onClose}>{"Annuler"}</Button>
-                    <Button variant="success"  onClick={this.onSave}>{"Enregistrer"}</Button>
-                </Modal.Footer>
-            </Modal>;       
+        let personalNote = <PersonalNoteForm userId={this.props.userId} cmId={this.props.cmId} setOnSave={this.setOnSave}
+                                                    noteTitle={this.props.noteTitle} ccCmId={this.props.ccCmId}/>;
+        let footer = 
+            <div className="btn-tollbar" style={{width: "100%", display: "flex", justifyContent: "space-between"}}>
+                <div className="btn-group">
+                    <Button  variant="secondary" onClick={this.onClose}>{"Annuler"}</Button>
+                    <Button  variant="success"  onClick={this.onSave}>{"Enregistrer"}</Button>
+                </div>
+            </div>;
+                
+        let main = <ModalTmp header={`Note: ${this.props.noteTitle}`} body={personalNote} footer={footer} onClose={this.props.onClose} />;
 
         return (main);
     }
