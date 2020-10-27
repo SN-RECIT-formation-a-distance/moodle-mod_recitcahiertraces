@@ -9,8 +9,20 @@ $showFeedback = (intval(required_param('sf', PARAM_INT)) == 1 ? true : false);
 
 require_login();
 
+list ($course, $cm) = get_course_and_cm_from_cmid($cmId, 'recitcahiercanada');
+
+//$PAGE->set_context(context_module::instance($cm->id));
+
+$theme = theme_config::load('recit');
+
+$brandImage = "{$CFG->wwwroot}/mod/recitcahiercanada/pix/recit-logo.png";
+$customerLogo = $theme->setting_file_url('logo', 'logo');
+if(!empty($customerLogo)){
+    $brandImage = $customerLogo;
+}
+
 // check the permissions
-$roles = Utils::getUserRoles($COURSE->id, $USER->id);
+$roles = Utils::getUserRoles($course->id, $USER->id);
 // check if the user has admin access
 if(!Utils::isAdminRole($roles)){
     // if not admin then the user has the right to see its own notes
@@ -43,7 +55,7 @@ $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahie
                 <div class='Title'><?php echo get_string('pluginname', 'mod_recitcahiercanada'); ?></div>
                 <div class='Subtitle'><?php echo sprintf("%s | %s | %s", $cahierCanada->ccName, $student->userName, $student->groupName) ; ?></div>
             </div>
-            <div class='Logo'><img src='../pix/recit-logo.png' alt='RECIT logo'/></div>
+            <div class='Logo'><img src='<?php echo $brandImage; ?>' alt='brand logo'/></div>
         </header>
     <?php 
         foreach($personalNotes as $notes){

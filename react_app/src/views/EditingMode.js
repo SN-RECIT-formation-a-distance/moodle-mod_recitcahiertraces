@@ -145,7 +145,7 @@ class NoteForm extends Component
             </Form>;
 
         let footer = 
-            <div className="btn-tollbar" style={{width: "100%", display: "flex", justifyContent: "right"}}>
+            <div className="btn-tollbar" style={{width: "100%", display: "flex", justifyContent: "flex-end"}}>
                 <div className="btn-group">
                     <Button  variant="secondary" onClick={this.onClose}>{"Annuler"}</Button>
                     <Button  variant="success"  onClick={this.onSubmit}>{"Enregistrer"}</Button>
@@ -285,13 +285,13 @@ export class EditionMode extends Component{
         this.onAdd = this.onAdd.bind(this);
         this.onEdit = this.onEdit.bind(this);
         this.onRemove = this.onRemove.bind(this);
-        this.onCopyIC = this.onCopyIC.bind(this);
         this.onSelectCm = this.onSelectCm.bind(this);
         this.onClose = this.onClose.bind(this);
         this.onDragRow = this.onDragRow.bind(this);
         this.onDropRow = this.onDropRow.bind(this);
+        this.onCopy = this.onCopy.bind(this);
 
-        this.state = {ccCm: null, ccCmId: -1, cmList: [], cmNoteList: [], draggingItem: null };
+        this.state = {ccCm: null, ccCmId: -1, cmList: [], cmNoteList: [], draggingItem: null, copyIC: "" };
 
         this.intCodeRef = React.createRef();
     }
@@ -384,7 +384,7 @@ export class EditionMode extends Component{
                                             <DropdownButton size="sm" title={<span><FontAwesomeIcon icon={faBars}/>{" Actions"}</span>}>
                                                 <Dropdown.Item onClick={() => this.onEdit(item.ccCmId)}><FontAwesomeIcon icon={faPencilAlt}/>{" Modifier"}</Dropdown.Item>
                                                 <Dropdown.Item onClick={() => this.onRemove(item)}><FontAwesomeIcon icon={faTrashAlt}/>{" Supprimer"}</Dropdown.Item>
-                                                <Dropdown.Item onClick={() => this.onCopyIC(item.intCode)}><FontAwesomeIcon icon={faCopy}/>{" Code d'intégration"}</Dropdown.Item>
+                                                <Dropdown.Item onClick={() => this.onCopy(item.intCode)}><FontAwesomeIcon icon={faCopy}/>{" Code d'intégration"}</Dropdown.Item>
                                             </DropdownButton>
                                         </DataGrid.Body.Cell>
                                     </DataGrid.Body.RowDraggable>
@@ -393,9 +393,10 @@ export class EditionMode extends Component{
                         )}
                     </DataGrid.Body>
                 </DataGrid>
-                
-                <Form.Control type="hidden" ref={this.intCodeRef}/>
+                                
                 {this.state.ccCmId >= 0 && <NoteForm ccCmId={this.state.ccCmId} ccCm={this.state.ccCm} onClose={this.onClose}/>}
+
+                {this.state.copyIC.length > 0 && <ModalGenerateIntCode onClose={this.onClose} onCopy={this.onClose} intCode={this.state.copyIC} />}
             </div> 
 
         return (main);
@@ -439,25 +440,86 @@ export class EditionMode extends Component{
         if(window.confirm($glVars.i18n.tags.msgConfirmDeletion)){
             $glVars.webApi.removeCcCmNote(item.ccCmId, item.cmId, callback);
         }
-    }
-
-    getIntegrationCode(intCode){
-        return `{"intCode":"${intCode}", "nbLines": "15"}`;
-    }
-
-    onCopyIC(intCode){
-        this.intCodeRef.current.value = this.getIntegrationCode(intCode);
-        this.intCodeRef.current.type = "text";
-        this.intCodeRef.current.select()
-		document.execCommand('copy');
-		this.intCodeRef.current.type = "hidden";
-    }
+    }    
 
     onSelectCm(event){
         this.setState({ccCm: event.target.data}, this.getData2);
     }
 
+    onCopy(intCode){
+        this.setState({copyIC: intCode});
+    }
+
     onClose(){
-        this.setState({ccCmId: -1});
+        this.setState({ccCmId: -1, copyIC: ""});
+    }
+}
+
+class ModalGenerateIntCode extends Component{
+    static defaultProps = {        
+        intCode: "",
+        onClose: null,
+        onCopy: null
+    };
+
+    constructor(props){
+        super(props);
+
+        this.onCopy = this.onCopy.bind(this);
+        this.onDataChange = this.onDataChange.bind(this);
+
+        this.state = {data: {nbLines: 15, color: ''}};
+
+        this.intCodeRef = React.createRef();
+    }
+
+    render(){        
+        let body = 
+            <Form >
+                <Form.Row>
+                    <Form.Group as={Col}>
+                        <Form.Label>{"Nombre de lignes"}</Form.Label>
+                        <InputNumber required  value={this.state.data.nbLines} name="nbLines" min={0} onChange={this.onDataChange}/>
+                    </Form.Group>
+                </Form.Row>
+                <Form.Row>
+                    <Form.Group as={Col}>
+                        <Form.Label>{"Couleur"}</Form.Label>
+                        <Form.Control type="text" required value={this.state.data.color} name="color" onChange={this.onDataChange}/>
+                    </Form.Group>
+                </Form.Row>
+                <Form.Control type="hidden" ref={this.intCodeRef}/>
+            </Form>;
+
+        let footer = 
+            <div className="btn-tollbar" style={{width: "100%", display: "flex", justifyContent: "flex-end"}}>
+                <div className="btn-group">
+                    <Button  variant="secondary" onClick={this.props.onClose}>{"Annuler"}</Button>
+                    <Button  variant="success"  onClick={this.onCopy}>{"Copier"}</Button>
+                </div>
+            </div>;
+
+        let main = <Modal title={`Créer le code d'intégration`} body={body} footer={footer} onClose={this.props.onClose} width={"400px"}/>;
+
+        return main;
+    }
+
+    onDataChange(event){
+        let data = this.state.data;
+        data[event.target.name] = event.target.value;
+        this.setState({data: data});
+    }
+
+    getIntegrationCode(){
+        return `{"intCode":"${this.props.intCode}", "nbLines": "${Math.min(1,this.state.data.nbLines)}", "color": "${this.state.data.color}"}`;
+    }
+
+    onCopy(){
+        this.intCodeRef.current.value = this.getIntegrationCode();
+        this.intCodeRef.current.type = "text";
+        this.intCodeRef.current.select();
+		document.execCommand('copy');
+        this.intCodeRef.current.type = "hidden";
+        this.props.onCopy();
     }
 }

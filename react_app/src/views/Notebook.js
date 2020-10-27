@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { ButtonGroup, Form, Button, Col, Tab, DropdownButton, Dropdown, Collapse, Card, Row, Nav} from 'react-bootstrap';
-import {faArrowLeft, faArrowRight, faPencilAlt, faBars, faEye} from '@fortawesome/free-solid-svg-icons';
+import {faArrowLeft, faArrowRight, faPencilAlt, faBars, faEye, faPrint} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {FeedbackCtrl, DataGrid, ComboBox, Modal} from '../libs/components/Components';
 import {UtilsMoodle, JsNx} from '../libs/utils/Utils';
@@ -474,10 +474,9 @@ export class TeacherNotebook extends Notebook{
 
                 {this.state.data.userId > 0 &&
                     <div>
-                        <ActionBar cmId={$glVars.urlParams.id} userId={this.state.data.userId}/>
-
                         <hr/>
-
+                        <ActionBar cmId={$glVars.urlParams.id} userId={this.state.data.userId}/>
+                        <hr/>
                         <NavActivities dataProvider={this.state.dataProvider} onEdit={this.onEdit}/>
                     
                         {this.state.data.ccCmId > 0 && 
@@ -562,8 +561,8 @@ class ActionBar extends Component{
 
     render(){
         let main = 
-            <div style={{textAlign: "right", marginBottom: "1rem"}}>
-                <a href={this.getPrintLink(1)} target="_blank">{"Imprimer des notes"}</a>
+            <div style={{marginBottom: "1rem"}}>
+                <a href={this.getPrintLink(1)} target="_blank"><FontAwesomeIcon icon={faPrint}/>{" Imprimer des notes"}</a>
             </div>;
 
 //<a href={this.getPrintLink(1)} target="_blank">{"Imprimer des notes + Rétroaction"}</a>
