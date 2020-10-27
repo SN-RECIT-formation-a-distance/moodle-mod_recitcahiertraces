@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import { ButtonGroup, Form, Button, Col, Tab, DropdownButton, Dropdown, Modal, Collapse, Card, Row, Nav} from 'react-bootstrap';
+import { ButtonGroup, Form, Button, Col, Tab, DropdownButton, Dropdown, Collapse, Card, Row, Nav} from 'react-bootstrap';
 import {faArrowLeft, faArrowRight, faPencilAlt, faBars, faEye} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {FeedbackCtrl, DataGrid, ComboBox} from '../libs/components/Components';
+import {FeedbackCtrl, DataGrid, ComboBox, Modal} from '../libs/components/Components';
 import {UtilsMoodle, JsNx} from '../libs/utils/Utils';
 import {$glVars} from '../common/common';
 
@@ -208,41 +208,14 @@ class PersonalNoteForm extends Component{
     }
 }
 
-/**
- * Ce modal est nécessaire, car le Bootstrap Modal ne marche pas avec les menus déroulants de Atto
- */
-class ModalTmp extends Component{
-    static defaultProps = {        
-        title: "",
-        body: null,
-        footer: null,
-        onClose: null
-    };
-
-    render(){
-        let main = 
-            <div style={{position: "fixed", top: 0, backgroundColor: "rgba(0,0,0,0.5)", left: 0, bottom: 0, right: 0, zIndex: 1040, overflowX: 'hidden', overflowY: 'auto'}}>
-                <div style={{width: "75%", margin: "1.75rem auto", backgroundColor: "#FFF"}}>
-                    <div className="modal-header">
-                        <h4 className="text-truncate">{this.props.title}</h4>
-                        <button type="button" className="close" onClick={this.props.onClose}><span aria-hidden="true">×</span><span className="sr-only">Close</span></button>
-                    </div>
-                    <div className="modal-body">{this.props.body}</div>
-                    <div className="modal-footer">{this.props.footer}</div>
-                </div>
-            </div>;
-
-        return main;
-    }
-}
-
 class ModalPersonalNote extends Component{
     static defaultProps = {        
         data: {},
         onClose: null,
         onPreviousStudent: null,
         onNextStudent: null,
-        navStatus: {previous: false, next: false}
+        navStatus: {previous: false, next: false},
+        modalTitle: ""
     };
 
     constructor(props){
@@ -270,7 +243,7 @@ class ModalPersonalNote extends Component{
                 </div>
             </div>;
                 
-        let main = <ModalTmp title={`Élève: ${this.props.data.username}`} body={personalNote} footer={footer} onClose={this.props.onClose} />;
+        let main = <Modal title={this.props.modalTitle} body={personalNote} footer={footer} onClose={this.props.onClose} />;
 
         return (main);
     }
@@ -298,26 +271,114 @@ class ModalPersonalNote extends Component{
     }
 }
 
-export class TeacherNotebook extends Component{
+class NavActivities extends Component{
     static defaultProps = {
-        
+        dataProvider: [],
+        onEdit: null
     };
 
     constructor(props){
         super(props);
 
         this.onSelectTab = this.onSelectTab.bind(this);
+
+        this.state = {
+            activeTab: 0, 
+        };
+    }
+
+    render(){
+        let that = this;
+
+        let main = 
+            <Tab.Container id="tabActivities" activeKey={this.state.activeTab} onSelect={this.onSelectTab}>
+                <Row>
+                    <Col sm={12}>
+                        <Nav variant="pills" className="flex-row">
+                            {this.props.dataProvider.map(function(items, index){
+                                let activityName = JsNx.at(items, 0).activityName;
+                                return  <Nav.Item key={index} >
+                                            <Nav.Link eventKey={index} className="text-truncate" style={{width: '300px', textAlign: "center"}} title={activityName}>
+                                                {activityName}
+                                            </Nav.Link>
+                                        </Nav.Item>;
+                            })}
+                        </Nav>
+                    </Col>
+                </Row>
+                <br/>
+                <Row>
+                    <Col sm={12}>
+                        <Tab.Content>
+                            {this.props.dataProvider.map(function(items, index){
+                                let datagrid = 
+                                <DataGrid orderBy={true}>
+                                    <DataGrid.Header>
+                                        <DataGrid.Header.Row>
+                                            <DataGrid.Header.Cell style={{width: 80}}>{"#"}</DataGrid.Header.Cell>
+                                            <DataGrid.Header.Cell >{"Titre de la note"}</DataGrid.Header.Cell>
+                                            <DataGrid.Header.Cell style={{width: 300}}>{"Note"}</DataGrid.Header.Cell>
+                                            <DataGrid.Header.Cell style={{width: 300}}>{"Rétroaction"}</DataGrid.Header.Cell>
+                                            <DataGrid.Header.Cell  style={{width: 120}}></DataGrid.Header.Cell>
+                                        </DataGrid.Header.Row>
+                                    </DataGrid.Header>
+                                    <DataGrid.Body>
+                                        {items.map((item, index2) => {
+                                                let row = 
+                                                    <DataGrid.Body.Row key={index2} onDbClick={() => that.props.onEdit(item)}>
+                                                        <DataGrid.Body.Cell>{index2 + 1}</DataGrid.Body.Cell>
+                                                        <DataGrid.Body.Cell><FontAwesomeIcon icon={faEye}/>{` ${item.noteTitle}`}</DataGrid.Body.Cell>
+                                                        <DataGrid.Body.Cell>{that.formatText(item.note.text)}</DataGrid.Body.Cell>
+                                                        <DataGrid.Body.Cell>{that.formatText(item.feedback)}</DataGrid.Body.Cell>
+                                                        <DataGrid.Body.Cell>
+                                                            <DropdownButton size="sm" title={<span><FontAwesomeIcon icon={faBars}/>{" Actions"}</span>}>
+                                                                <Dropdown.Item onClick={() => that.props.onEdit(item)}><FontAwesomeIcon icon={faPencilAlt}/>{" Modifier"}</Dropdown.Item>
+                                                            </DropdownButton>
+                                                        </DataGrid.Body.Cell>
+                                                    </DataGrid.Body.Row>
+                                                return (row);                                    
+                                            }
+                                        )}
+                                    </DataGrid.Body>
+                                </DataGrid>
+                                return <Tab.Pane key={index} eventKey={index}>{datagrid}</Tab.Pane>;
+                            })}
+                        </Tab.Content>
+                    </Col>
+                </Row>
+            </Tab.Container>;
+
+        return main;
+    }
+    
+    formatText(text){
+        let tmp = document.createElement("div");
+        tmp.innerHTML = text;
+        
+        text = tmp.textContent || tmp.innerText || ""; // Retrieve the text property of the element (cross-browser support)
+
+        return (text.length > 50 ? `${text.substr(0, 50)}...` : text);
+    }
+    
+    onSelectTab(eventKey){
+        this.setState({activeTab: eventKey});
+    }
+}
+
+class Notebook extends Component{
+    static defaultProps = {
+    };
+
+    constructor(props){
+        super(props);
+
         this.getData = this.getData.bind(this);
         this.getDataResult = this.getDataResult.bind(this);
         this.onEdit = this.onEdit.bind(this);
         this.onClose = this.onClose.bind(this);
-        this.onSelectUser = this.onSelectUser.bind(this);
-        this.onNextStudent = this.onNextStudent.bind(this);
-        this.onPreviousStudent = this.onPreviousStudent.bind(this);
 
         this.state = {
             dataProvider: [], 
-            activeTab: 0, 
             data: {
                 userId: 0,
                 username: "",
@@ -326,8 +387,6 @@ export class TeacherNotebook extends Component{
                 ccCmId: 0
             }
         };
-
-        this.groupUserSelect = React.createRef();
     }
     
     componentDidMount(){
@@ -375,92 +434,7 @@ export class TeacherNotebook extends Component{
     }
     
     render(){
-        let that = this;
-
-        let main = 
-            <div>  
-                <GroupUserSelect ref={this.groupUserSelect} onSelectUser={this.onSelectUser}/>
-
-                {this.state.data.userId > 0 &&
-                    <div>
-                        <ActionBar cmId={$glVars.urlParams.id} userId={this.state.data.userId}/>
-
-                        <hr/>
-
-                        <Tab.Container id="tabActivities" activeKey={this.state.activeTab} onSelect={this.onSelectTab}>
-                            <Row>
-                                <Col sm={12}>
-                                    <Nav variant="pills" className="flex-row">
-                                        {this.state.dataProvider.map(function(items, index){
-                                            let activityName = JsNx.at(items, 0).activityName;
-                                            return  <Nav.Item key={index} >
-                                                        <Nav.Link eventKey={index} className="text-truncate" style={{width: '300px', textAlign: "center"}} title={activityName}>
-                                                            {activityName}
-                                                        </Nav.Link>
-                                                    </Nav.Item>;
-                                        })}
-                                    </Nav>
-                                </Col>
-                            </Row>
-                            <br/>
-                            <Row>
-                                <Col sm={12}>
-                                    <Tab.Content>
-                                        {this.state.dataProvider.map(function(items, index){
-                                            let datagrid = 
-                                            <DataGrid orderBy={true}>
-                                                <DataGrid.Header>
-                                                    <DataGrid.Header.Row>
-                                                        <DataGrid.Header.Cell style={{width: 80}}>{"#"}</DataGrid.Header.Cell>
-                                                        <DataGrid.Header.Cell >{"Titre de la note"}</DataGrid.Header.Cell>
-                                                        <DataGrid.Header.Cell style={{width: 300}}>{"Note"}</DataGrid.Header.Cell>
-                                                        <DataGrid.Header.Cell style={{width: 300}}>{"Rétroaction"}</DataGrid.Header.Cell>
-                                                        <DataGrid.Header.Cell  style={{width: 120}}></DataGrid.Header.Cell>
-                                                    </DataGrid.Header.Row>
-                                                </DataGrid.Header>
-                                                <DataGrid.Body>
-                                                    {items.map((item, index2) => {
-                                                            let row = 
-                                                                <DataGrid.Body.Row key={index2} onDbClick={() => that.onEdit(item)}>
-                                                                    <DataGrid.Body.Cell>{index2 + 1}</DataGrid.Body.Cell>
-                                                                    <DataGrid.Body.Cell><FontAwesomeIcon icon={faEye}/>{` ${item.noteTitle}`}</DataGrid.Body.Cell>
-                                                                    <DataGrid.Body.Cell>{that.formatText(item.note.text)}</DataGrid.Body.Cell>
-                                                                    <DataGrid.Body.Cell>{that.formatText(item.feedback)}</DataGrid.Body.Cell>
-                                                                    <DataGrid.Body.Cell>
-                                                                        <DropdownButton size="sm" title={<span><FontAwesomeIcon icon={faBars}/>{" Actions"}</span>}>
-                                                                            <Dropdown.Item onClick={() => that.onEdit(item)}><FontAwesomeIcon icon={faPencilAlt}/>{" Modifier"}</Dropdown.Item>
-                                                                        </DropdownButton>
-                                                                    </DataGrid.Body.Cell>
-                                                                </DataGrid.Body.Row>
-                                                            return (row);                                    
-                                                        }
-                                                    )}
-                                                </DataGrid.Body>
-                                            </DataGrid>
-                                            return <Tab.Pane key={index} eventKey={index}>{datagrid}</Tab.Pane>;
-                                        })}
-                                    </Tab.Content>
-                                </Col>
-                            </Row>
-                        </Tab.Container>
-                    
-                        {this.state.data.ccCmId > 0 && 
-                                <ModalPersonalNote data={this.state.data} onClose={this.onClose} onNextStudent={this.onNextStudent} 
-                                        onPreviousStudent={this.onPreviousStudent} navStatus={this.getNavStatus()}/>}
-                    </div>
-                }
-            </div>;
-
-        return (main);
-    }
-
-    formatText(text){
-        let tmp = document.createElement("div");
-        tmp.innerHTML = text;
-        
-        text = tmp.textContent || tmp.innerText || ""; // Retrieve the text property of the element (cross-browser support)
-
-        return (text.length > 50 ? `${text.substr(0, 50)}...` : text);
+        return (null);
     }
 
     onEdit(item){
@@ -480,9 +454,40 @@ export class TeacherNotebook extends Component{
         data.noteTitle = "";
         this.setState({data: data});
     }
+}
 
-    onSelectTab(eventKey){
-        this.setState({activeTab: eventKey});
+export class TeacherNotebook extends Notebook{
+    constructor(props){
+        super(props);
+
+        this.onSelectUser = this.onSelectUser.bind(this);
+        this.onNextStudent = this.onNextStudent.bind(this);
+        this.onPreviousStudent = this.onPreviousStudent.bind(this);
+
+        this.groupUserSelect = React.createRef();
+    }
+    
+    render(){
+        let main = 
+            <div>  
+                <GroupUserSelect ref={this.groupUserSelect} onSelectUser={this.onSelectUser}/>
+
+                {this.state.data.userId > 0 &&
+                    <div>
+                        <ActionBar cmId={$glVars.urlParams.id} userId={this.state.data.userId}/>
+
+                        <hr/>
+
+                        <NavActivities dataProvider={this.state.dataProvider} onEdit={this.onEdit}/>
+                    
+                        {this.state.data.ccCmId > 0 && 
+                                <ModalPersonalNote modalTitle={`Élève: ${this.state.data.username}`} data={this.state.data} onClose={this.onClose} onNextStudent={this.onNextStudent} 
+                                        onPreviousStudent={this.onPreviousStudent} navStatus={this.getNavStatus()}/>}
+                    </div>
+                }
+            </div>;
+
+        return (main);
     }
 
     onSelectUser(userId, username){
@@ -507,19 +512,13 @@ export class TeacherNotebook extends Component{
     }
 }
 
-export class StudentNotebook extends Component{
+export class StudentNotebook extends Notebook{
     static defaultProps = {
         userId: 0
     };
 
     constructor(props){
         super(props);
-
-        this.onSelectTab = this.onSelectTab.bind(this);
-        this.getData = this.getData.bind(this);
-        this.getDataResult = this.getDataResult.bind(this);
-        this.onEdit = this.onEdit.bind(this);
-        this.onClose = this.onClose.bind(this);
 
         this.state = {
             dataProvider: [], 
@@ -534,53 +533,7 @@ export class StudentNotebook extends Component{
         };
     }
     
-    componentDidMount(){
-        $glVars.webApi.addObserver("Notebook", this.getData, ['savePersonalNote']);        
-        this.getData();
-    }
-
-    componentWillUnmount(){
-        $glVars.webApi.removeObserver("Notebook");
-    }
-
-    getData(){
-        if(this.state.data.userId === 0){
-            this.setState({dataProvider: []});
-            return;
-        }
-        
-        $glVars.webApi.getPersonalNotes($glVars.urlParams.id, this.state.data.userId, this.getDataResult);
-    }
-
-    getDataResult(result){
-        if(!result.success){
-            FeedbackCtrl.instance.showError($glVars.i18n.appName, result.msg);
-            return;
-        }
-
-        // If the user is trying to load automatically some note by URL
-        if(!$glVars.urlParams.loaded){
-            let item = null;
-            for(let activity of result.data){
-                for(let note of activity){
-                    if((note.ccCmId === $glVars.urlParams.ccCmId) && (note.cmId === $glVars.urlParams.cmId)){
-                        item = note;
-                    }
-                }
-            }
-
-            $glVars.urlParams.loaded = true;
-
-            this.setState({dataProvider: result.data}, () => this.onEdit(item));
-        }
-        else{
-            this.setState({dataProvider: result.data});
-        }
-    }
-    
     render(){
-        let that = this;
-
         let main = 
             <div>  
                 {this.state.data.userId > 0 &&
@@ -589,101 +542,15 @@ export class StudentNotebook extends Component{
 
                         <hr/>
 
-                        <Tab.Container id="tabActivities" activeKey={this.state.activeTab} onSelect={this.onSelectTab}>
-                            <Row>
-                                <Col sm={12}>
-                                    <Nav variant="pills" className="flex-row">
-                                        {this.state.dataProvider.map(function(items, index){
-                                            let activityName = JsNx.at(items, 0).activityName;
-                                            return  <Nav.Item key={index} >
-                                                        <Nav.Link eventKey={index} className="text-truncate" style={{width: '300px', textAlign: "center"}} title={activityName}>
-                                                            {activityName}
-                                                        </Nav.Link>
-                                                    </Nav.Item>;
-                                        })}
-                                    </Nav>
-                                </Col>
-                            </Row>
-                            <br/>
-                            <Row>
-                                <Col sm={12}>
-                                    <Tab.Content>
-                                        {this.state.dataProvider.map(function(items, index){
-                                            let datagrid = 
-                                            <DataGrid orderBy={true}>
-                                                <DataGrid.Header>
-                                                    <DataGrid.Header.Row>
-                                                        <DataGrid.Header.Cell style={{width: 80}}>{"#"}</DataGrid.Header.Cell>
-                                                        <DataGrid.Header.Cell >{"Titre de la note"}</DataGrid.Header.Cell>
-                                                        <DataGrid.Header.Cell style={{width: 300}}>{"Note"}</DataGrid.Header.Cell>
-                                                        <DataGrid.Header.Cell style={{width: 300}}>{"Rétroaction"}</DataGrid.Header.Cell>
-                                                        <DataGrid.Header.Cell  style={{width: 120}}></DataGrid.Header.Cell>
-                                                    </DataGrid.Header.Row>
-                                                </DataGrid.Header>
-                                                <DataGrid.Body>
-                                                    {items.map((item, index2) => {
-                                                            let row = 
-                                                                <DataGrid.Body.Row key={index2} onDbClick={() => that.onEdit(item)}>
-                                                                    <DataGrid.Body.Cell>{index2 + 1}</DataGrid.Body.Cell>
-                                                                    <DataGrid.Body.Cell><FontAwesomeIcon icon={faEye}/>{` ${item.noteTitle}`}</DataGrid.Body.Cell>
-                                                                    <DataGrid.Body.Cell>{that.formatText(item.note.text)}</DataGrid.Body.Cell>
-                                                                    <DataGrid.Body.Cell>{that.formatText(item.feedback)}</DataGrid.Body.Cell>
-                                                                    <DataGrid.Body.Cell>
-                                                                        <DropdownButton size="sm" title={<span><FontAwesomeIcon icon={faBars}/>{" Actions"}</span>}>
-                                                                            <Dropdown.Item onClick={() => that.onEdit(item)}><FontAwesomeIcon icon={faPencilAlt}/>{" Modifier"}</Dropdown.Item>
-                                                                        </DropdownButton>
-                                                                    </DataGrid.Body.Cell>
-                                                                </DataGrid.Body.Row>
-                                                            return (row);                                    
-                                                        }
-                                                    )}
-                                                </DataGrid.Body>
-                                            </DataGrid>
-                                            return <Tab.Pane key={index} eventKey={index}>{datagrid}</Tab.Pane>;
-                                        })}
-                                    </Tab.Content>
-                                </Col>
-                            </Row>
-                        </Tab.Container>
+                        <NavActivities dataProvider={this.state.dataProvider} onEdit={this.onEdit}/>
                     
                         {this.state.data.ccCmId > 0 && 
-                                <ModalPersonalNote data={this.state.data} onClose={this.onClose} />}
+                                <ModalPersonalNote modalTitle={`Cahier de traces - Note personnelle`} data={this.state.data} onClose={this.onClose} />}
                     </div>
                 }
             </div>;
 
         return (main);
-    }
-
-    formatText(text){
-        let tmp = document.createElement("div");
-        tmp.innerHTML = text;
-        
-        text = tmp.textContent || tmp.innerText || ""; // Retrieve the text property of the element (cross-browser support)
-
-        return (text.length > 50 ? `${text.substr(0, 50)}...` : text);
-    }
-
-    onEdit(item){
-        if(item === null){ return; }
-
-        let data = this.state.data;
-        data.cmId = item.cmId;
-        data.ccCmId = item.ccCmId;
-        data.noteTitle = item.noteTitle;
-        this.setState({data: data});
-    }
-
-    onClose(){
-        let data = this.state.data;
-        data.cmId = 0;
-        data.ccCmId = 0;
-        data.noteTitle = "";
-        this.setState({data: data});
-    }
-
-    onSelectTab(eventKey){
-        this.setState({activeTab: eventKey});
     }
 }
 

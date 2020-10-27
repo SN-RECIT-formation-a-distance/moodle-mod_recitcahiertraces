@@ -1,9 +1,9 @@
 
 import React, { Component } from 'react';
-import {ButtonGroup, Button, Form, Col, Tabs, Tab, DropdownButton, Dropdown, Modal} from 'react-bootstrap';
+import {ButtonGroup, Button, Form, Col, Tabs, Tab, DropdownButton, Dropdown} from 'react-bootstrap';
 import {faPencilAlt, faPlusCircle, faWrench, faTrashAlt, faCopy, faBars, faGripVertical} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {ComboBox, FeedbackCtrl, DataGrid, InputNumber, ToggleButtons} from '../libs/components/Components';
+import {ComboBox, FeedbackCtrl, DataGrid, InputNumber, ToggleButtons, Modal} from '../libs/components/Components';
 import {JsNx} from '../libs/utils/Utils';
 import {$glVars} from '../common/common';
 
@@ -87,73 +87,72 @@ class NoteForm extends Component
         let data = this.state.data;
         let styleTab = {padding: 10};
     
-        let main =
-            <Modal show={true} onHide={() => this.props.onClose()} backdrop="static" size="xl" >
-                <Modal.Header closeButton>
-                    <Modal.Title>{`Note: ${data.noteTitle}`}</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>                          
-                    <Form noValidate validated={this.state.formValidated} ref={this.formRef}>
-                        <Tabs defaultActiveKey={this.state.activeTab} id="tab" onSelect={this.onSelectTag}>
-                            <Tab eventKey={0} title="Note" style={styleTab}>
-                                <Form.Row>
-                                    <Form.Group as={Col}>
-                                        <Form.Label>{"Activité de la section:"}</Form.Label>
-                                        <ComboBox placeholder={"Sélectionnez votre option"} required={true}  name="cmId" value={data.cmId} options={this.state.dropdownLists.activityList} onChange={this.onDataChange} />
-                                    </Form.Group>
-                                </Form.Row>
-                                <Form.Row>
-                                    <Form.Group as={Col}>
-                                        <Form.Label>{"Titre"}</Form.Label>
-                                        <Form.Control type="text" required value={data.noteTitle} name="noteTitle" onChange={this.onDataChange}/>
-                                    </Form.Group>
-                                </Form.Row>
-                                <Form.Row>
-                                    <Form.Group as={Col}>
-                                        <Form.Label>{"Position"}</Form.Label>
-                                        <InputNumber  value={data.slot} name="slot" min={0} onChange={this.onDataChange}/>
-                                    </Form.Group>
-                                </Form.Row>
-                                <Form.Row>
-                                    <Form.Group as={Col}>
-                                        <Form.Label>{"Notifier l'enseignant lors d'une mise à jour"}</Form.Label>
-                                        <ToggleButtons name="notifyTeacher" defaultValue={[data.notifyTeacher]} onChange={this.onDataChange} 
-                                                options={[
-                                                    {value: 1, text:"Oui"},
-                                                    {value: 0, text:"Non"}
-                                                ]}/>
-                                    </Form.Group>
-                                </Form.Row>
-                            </Tab>
-                            <Tab eventKey={1} title="Modèle de note"  style={styleTab}>
-                                <Form.Row>
-                                    <Form.Group as={Col}>
-                                        <div ref={this.editorTemplateNoteRef}></div>
-                                    </Form.Group>
-                                </Form.Row>
-                            </Tab>
-                            <Tab eventKey={2} title="Réponse suggérée"  style={styleTab}>
-                                <Form.Row>
-                                    <Form.Group as={Col}>
-                                        <div ref={this.editorSuggestedNoteRef}></div>
-                                    </Form.Group>
-                                </Form.Row>
-                            </Tab>
-                            <Tab eventKey={3} title="Rétroaction automatique"  style={styleTab}> 
-                                <Form.Row>
-                                    <Form.Group as={Col}>
-                                        <div ref={this.editorTeacherTipRef}></div>
-                                    </Form.Group>
-                                </Form.Row>
-                            </Tab>
-                        </Tabs>
-                    </Form>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button variant="secondary" onClick={this.onClose}>{"Annuler"}</Button>
-                    <Button variant="success"  onClick={this.onSubmit}>{"Enregistrer"}</Button>
-                </Modal.Footer>
-            </Modal>;       
+        let body = 
+            <Form noValidate validated={this.state.formValidated} ref={this.formRef}>
+                <Tabs defaultActiveKey={this.state.activeTab} id="tab" onSelect={this.onSelectTag}>
+                    <Tab eventKey={0} title="Note" style={styleTab}>
+                        <Form.Row>
+                            <Form.Group as={Col}>
+                                <Form.Label>{"Activité de la section:"}</Form.Label>
+                                <ComboBox placeholder={"Sélectionnez votre option"} required={true}  name="cmId" value={data.cmId} options={this.state.dropdownLists.activityList} onChange={this.onDataChange} />
+                            </Form.Group>
+                        </Form.Row>
+                        <Form.Row>
+                            <Form.Group as={Col}>
+                                <Form.Label>{"Titre"}</Form.Label>
+                                <Form.Control type="text" required value={data.noteTitle} name="noteTitle" onChange={this.onDataChange}/>
+                            </Form.Group>
+                        </Form.Row>
+                        <Form.Row>
+                            <Form.Group as={Col}>
+                                <Form.Label>{"Position"}</Form.Label>
+                                <InputNumber  value={data.slot} name="slot" min={0} onChange={this.onDataChange}/>
+                            </Form.Group>
+                        </Form.Row>
+                        <Form.Row>
+                            <Form.Group as={Col}>
+                                <Form.Label>{"Notifier l'enseignant lors d'une mise à jour"}</Form.Label>
+                                <ToggleButtons name="notifyTeacher" defaultValue={[data.notifyTeacher]} onChange={this.onDataChange} 
+                                        options={[
+                                            {value: 1, text:"Oui"},
+                                            {value: 0, text:"Non"}
+                                        ]}/>
+                            </Form.Group>
+                        </Form.Row>
+                    </Tab>
+                    <Tab eventKey={1} title="Modèle de note"  style={styleTab}>
+                        <Form.Row>
+                            <Form.Group as={Col}>
+                                <div ref={this.editorTemplateNoteRef}></div>
+                            </Form.Group>
+                        </Form.Row>
+                    </Tab>
+                    <Tab eventKey={2} title="Réponse suggérée"  style={styleTab}>
+                        <Form.Row>
+                            <Form.Group as={Col}>
+                                <div ref={this.editorSuggestedNoteRef}></div>
+                            </Form.Group>
+                        </Form.Row>
+                    </Tab>
+                    <Tab eventKey={3} title="Rétroaction automatique"  style={styleTab}> 
+                        <Form.Row>
+                            <Form.Group as={Col}>
+                                <div ref={this.editorTeacherTipRef}></div>
+                            </Form.Group>
+                        </Form.Row>
+                    </Tab>
+                </Tabs>
+            </Form>;
+
+        let footer = 
+            <div className="btn-tollbar" style={{width: "100%", display: "flex", justifyContent: "right"}}>
+                <div className="btn-group">
+                    <Button  variant="secondary" onClick={this.onClose}>{"Annuler"}</Button>
+                    <Button  variant="success"  onClick={this.onSubmit}>{"Enregistrer"}</Button>
+                </div>
+            </div>;
+
+        let main = <Modal title={`Note: ${data.noteTitle}`} body={body} footer={footer} onClose={this.props.onClose} />;
 
         return (main);
     }
