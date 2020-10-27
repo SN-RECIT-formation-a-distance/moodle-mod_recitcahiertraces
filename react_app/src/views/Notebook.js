@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import { Button, Col, Tab, DropdownButton, Dropdown, Modal, Collapse, Card, Row, Nav} from 'react-bootstrap';
-import {faPencilAlt, faBars, faEye} from '@fortawesome/free-solid-svg-icons';
+import { ButtonGroup, Form, Button, Col, Tab, DropdownButton, Dropdown, Modal, Collapse, Card, Row, Nav} from 'react-bootstrap';
+import {faArrowLeft, faArrowRight, faPencilAlt, faBars, faEye} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {FeedbackCtrl, DataGrid} from '../libs/components/Components';
+import {FeedbackCtrl, DataGrid, ComboBox} from '../libs/components/Components';
 import {UtilsMoodle, JsNx} from '../libs/utils/Utils';
 import {$glVars} from '../common/common';
 
@@ -11,7 +11,6 @@ class PersonalNoteForm extends Component{
         userId: 0,
         cmId: 0,
         ccCmId: 0,
-        noteTitle: "",
         setOnSave: null,
     };
 
@@ -50,6 +49,20 @@ class PersonalNoteForm extends Component{
         this.editorDec.close();
         this.editorDec.dom.style.display = 'none';
         document.body.appendChild(this.editorDec.dom);
+    }
+
+    componentDidUpdate(prevProps){
+        if(this.editorRef.current !== null){
+            this.editorDec.show();        
+            
+            if(!this.editorRef.current.hasChildNodes()){
+                this.editorRef.current.appendChild(this.editorDec.dom);   
+            }
+        }
+
+        if(prevProps.userId !== this.props.userId){
+            this.getData();
+        }
     }
 
     getData(){
@@ -107,6 +120,7 @@ class PersonalNoteForm extends Component{
         
         let main =
             <div>
+                <h5 className="text-truncate">{`Note: ${this.state.data.noteTitle}`}</h5>
                 <Card>
                     <Card.Header style={styleHeader} onClick={() => this.onCollapse("note")}>
                         {"Note de l'élève"}
@@ -139,16 +153,7 @@ class PersonalNoteForm extends Component{
 
         return (main);
     }
-
-    componentDidUpdate(){
-        if(this.editorRef.current !== null){
-            this.editorDec.show();        
-            if(!this.editorRef.current.hasChildNodes()){
-                this.editorRef.current.appendChild(this.editorDec.dom);   
-            }
-        }
-    }
-    
+   
     onCollapse(name){
         let data = this.state.collapse;
         data[name] = !data[name];
@@ -208,7 +213,7 @@ class PersonalNoteForm extends Component{
  */
 class ModalTmp extends Component{
     static defaultProps = {        
-        header: null,
+        title: "",
         body: null,
         footer: null,
         onClose: null
@@ -219,7 +224,7 @@ class ModalTmp extends Component{
             <div style={{position: "fixed", top: 0, backgroundColor: "rgba(0,0,0,0.5)", left: 0, bottom: 0, right: 0, zIndex: 1040, overflowX: 'hidden', overflowY: 'auto'}}>
                 <div style={{width: "75%", margin: "1.75rem auto", backgroundColor: "#FFF"}}>
                     <div className="modal-header">
-                        <h4 className="text-truncate">{this.props.header}</h4>
+                        <h4 className="text-truncate">{this.props.title}</h4>
                         <button type="button" className="close" onClick={this.props.onClose}><span aria-hidden="true">×</span><span className="sr-only">Close</span></button>
                     </div>
                     <div className="modal-body">{this.props.body}</div>
@@ -233,11 +238,11 @@ class ModalTmp extends Component{
 
 class ModalPersonalNote extends Component{
     static defaultProps = {        
-        userId: 0,
-        cmId: 0,
-        ccCmId: 0,
-        noteTitle: "",
+        data: {},
         onClose: null,
+        onPreviousStudent: null,
+        onNextStudent: null,
+        navStatus: {previous: false, next: false}
     };
 
     constructor(props){
@@ -251,17 +256,21 @@ class ModalPersonalNote extends Component{
     }
 
     render(){
-        let personalNote = <PersonalNoteForm userId={this.props.userId} cmId={this.props.cmId} setOnSave={this.setOnSave}
-                                                    noteTitle={this.props.noteTitle} ccCmId={this.props.ccCmId}/>;
+        let personalNote = <PersonalNoteForm userId={this.props.data.userId} cmId={this.props.data.cmId} setOnSave={this.setOnSave} ccCmId={this.props.data.ccCmId}/>;
         let footer = 
             <div className="btn-tollbar" style={{width: "100%", display: "flex", justifyContent: "space-between"}}>
                 <div className="btn-group">
+                    {this.props.onNextStudent && <Button variant="primary" onClick={this.props.onPreviousStudent} disabled={!this.props.navStatus.previous}><FontAwesomeIcon icon={faArrowLeft}/>{" Précédent"}</Button>}
+                    {this.props.onPreviousStudent && <Button variant="primary"  onClick={this.props.onNextStudent} disabled={!this.props.navStatus.next}>{"Prochain "}<FontAwesomeIcon icon={faArrowRight}/></Button>}
+                </div>
+                <div className="btn-group">
                     <Button  variant="secondary" onClick={this.onClose}>{"Annuler"}</Button>
-                    <Button  variant="success"  onClick={this.onSave}>{"Enregistrer"}</Button>
+                    {this.props.onNextStudent && <Button  variant="success"  onClick={() => this.onSave(false)}>{"Enregistrer"}</Button>}
+                    <Button  variant="success"  onClick={() => this.onSave(true)}>{"Enregistrer et fermer"}</Button>
                 </div>
             </div>;
                 
-        let main = <ModalTmp header={`Note: ${this.props.noteTitle}`} body={personalNote} footer={footer} onClose={this.props.onClose} />;
+        let main = <ModalTmp title={`Élève: ${this.props.data.username}`} body={personalNote} footer={footer} onClose={this.props.onClose} />;
 
         return (main);
     }
@@ -270,13 +279,15 @@ class ModalPersonalNote extends Component{
         this.setState({onSave: onSave})
     }
 
-    onSave(){
+    onSave(shouldClose){
         let that = this;
 
         if(this.state.onSave){
             this.state.onSave((result) => {
                 if(result.success){
-                    that.onClose();
+                    if(shouldClose){
+                        that.onClose();
+                    }
                 }
             });
         }
@@ -287,9 +298,9 @@ class ModalPersonalNote extends Component{
     }
 }
 
-export class Notebook extends Component{
+export class TeacherNotebook extends Component{
     static defaultProps = {
-        userId: 0
+        
     };
 
     constructor(props){
@@ -300,8 +311,23 @@ export class Notebook extends Component{
         this.getDataResult = this.getDataResult.bind(this);
         this.onEdit = this.onEdit.bind(this);
         this.onClose = this.onClose.bind(this);
+        this.onSelectUser = this.onSelectUser.bind(this);
+        this.onNextStudent = this.onNextStudent.bind(this);
+        this.onPreviousStudent = this.onPreviousStudent.bind(this);
 
-        this.state = {dataProvider: [], activeTab: 0, personalNote: null, cmId: $glVars.urlParams.id};
+        this.state = {
+            dataProvider: [], 
+            activeTab: 0, 
+            data: {
+                userId: 0,
+                username: "",
+                cmId: 0,
+                noteTitle: "",
+                ccCmId: 0
+            }
+        };
+
+        this.groupUserSelect = React.createRef();
     }
     
     componentDidMount(){
@@ -313,22 +339,13 @@ export class Notebook extends Component{
         $glVars.webApi.removeObserver("Notebook");
     }
 
-    componentDidUpdate(prevProps) {
-        if(isNaN(prevProps.userId)){ return;}
-
-        // Typical usage (don't forget to compare props):
-        if (this.props.userId !== prevProps.userId) {
-            this.getData();
-        }
-    }
-
     getData(){
-        if(this.props.userId === 0){
+        if(this.state.data.userId === 0){
             this.setState({dataProvider: []});
             return;
         }
         
-        $glVars.webApi.getPersonalNotes(this.state.cmId, this.props.userId, this.getDataResult);
+        $glVars.webApi.getPersonalNotes($glVars.urlParams.id, this.state.data.userId, this.getDataResult);
     }
 
     getDataResult(result){
@@ -356,79 +373,82 @@ export class Notebook extends Component{
             this.setState({dataProvider: result.data});
         }
     }
-
-    getPrintLink(showFeedback){
-        return UtilsMoodle.wwwRoot()+`/mod/recitcahiercanada/classes/ReportStudentNotes.php?cmId=${this.state.cmId}&userId=${this.props.userId}&sf=${showFeedback || 0}`;
-    }
-
+    
     render(){
-        if(this.state.dataProvider.length === 0){ return null;}
-
         let that = this;
+
         let main = 
             <div>  
-                <div style={{textAlign: "right", marginBottom: "1rem"}}>
-                    <a href={this.getPrintLink()} target="_blank">{"Imprimer des notes"}</a>{ " | "}
-                    <a href={this.getPrintLink(1)} target="_blank">{"Imprimer des notes + Rétroaction"}</a>
-                </div>
+                <GroupUserSelect ref={this.groupUserSelect} onSelectUser={this.onSelectUser}/>
 
-                <hr/>
+                {this.state.data.userId > 0 &&
+                    <div>
+                        <ActionBar cmId={$glVars.urlParams.id} userId={this.state.data.userId}/>
 
-                <Tab.Container id="tabActivities" activeKey={this.state.activeTab} onSelect={this.onSelectTab}>
-                    <Row>
-                        <Col sm={12}>
-                            <Nav variant="pills" className="flex-row">
-                                {this.state.dataProvider.map(function(items, index){
-                                    return <Nav.Item key={index} ><Nav.Link eventKey={index}>{JsNx.at(items, 0).activityName}</Nav.Link></Nav.Item>;
-                                })}
-                            </Nav>
-                        </Col>
-                    </Row>
-                    <br/>
-                    <Row>
-                        <Col sm={12}>
-                            <Tab.Content>
-                                {this.state.dataProvider.map(function(items, index){
-                                    let datagrid = 
-                                    <DataGrid orderBy={true}>
-                                        <DataGrid.Header>
-                                            <DataGrid.Header.Row>
-                                                <DataGrid.Header.Cell style={{width: 80}}>{"#"}</DataGrid.Header.Cell>
-                                                <DataGrid.Header.Cell >{"Titre de la note"}</DataGrid.Header.Cell>
-                                                <DataGrid.Header.Cell style={{width: 300}}>{"Note"}</DataGrid.Header.Cell>
-                                                <DataGrid.Header.Cell style={{width: 300}}>{"Rétroaction"}</DataGrid.Header.Cell>
-                                                <DataGrid.Header.Cell  style={{width: 120}}></DataGrid.Header.Cell>
-                                            </DataGrid.Header.Row>
-                                        </DataGrid.Header>
-                                        <DataGrid.Body>
-                                            {items.map((item, index2) => {
-                                                    let row = 
-                                                        <DataGrid.Body.Row key={index2} onDbClick={() => that.onEdit(item)}>
-                                                            <DataGrid.Body.Cell>{index2 + 1}</DataGrid.Body.Cell>
-                                                            <DataGrid.Body.Cell><FontAwesomeIcon icon={faEye}/>{` ${item.noteTitle}`}</DataGrid.Body.Cell>
-                                                            <DataGrid.Body.Cell>{that.formatText(item.note.text)}</DataGrid.Body.Cell>
-                                                            <DataGrid.Body.Cell>{that.formatText(item.feedback)}</DataGrid.Body.Cell>
-                                                            <DataGrid.Body.Cell>
-                                                                <DropdownButton size="sm" title={<span><FontAwesomeIcon icon={faBars}/>{" Actions"}</span>}>
-                                                                    <Dropdown.Item onClick={() => that.onEdit(item)}><FontAwesomeIcon icon={faPencilAlt}/>{" Modifier"}</Dropdown.Item>
-                                                                </DropdownButton>
-                                                            </DataGrid.Body.Cell>
-                                                        </DataGrid.Body.Row>
-                                                    return (row);                                    
-                                                }
-                                            )}
-                                        </DataGrid.Body>
-                                    </DataGrid>
-                                    return <Tab.Pane key={index} eventKey={index}>{datagrid}</Tab.Pane>;
-                                })}
-                            </Tab.Content>
-                        </Col>
-                    </Row>
-                </Tab.Container>
-                
-                {this.state.personalNote !== null && 
-                            <ModalPersonalNote userId={this.props.userId} cmId={this.state.personalNote.cmId} onClose={this.onClose}
-                                    noteTitle={this.state.personalNote.noteTitle} ccCmId={this.state.personalNote.ccCmId} />}
+                        <hr/>
+
+                        <Tab.Container id="tabActivities" activeKey={this.state.activeTab} onSelect={this.onSelectTab}>
+                            <Row>
+                                <Col sm={12}>
+                                    <Nav variant="pills" className="flex-row">
+                                        {this.state.dataProvider.map(function(items, index){
+                                            let activityName = JsNx.at(items, 0).activityName;
+                                            return  <Nav.Item key={index} >
+                                                        <Nav.Link eventKey={index} className="text-truncate" style={{width: '300px', textAlign: "center"}} title={activityName}>
+                                                            {activityName}
+                                                        </Nav.Link>
+                                                    </Nav.Item>;
+                                        })}
+                                    </Nav>
+                                </Col>
+                            </Row>
+                            <br/>
+                            <Row>
+                                <Col sm={12}>
+                                    <Tab.Content>
+                                        {this.state.dataProvider.map(function(items, index){
+                                            let datagrid = 
+                                            <DataGrid orderBy={true}>
+                                                <DataGrid.Header>
+                                                    <DataGrid.Header.Row>
+                                                        <DataGrid.Header.Cell style={{width: 80}}>{"#"}</DataGrid.Header.Cell>
+                                                        <DataGrid.Header.Cell >{"Titre de la note"}</DataGrid.Header.Cell>
+                                                        <DataGrid.Header.Cell style={{width: 300}}>{"Note"}</DataGrid.Header.Cell>
+                                                        <DataGrid.Header.Cell style={{width: 300}}>{"Rétroaction"}</DataGrid.Header.Cell>
+                                                        <DataGrid.Header.Cell  style={{width: 120}}></DataGrid.Header.Cell>
+                                                    </DataGrid.Header.Row>
+                                                </DataGrid.Header>
+                                                <DataGrid.Body>
+                                                    {items.map((item, index2) => {
+                                                            let row = 
+                                                                <DataGrid.Body.Row key={index2} onDbClick={() => that.onEdit(item)}>
+                                                                    <DataGrid.Body.Cell>{index2 + 1}</DataGrid.Body.Cell>
+                                                                    <DataGrid.Body.Cell><FontAwesomeIcon icon={faEye}/>{` ${item.noteTitle}`}</DataGrid.Body.Cell>
+                                                                    <DataGrid.Body.Cell>{that.formatText(item.note.text)}</DataGrid.Body.Cell>
+                                                                    <DataGrid.Body.Cell>{that.formatText(item.feedback)}</DataGrid.Body.Cell>
+                                                                    <DataGrid.Body.Cell>
+                                                                        <DropdownButton size="sm" title={<span><FontAwesomeIcon icon={faBars}/>{" Actions"}</span>}>
+                                                                            <Dropdown.Item onClick={() => that.onEdit(item)}><FontAwesomeIcon icon={faPencilAlt}/>{" Modifier"}</Dropdown.Item>
+                                                                        </DropdownButton>
+                                                                    </DataGrid.Body.Cell>
+                                                                </DataGrid.Body.Row>
+                                                            return (row);                                    
+                                                        }
+                                                    )}
+                                                </DataGrid.Body>
+                                            </DataGrid>
+                                            return <Tab.Pane key={index} eventKey={index}>{datagrid}</Tab.Pane>;
+                                        })}
+                                    </Tab.Content>
+                                </Col>
+                            </Row>
+                        </Tab.Container>
+                    
+                        {this.state.data.ccCmId > 0 && 
+                                <ModalPersonalNote data={this.state.data} onClose={this.onClose} onNextStudent={this.onNextStudent} 
+                                        onPreviousStudent={this.onPreviousStudent} navStatus={this.getNavStatus()}/>}
+                    </div>
+                }
             </div>;
 
         return (main);
@@ -444,14 +464,389 @@ export class Notebook extends Component{
     }
 
     onEdit(item){
-        this.setState({personalNote: item});
+        if(item === null){ return; }
+
+        let data = this.state.data;
+        data.cmId = item.cmId;
+        data.ccCmId = item.ccCmId;
+        data.noteTitle = item.noteTitle;
+        this.setState({data: data});
     }
 
     onClose(){
-        this.setState({personalNote: null});
+        let data = this.state.data;
+        data.cmId = 0;
+        data.ccCmId = 0;
+        data.noteTitle = "";
+        this.setState({data: data});
     }
 
     onSelectTab(eventKey){
         this.setState({activeTab: eventKey});
+    }
+
+    onSelectUser(userId, username){
+        let data = this.state.data;
+        data.userId = userId;
+        data.username = username;
+        this.setState({data: data}, this.getData);
+    }
+
+    onNextStudent(){
+        this.groupUserSelect.current.onNext();
+    }
+
+    onPreviousStudent(){
+        this.groupUserSelect.current.onPrevious();
+    }
+
+    getNavStatus(){
+        if(this.groupUserSelect.current){
+            return this.groupUserSelect.current.getNavStatus();
+        }
+    }
+}
+
+export class StudentNotebook extends Component{
+    static defaultProps = {
+        userId: 0
+    };
+
+    constructor(props){
+        super(props);
+
+        this.onSelectTab = this.onSelectTab.bind(this);
+        this.getData = this.getData.bind(this);
+        this.getDataResult = this.getDataResult.bind(this);
+        this.onEdit = this.onEdit.bind(this);
+        this.onClose = this.onClose.bind(this);
+
+        this.state = {
+            dataProvider: [], 
+            activeTab: 0, 
+            data: {
+                userId: this.props.userId,
+                username: "",
+                cmId: 0,
+                noteTitle: "",
+                ccCmId: 0
+            }
+        };
+    }
+    
+    componentDidMount(){
+        $glVars.webApi.addObserver("Notebook", this.getData, ['savePersonalNote']);        
+        this.getData();
+    }
+
+    componentWillUnmount(){
+        $glVars.webApi.removeObserver("Notebook");
+    }
+
+    getData(){
+        if(this.state.data.userId === 0){
+            this.setState({dataProvider: []});
+            return;
+        }
+        
+        $glVars.webApi.getPersonalNotes($glVars.urlParams.id, this.state.data.userId, this.getDataResult);
+    }
+
+    getDataResult(result){
+        if(!result.success){
+            FeedbackCtrl.instance.showError($glVars.i18n.appName, result.msg);
+            return;
+        }
+
+        // If the user is trying to load automatically some note by URL
+        if(!$glVars.urlParams.loaded){
+            let item = null;
+            for(let activity of result.data){
+                for(let note of activity){
+                    if((note.ccCmId === $glVars.urlParams.ccCmId) && (note.cmId === $glVars.urlParams.cmId)){
+                        item = note;
+                    }
+                }
+            }
+
+            $glVars.urlParams.loaded = true;
+
+            this.setState({dataProvider: result.data}, () => this.onEdit(item));
+        }
+        else{
+            this.setState({dataProvider: result.data});
+        }
+    }
+    
+    render(){
+        let that = this;
+
+        let main = 
+            <div>  
+                {this.state.data.userId > 0 &&
+                    <div>
+                        <ActionBar cmId={$glVars.urlParams.id} userId={this.state.data.userId}/>
+
+                        <hr/>
+
+                        <Tab.Container id="tabActivities" activeKey={this.state.activeTab} onSelect={this.onSelectTab}>
+                            <Row>
+                                <Col sm={12}>
+                                    <Nav variant="pills" className="flex-row">
+                                        {this.state.dataProvider.map(function(items, index){
+                                            let activityName = JsNx.at(items, 0).activityName;
+                                            return  <Nav.Item key={index} >
+                                                        <Nav.Link eventKey={index} className="text-truncate" style={{width: '300px', textAlign: "center"}} title={activityName}>
+                                                            {activityName}
+                                                        </Nav.Link>
+                                                    </Nav.Item>;
+                                        })}
+                                    </Nav>
+                                </Col>
+                            </Row>
+                            <br/>
+                            <Row>
+                                <Col sm={12}>
+                                    <Tab.Content>
+                                        {this.state.dataProvider.map(function(items, index){
+                                            let datagrid = 
+                                            <DataGrid orderBy={true}>
+                                                <DataGrid.Header>
+                                                    <DataGrid.Header.Row>
+                                                        <DataGrid.Header.Cell style={{width: 80}}>{"#"}</DataGrid.Header.Cell>
+                                                        <DataGrid.Header.Cell >{"Titre de la note"}</DataGrid.Header.Cell>
+                                                        <DataGrid.Header.Cell style={{width: 300}}>{"Note"}</DataGrid.Header.Cell>
+                                                        <DataGrid.Header.Cell style={{width: 300}}>{"Rétroaction"}</DataGrid.Header.Cell>
+                                                        <DataGrid.Header.Cell  style={{width: 120}}></DataGrid.Header.Cell>
+                                                    </DataGrid.Header.Row>
+                                                </DataGrid.Header>
+                                                <DataGrid.Body>
+                                                    {items.map((item, index2) => {
+                                                            let row = 
+                                                                <DataGrid.Body.Row key={index2} onDbClick={() => that.onEdit(item)}>
+                                                                    <DataGrid.Body.Cell>{index2 + 1}</DataGrid.Body.Cell>
+                                                                    <DataGrid.Body.Cell><FontAwesomeIcon icon={faEye}/>{` ${item.noteTitle}`}</DataGrid.Body.Cell>
+                                                                    <DataGrid.Body.Cell>{that.formatText(item.note.text)}</DataGrid.Body.Cell>
+                                                                    <DataGrid.Body.Cell>{that.formatText(item.feedback)}</DataGrid.Body.Cell>
+                                                                    <DataGrid.Body.Cell>
+                                                                        <DropdownButton size="sm" title={<span><FontAwesomeIcon icon={faBars}/>{" Actions"}</span>}>
+                                                                            <Dropdown.Item onClick={() => that.onEdit(item)}><FontAwesomeIcon icon={faPencilAlt}/>{" Modifier"}</Dropdown.Item>
+                                                                        </DropdownButton>
+                                                                    </DataGrid.Body.Cell>
+                                                                </DataGrid.Body.Row>
+                                                            return (row);                                    
+                                                        }
+                                                    )}
+                                                </DataGrid.Body>
+                                            </DataGrid>
+                                            return <Tab.Pane key={index} eventKey={index}>{datagrid}</Tab.Pane>;
+                                        })}
+                                    </Tab.Content>
+                                </Col>
+                            </Row>
+                        </Tab.Container>
+                    
+                        {this.state.data.ccCmId > 0 && 
+                                <ModalPersonalNote data={this.state.data} onClose={this.onClose} />}
+                    </div>
+                }
+            </div>;
+
+        return (main);
+    }
+
+    formatText(text){
+        let tmp = document.createElement("div");
+        tmp.innerHTML = text;
+        
+        text = tmp.textContent || tmp.innerText || ""; // Retrieve the text property of the element (cross-browser support)
+
+        return (text.length > 50 ? `${text.substr(0, 50)}...` : text);
+    }
+
+    onEdit(item){
+        if(item === null){ return; }
+
+        let data = this.state.data;
+        data.cmId = item.cmId;
+        data.ccCmId = item.ccCmId;
+        data.noteTitle = item.noteTitle;
+        this.setState({data: data});
+    }
+
+    onClose(){
+        let data = this.state.data;
+        data.cmId = 0;
+        data.ccCmId = 0;
+        data.noteTitle = "";
+        this.setState({data: data});
+    }
+
+    onSelectTab(eventKey){
+        this.setState({activeTab: eventKey});
+    }
+}
+
+class ActionBar extends Component{
+    static defaultProps = {
+        cmId: 0,
+        userId: 0
+    };
+
+    render(){
+        let main = 
+            <div style={{textAlign: "right", marginBottom: "1rem"}}>
+                <a href={this.getPrintLink(1)} target="_blank">{"Imprimer des notes"}</a>
+            </div>;
+
+//<a href={this.getPrintLink(1)} target="_blank">{"Imprimer des notes + Rétroaction"}</a>
+
+        return main;
+    }
+
+    getPrintLink(showFeedback){
+        return UtilsMoodle.wwwRoot()+`/mod/recitcahiercanada/classes/ReportStudentNotes.php?cmId=${this.props.cmId}&userId=${this.props.userId}&sf=${showFeedback || 0}`;
+    }
+
+}
+
+class GroupUserSelect extends Component{
+    static defaultProps = {
+        onSelectUser: null
+    };
+
+    constructor(props){
+        super(props);
+
+        this.onSelectGroup = this.onSelectGroup.bind(this);
+        this.onSelectUser = this.onSelectUser.bind(this);
+        this.onPrevious = this.onPrevious.bind(this);
+        this.onNext = this.onNext.bind(this);
+        this.getData = this.getData.bind(this);
+        this.getDataResult = this.getDataResult.bind(this);
+
+        this.state = {selectedUserIndex: -1, selectedGroupId: -1, groupList:[], userList: [], userListFiltered: []};
+    }
+
+    componentDidMount(){
+        this.getData();
+    }
+    
+    getData(){
+        $glVars.webApi.getEnrolledUserList($glVars.urlParams.id, this.getDataResult);
+    }
+
+    getDataResult(result){
+        if(!result.success){
+            FeedbackCtrl.instance.showError($glVars.i18n.appName, result.msg);
+            return;
+        }
+        
+        let groupList = [];
+        let userList = [];
+        for(let group of result.data){
+            groupList.push({text: group[0].groupName, value: group[0].groupId, data: group});
+            for(let user of group){
+                if(JsNx.getItem(userList, "value", user.userId, null) === null){
+                    userList.push({text: user.userName, value: user.userId, data: user});
+                }
+            }
+        }
+
+        groupList.sort((a, b) => { return ('' + a.text).localeCompare(b.text);})
+        userList.sort((a, b) => { return ('' + a.text).localeCompare(b.text);})
+
+        if(!$glVars.urlParams.loaded){
+            let item = JsNx.getItemIndex(userList, 'value', $glVars.urlParams.userId);
+
+            this.setState(
+                {groupList: groupList, userList: userList, userListFiltered: userList, selectedUserIndex: JsNx.getItemIndex(userList, 'value', $glVars.urlParams.userId)}, 
+                () => this.props.onSelectUser(parseInt(item.value, 10), item.text)
+            );
+        }
+        else{
+            this.setState({groupList: groupList, userList: userList});
+        }
+    }
+
+    render(){
+        let value = "";
+        //if(userList.nxExists(this.state.selectedUserIndex)){
+            
+        if(JsNx.exists(this.state.userListFiltered, this.state.selectedUserIndex)){
+            value = this.state.userListFiltered[this.state.selectedUserIndex].value;
+        }
+
+        let main = 
+            <Form>
+                <Form.Row>
+                    <Form.Group as={Col}>
+                        <Form.Label>Sélectionnez le groupe:</Form.Label>
+                        <ComboBox placeholder={"Sélectionnez votre option"} options={this.state.groupList} onChange={this.onSelectGroup} value={this.state.selectedGroupId}/>
+                    </Form.Group>
+                </Form.Row>
+                <Form.Row>
+                    <Form.Group  as={Col}>
+                        <Form.Label>Sélectionnez l'utilisateur:</Form.Label>
+                        <ComboBox placeholder={"Sélectionnez votre option"} options={this.state.userListFiltered} onChange={this.onSelectUser} value={value}/>
+                    </Form.Group>
+                </Form.Row>
+                <ButtonGroup style={{textAlign: "center", display: "block"}}>
+                    <Button variant="primary" onClick={this.onPrevious} disabled={(this.state.selectedUserIndex <= -1)}><FontAwesomeIcon icon={faArrowLeft}/>{" Précédent"}</Button>
+                    <Button variant="primary" onClick={this.onNext} disabled={(this.state.userListFiltered.length <= (this.state.selectedUserIndex + 1))}>{"Suivant "}<FontAwesomeIcon icon={faArrowRight}/></Button>
+                </ButtonGroup>
+            </Form>;
+
+        return (main);
+    }
+
+    onSelectGroup(event){
+        let userListFiltered = this.state.userList;
+        let selectedGroupId = this.state.selectedGroupId;
+
+        if(selectedGroupId > 0){
+            userListFiltered = this.state.userList.filter(function(item){
+                return (item.data.groupId.toString() === selectedGroupId.toString());
+            })
+        }
+
+
+        this.setState({selectedGroupId: event.target.value, selectedUserIndex: -1, userListFiltered: userListFiltered});
+    }
+
+    onSelectUser(event){
+        let userId = parseInt(event.target.value, 10) || 0;
+        this.setState({selectedUserIndex: event.target.index}, () => 
+            this.props.onSelectUser(this.state.userListFiltered[event.target.index].value, this.state.userListFiltered[event.target.index].text)
+        );
+    }
+
+    onPrevious(){
+        let newIndex = this.state.selectedUserIndex - 1;
+        let item = {text: "", value: 0};
+
+        if(this.state.userListFiltered[newIndex]){
+            item.text = this.state.userListFiltered[newIndex].text;
+            item.value = parseInt(this.state.userListFiltered[newIndex].value, 10);
+        }
+
+        this.setState({selectedUserIndex: newIndex}, this.props.onSelectUser(item.value, item.text));
+    }
+
+    onNext(){
+        let newIndex = this.state.selectedUserIndex + 1;
+        
+        let item = {text: "", value: 0};
+
+        if(this.state.userListFiltered[newIndex]){
+            item.text = this.state.userListFiltered[newIndex].text;
+            item.value = parseInt(this.state.userListFiltered[newIndex].value, 10);
+        }
+
+        this.setState({selectedUserIndex: newIndex}, this.props.onSelectUser(item.value, item.text));
+    }
+
+    getNavStatus(){
+        return {previous: !(this.state.selectedUserIndex <= -1), next: !(this.state.userListFiltered.length <= (this.state.selectedUserIndex + 1))};
     }
 }
