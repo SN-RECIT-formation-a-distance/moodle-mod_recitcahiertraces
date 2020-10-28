@@ -8,4 +8,5 @@ i18n.addTag("msgConfirmDeletion", "Do you confirm the deletion?", "Confirmez-vou
 i18n.addTag("msgConfirm", "Are you sure you want to proceed?", "Êtes-vous sur de vouloir continuer?");
 i18n.addTag("msgSuccess", "The action has been completed successfully", "L'action a été complétée avec succès");
 i18n.addTag("msgCCSeqPos", "The Cahier de traces activity must be the last one in the course section.", "L'activité Cahier de traces doit être la dernière de la section de cours.");
+i18n.addTag("msgCopy", "Copy to the clipboard was successful.", "La copie dans le presse-papiers a réussi.");
 i18n.loadTags();

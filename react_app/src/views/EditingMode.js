@@ -468,7 +468,7 @@ class ModalGenerateIntCode extends Component{
         this.onCopy = this.onCopy.bind(this);
         this.onDataChange = this.onDataChange.bind(this);
 
-        this.state = {data: {nbLines: 15, color: ''}};
+        this.state = {data: {nbLines: 15, color: '#000000', btnSaveVariant: '', btnResetVariant: ''}};
 
         this.intCodeRef = React.createRef();
     }
@@ -479,13 +479,25 @@ class ModalGenerateIntCode extends Component{
                 <Form.Row>
                     <Form.Group as={Col}>
                         <Form.Label>{"Nombre de lignes"}</Form.Label>
-                        <InputNumber required  value={this.state.data.nbLines} name="nbLines" min={0} onChange={this.onDataChange}/>
+                        <InputNumber  value={this.state.data.nbLines} name="nbLines" min={0} onChange={this.onDataChange}/>
                     </Form.Group>
                 </Form.Row>
                 <Form.Row>
                     <Form.Group as={Col}>
                         <Form.Label>{"Couleur"}</Form.Label>
-                        <Form.Control type="text" required value={this.state.data.color} name="color" onChange={this.onDataChange}/>
+                        <Form.Control type="color" value={this.state.data.color} name="color" onChange={this.onDataChange} style={{width: "80px"}}/>
+                    </Form.Group>
+                </Form.Row>
+                <Form.Row>
+                    <Form.Group as={Col}>
+                        <Form.Label>{"Bouton 'Enregistrer'"}</Form.Label>
+                        <Form.Control type="text" value={this.state.data.btnSaveVariant} name="btnSaveVariant" onChange={this.onDataChange}/>
+                    </Form.Group>
+                </Form.Row>
+                <Form.Row>
+                    <Form.Group as={Col}>
+                        <Form.Label>{"Bouton 'Réinitialiser'"}</Form.Label>
+                        <Form.Control type="text" value={this.state.data.btnResetVariant} name="btnResetVariant" onChange={this.onDataChange}/>
                     </Form.Group>
                 </Form.Row>
                 <Form.Control type="hidden" ref={this.intCodeRef}/>
@@ -511,7 +523,7 @@ class ModalGenerateIntCode extends Component{
     }
 
     getIntegrationCode(){
-        return `{"intCode":"${this.props.intCode}", "nbLines": "${Math.min(1,this.state.data.nbLines)}", "color": "${this.state.data.color}"}`;
+        return `{"intCode":"${this.props.intCode}", "nbLines": "${Math.min(1,this.state.data.nbLines)}", "color": "${this.state.data.color}", "btnSaveVariant": "${this.state.data.btnSaveVariant}", "btnResetVariant": "${this.state.data.btnResetVariant}"}`;
     }
 
     onCopy(){
@@ -521,5 +533,6 @@ class ModalGenerateIntCode extends Component{
 		document.execCommand('copy');
         this.intCodeRef.current.type = "hidden";
         this.props.onCopy();
+        $glVars.feedback.showInfo($glVars.i18n.tags.appName, $glVars.i18n.tags.msgCopy, 3);
     }
 }
