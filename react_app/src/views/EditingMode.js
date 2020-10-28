@@ -492,12 +492,14 @@ class ModalGenerateIntCode extends Component{
                     <Form.Group as={Col}>
                         <Form.Label>{"Bouton 'Enregistrer'"}</Form.Label>
                         <Form.Control type="text" value={this.state.data.btnSaveVariant} name="btnSaveVariant" onChange={this.onDataChange}/>
+                        <Form.Text className="text-muted">{"Défaut: vide. Ex: btn-danger"}</Form.Text>
                     </Form.Group>
                 </Form.Row>
                 <Form.Row>
                     <Form.Group as={Col}>
                         <Form.Label>{"Bouton 'Réinitialiser'"}</Form.Label>
                         <Form.Control type="text" value={this.state.data.btnResetVariant} name="btnResetVariant" onChange={this.onDataChange}/>
+                        <Form.Text className="text-muted">{"Défaut: vide. Ex: btn-danger"}</Form.Text>
                     </Form.Group>
                 </Form.Row>
                 <Form.Control type="hidden" ref={this.intCodeRef}/>
