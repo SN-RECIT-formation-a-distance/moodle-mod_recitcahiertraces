@@ -479,7 +479,7 @@ class ModalGenerateIntCode extends Component{
                 <Form.Row>
                     <Form.Group as={Col}>
                         <Form.Label>{"Nombre de lignes"}</Form.Label>
-                        <InputNumber  value={this.state.data.nbLines} name="nbLines" min={0} onChange={this.onDataChange}/>
+                        <InputNumber  value={this.state.data.nbLines} name="nbLines" min={1} onChange={this.onDataChange}/>
                     </Form.Group>
                 </Form.Row>
                 <Form.Row>
@@ -525,7 +525,7 @@ class ModalGenerateIntCode extends Component{
     }
 
     getIntegrationCode(){
-        return `{"intCode":"${this.props.intCode}", "nbLines": "${Math.min(1,this.state.data.nbLines)}", "color": "${this.state.data.color}", "btnSaveVariant": "${this.state.data.btnSaveVariant}", "btnResetVariant": "${this.state.data.btnResetVariant}"}`;
+        return `{"intCode":"${this.props.intCode}", "nbLines": "${Math.max(1,this.state.data.nbLines)}", "color": "${this.state.data.color}", "btnSaveVariant": "${this.state.data.btnSaveVariant}", "btnResetVariant": "${this.state.data.btnResetVariant}"}`;
     }
 
     onCopy(){
