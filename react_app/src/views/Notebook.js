@@ -233,8 +233,8 @@ class ModalPersonalNote extends Component{
         let footer = 
             <div className="btn-tollbar" style={{width: "100%", display: "flex", justifyContent: "space-between"}}>
                 <div className="btn-group">
-                    {this.props.onNextStudent && <Button variant="primary" onClick={this.props.onPreviousStudent} disabled={!this.props.navStatus.previous}><FontAwesomeIcon icon={faArrowLeft}/>{" Précédent"}</Button>}
-                    {this.props.onPreviousStudent && <Button variant="primary"  onClick={this.props.onNextStudent} disabled={!this.props.navStatus.next}>{"Prochain "}<FontAwesomeIcon icon={faArrowRight}/></Button>}
+                    {this.props.onNextStudent && <Button variant="primary" onClick={this.props.onPreviousStudent} disabled={!this.props.navStatus.previous}><FontAwesomeIcon icon={faArrowLeft}/>{" " + $glVars.i18n.tags.previousStudent}</Button>}
+                    {this.props.onPreviousStudent && <Button variant="primary"  onClick={this.props.onNextStudent} disabled={!this.props.navStatus.next}>{$glVars.i18n.tags.nextStudent + " "}<FontAwesomeIcon icon={faArrowRight}/></Button>}
                 </div>
                 <div className="btn-group">
                     <Button  variant="secondary" onClick={this.onClose}>{"Annuler"}</Button>
@@ -658,8 +658,8 @@ class GroupUserSelect extends Component{
                     </Form.Group>
                 </Form.Row>
                 <ButtonGroup style={{textAlign: "center", display: "block"}}>
-                    <Button variant="primary" onClick={this.onPrevious} disabled={(this.state.selectedUserIndex <= -1)}><FontAwesomeIcon icon={faArrowLeft}/>{" Précédent"}</Button>
-                    <Button variant="primary" onClick={this.onNext} disabled={(this.state.userListFiltered.length <= (this.state.selectedUserIndex + 1))}>{"Suivant "}<FontAwesomeIcon icon={faArrowRight}/></Button>
+                    <Button variant="primary" onClick={this.onPrevious} disabled={(this.state.selectedUserIndex <= -1)}><FontAwesomeIcon icon={faArrowLeft}/>{" " + $glVars.i18n.tags.previousStudent}</Button>
+                    <Button variant="primary" onClick={this.onNext} disabled={(this.state.userListFiltered.length <= (this.state.selectedUserIndex + 1))}>{$glVars.i18n.tags.nextStudent + " "}<FontAwesomeIcon icon={faArrowRight}/></Button>
                 </ButtonGroup>
             </Form>;
 

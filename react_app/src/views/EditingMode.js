@@ -134,7 +134,7 @@ class NoteForm extends Component
                             </Form.Group>
                         </Form.Row>
                     </Tab>
-                    <Tab eventKey={3} title="Rétroaction automatique"  style={styleTab}> 
+                    <Tab eventKey={3} title="Pistes pour valider ta réponse"  style={styleTab}> 
                         <Form.Row>
                             <Form.Group as={Col}>
                                 <div ref={this.editorTeacherTipRef}></div>
