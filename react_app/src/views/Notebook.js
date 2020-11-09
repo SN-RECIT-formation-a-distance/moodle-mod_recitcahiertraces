@@ -298,7 +298,7 @@ class NavActivities extends Component{
                             {this.props.dataProvider.map(function(items, index){
                                 let activityName = JsNx.at(items, 0).activityName;
                                 return  <Nav.Item key={index} >
-                                            <Nav.Link eventKey={index} className="text-truncate" style={{width: '300px', textAlign: "center"}} title={activityName}>
+                                            <Nav.Link eventKey={index} className="text-truncate" style={{width: '290px', textAlign: "center"}} title={activityName}>
                                                 {activityName}
                                             </Nav.Link>
                                         </Nav.Item>;
@@ -490,6 +490,7 @@ export class TeacherNotebook extends Notebook{
     }
 
     onSelectUser(userId, username){
+        console.log(userId, username)
         let data = this.state.data;
         data.userId = userId;
         data.username = username;
@@ -621,13 +622,13 @@ class GroupUserSelect extends Component{
 
         groupList.sort((a, b) => { return ('' + a.text).localeCompare(b.text);})
         userList.sort((a, b) => { return ('' + a.text).localeCompare(b.text);})
-
+        
         if(!$glVars.urlParams.loaded){
-            let item = JsNx.getItemIndex(userList, 'value', $glVars.urlParams.userId);
+            let item = JsNx.getItem(userList, 'value', $glVars.urlParams.userId, null);
 
             this.setState(
                 {groupList: groupList, userList: userList, userListFiltered: userList, selectedUserIndex: JsNx.getItemIndex(userList, 'value', $glVars.urlParams.userId)}, 
-                () => this.props.onSelectUser(parseInt(item.value, 10), item.text)
+                (item === null ? null : () => this.props.onSelectUser(parseInt(item.value, 10), item.text))
             );
         }
         else{
