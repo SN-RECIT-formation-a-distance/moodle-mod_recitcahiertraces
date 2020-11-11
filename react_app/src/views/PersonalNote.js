@@ -231,12 +231,12 @@ export class ModalPersonalNote extends Component{
     render(){
         let personalNote = <PersonalNoteForm userId={this.props.data.userId} cmId={this.props.data.cmId} setOnSave={this.setOnSave} ccCmId={this.props.data.ccCmId}/>;
         let footer = 
-            <div className="btn-tollbar" style={{width: "100%", display: "flex", justifyContent: "space-between"}}>
-                <div className="btn-group">
+            <div className="btn-tollbar" style={{width: "100%", display: "flex", justifyContent: "space-between", flexWrap: "wrap"}}>
+                <div className="btn-group" style={{flexWrap: "wrap"}}>
                     {this.props.onNextStudent && <Button variant="primary" onClick={this.props.onPreviousStudent} disabled={!this.props.navStatus.previous}><FontAwesomeIcon icon={faArrowLeft}/>{" " + $glVars.i18n.tags.previousStudent}</Button>}
                     {this.props.onPreviousStudent && <Button variant="primary"  onClick={this.props.onNextStudent} disabled={!this.props.navStatus.next}>{$glVars.i18n.tags.nextStudent + " "}<FontAwesomeIcon icon={faArrowRight}/></Button>}
                 </div>
-                <div className="btn-group">
+                <div className="btn-group" style={{flexWrap: "wrap"}}>
                     <Button  variant="secondary" onClick={this.onClose}>{"Annuler"}</Button>
                     {this.props.onNextStudent && <Button  variant="success"  onClick={() => this.onSave(false)}>{"Enregistrer"}</Button>}
                     <Button  variant="success"  onClick={() => this.onSave(true)}>{"Enregistrer et fermer"}</Button>
