@@ -50,6 +50,7 @@ export class TeacherView extends Component {
                 : 
                     <div>
                         <BtnModeEdition variant="warning" onClick={this.onModeEditionClick} text={"Activer le mode d'édition"}></BtnModeEdition>
+                        <br/>
                         <TeacherNotebook />
                     </div>
                 }

@@ -27,7 +27,7 @@ export class ComboBox extends Component {
         let spreadAttr = {required: this.props.required, multiple: this.props.multiple, disabled: this.props.disabled, size: this.props.size};
 
         let main = 
-            <Form.Control as="select" {...spreadAttr}  onChange={this.onChange} value={this.props.value}>
+            <Form.Control as="select" {...spreadAttr}  onChange={this.onChange} value={this.props.value} style={this.props.style}>
                 <option  value="">{this.props.placeholder}</option>
                 {this.props.options.map(function(item, index){
                     return <option key={index} value={item.value}>{item.text}</option>;

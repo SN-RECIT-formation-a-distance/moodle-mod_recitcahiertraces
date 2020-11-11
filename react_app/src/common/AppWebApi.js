@@ -108,4 +108,9 @@ export class AppWebApi extends WebApi
         let options = {cmId: cmId, service: "checkCCSeqPos"};
         this.post(this.gateway, options, onSuccess);
     }
+
+    getRequiredNotes(cmId, onSuccess){
+        let data = {cmId: cmId, service: "getRequiredNotes"};
+        this.post(this.gateway, data, onSuccess);
+    }
 };

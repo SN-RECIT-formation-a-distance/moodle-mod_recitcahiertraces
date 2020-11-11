@@ -1,290 +1,366 @@
 import React, { Component } from 'react';
-import { ButtonGroup, Form, Button, Col, Tab, DropdownButton, Dropdown, Collapse, Card, Row, Nav} from 'react-bootstrap';
-import {faArrowLeft, faArrowRight, faPencilAlt, faBars, faEye, faPrint} from '@fortawesome/free-solid-svg-icons';
+import { ButtonGroup, Form, Button, Col, Tab, DropdownButton, Dropdown, Row, Nav, Tabs, Badge} from 'react-bootstrap';
+import {faArrowLeft, faArrowRight, faPencilAlt, faBars, faEye, faPrint, faCompass, faCommentDots} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {FeedbackCtrl, DataGrid, ComboBox, Modal} from '../libs/components/Components';
+import {FeedbackCtrl, DataGrid, ComboBox} from '../libs/components/Components';
 import {UtilsMoodle, JsNx} from '../libs/utils/Utils';
+import {ModalPersonalNote} from './PersonalNote';
 import {$glVars} from '../common/common';
 
-class PersonalNoteForm extends Component{
-    static defaultProps = {        
-        userId: 0,
-        cmId: 0,
-        ccCmId: 0,
-        setOnSave: null,
+class ViewPrintingNotes extends Component{
+    static defaultProps = {
+        style: null
     };
 
     constructor(props){
         super(props);
 
-        this.onDataChange = this.onDataChange.bind(this);
+        this.onSelectUser = this.onSelectUser.bind(this);
+
+        this.groupUserSelect = React.createRef();
+
+        this.state = {userId: 0};
+    }
+
+    render(){
+        let main =
+            <div style={this.props.style}>
+                <GroupUserSelect ref={this.groupUserSelect} onSelectUser={this.onSelectUser}/>
+
+                <hr/>
+                {this.state.userId > 0 &&
+                   <ActionBar cmId={$glVars.urlParams.id} userId={this.state.userId}/>              
+                }            
+                          
+            </div>;
+
+        return main;
+    }
+
+    onSelectUser(userId, username){
+        this.setState({userId: userId});
+    }
+}
+
+class ViewNavGroupAndStudents extends Component{
+    static defaultProps = {
+        style: null
+    };
+
+    constructor(props){
+        super(props);
+
+        this.onSelectUser = this.onSelectUser.bind(this);
+        this.onNextStudent = this.onNextStudent.bind(this);
+        this.onPreviousStudent = this.onPreviousStudent.bind(this);
+        this.onEdit = this.onEdit.bind(this);
+        this.onClose = this.onClose.bind(this);
+
+        this.groupUserSelect = React.createRef();
+
+        this.state = {
+            data: {
+                userId: 0,
+                username: "",
+                cmId: 0,
+                noteTitle: "",
+                ccCmId: 0
+            }
+        };
+    }    
+
+    render(){
+        let main =
+            <div style={this.props.style}>
+                <GroupUserSelect ref={this.groupUserSelect} onSelectUser={this.onSelectUser}/>
+
+                {this.state.data.userId > 0 &&
+                    <div>
+                        <hr/>
+                        <NavActivities userId={this.state.data.userId} onEdit={this.onEdit}/>                                
+                        {this.state.data.ccCmId > 0 && 
+                            <ModalPersonalNote modalTitle={`Élève: ${this.state.data.username}`} data={this.state.data} onClose={this.onClose} onNextStudent={this.onNextStudent} 
+                                onPreviousStudent={this.onPreviousStudent} navStatus={this.getNavStatus()}/>
+                        }  
+                    </div>                    
+                }            
+                          
+            </div>;
+
+        return main;
+    }
+
+    onEdit(item){
+        if(item === null){ return; }
+
+        let data = this.state.data;
+        data.cmId = item.cmId;
+        data.ccCmId = item.ccCmId;
+        data.noteTitle = item.noteTitle;
+
+        this.setState({data: data});
+    }
+
+    onClose(){
+        let data = this.state.data;
+        data.cmId = 0;
+        data.ccCmId = 0;
+        data.noteTitle = "";
+        this.setState({data: data});
+    }
+
+    onSelectUser(userId, username){
+        let data = this.state.data;
+        
+        data.userId = userId;
+        data.username = username;
+
+        this.setState({data: data});
+    }
+
+    onNextStudent(){
+        this.groupUserSelect.current.onNext();
+    }
+
+    onPreviousStudent(){
+        this.groupUserSelect.current.onPrevious();
+    }
+
+    getNavStatus(){
+        if(this.groupUserSelect.current){
+            return this.groupUserSelect.current.getNavStatus();
+        }
+    }
+}
+
+class ViewRequiredNotes extends Component{
+    static defaultProps = {
+        style: null,
+        onDataChange: null
+    };
+
+    constructor(props){
+        super(props);
+
         this.getData = this.getData.bind(this);
         this.getDataResult = this.getDataResult.bind(this);
-        this.onSave = this.onSave.bind(this);
-        this.onSaveResult = this.onSaveResult.bind(this);
-        this.prepareNewState = this.prepareNewState.bind(this);
-        this.onCollapse = this.onCollapse.bind(this);
-        
-        let mode = "";// it is a student?
-         if(UtilsMoodle.checkRoles($glVars.signedUser.roles, UtilsMoodle.rolesL3)){
-             mode = "s";
-        }
-        // it is a teacher
-        else if(UtilsMoodle.checkRoles($glVars.signedUser.roles, UtilsMoodle.rolesL2)){
-            mode = "t";
-        }
-        this.state = {data: null, dropdownLists: null, mode: mode, collapse: {note: true, suggestedNote: false, feedback: true}};
+        this.onEdit = this.onEdit.bind(this);
+        this.onClose = this.onClose.bind(this);
+        this.onNextStudent = this.onNextStudent.bind(this);
+        this.onPreviousStudent = this.onPreviousStudent.bind(this);
 
-        this.editorRef = React.createRef();
-        this.editorDec = new recit.components.EditorDecorator(`recit_cahiertraces_editor_container_1`);
-
-        this.props.setOnSave(this.onSave);
+        this.state = {
+            dataProvider: [],
+            data: {
+                userId: 0,
+                username: "",
+                cmId: 0,
+                noteTitle: "",
+                ccCmId: 0,
+                personalNoteId: 0
+            }
+        };
     }
 
     componentDidMount(){
-        this.getData();     
-    }  
+        $glVars.webApi.addObserver("ViewRequiredNotes", this.getData, ['savePersonalNote']);        
+        this.getData();
+    }
 
     componentWillUnmount(){
-        this.editorDec.close();
-        this.editorDec.dom.style.display = 'none';
-        document.body.appendChild(this.editorDec.dom);
+        $glVars.webApi.removeObserver("ViewRequiredNotes");
+    }
+
+    getData(){
+        $glVars.webApi.getRequiredNotes($glVars.urlParams.id, this.getDataResult);
+    }
+
+    getDataResult(result){
+        if(!result.success){
+            FeedbackCtrl.instance.showError($glVars.i18n.appName, result.msg);
+            return;
+        }
+
+        this.props.onDataChange({nbItems: result.data.length});
+
+        this.setState({dataProvider: result.data});
+    }
+
+    render(){
+        let that = this;
+
+        let main = 
+            <div style={this.props.style}>
+                <DataGrid orderBy={true}>
+                    <DataGrid.Header>
+                        <DataGrid.Header.Row>
+                            <DataGrid.Header.Cell style={{width: 80}}>{"#"}</DataGrid.Header.Cell>
+                            <DataGrid.Header.Cell >{"Activité"}</DataGrid.Header.Cell>
+                            <DataGrid.Header.Cell >{"Élève"}</DataGrid.Header.Cell>
+                            <DataGrid.Header.Cell >{"Titre de la note"}</DataGrid.Header.Cell>
+                            <DataGrid.Header.Cell style={{width: 300}}>{"Note"}</DataGrid.Header.Cell>
+                            <DataGrid.Header.Cell  style={{width: 120}}></DataGrid.Header.Cell>
+                        </DataGrid.Header.Row>
+                    </DataGrid.Header>
+                    <DataGrid.Body>
+                        {this.state.dataProvider.map((item, index) => {
+                                let row = 
+                                    <DataGrid.Body.Row key={index} onDbClick={() => that.onEdit(item)}>
+                                        <DataGrid.Body.Cell>{index + 1}</DataGrid.Body.Cell>
+                                        <DataGrid.Body.Cell>{item.activityName}</DataGrid.Body.Cell>
+                                        <DataGrid.Body.Cell>{item.username}</DataGrid.Body.Cell>
+                                        <DataGrid.Body.Cell>{item.noteTitle}</DataGrid.Body.Cell>
+                                        <DataGrid.Body.Cell>{that.formatText(item.note.text)}</DataGrid.Body.Cell>
+                                        <DataGrid.Body.Cell>
+                                            <DropdownButton size="sm" title={<span><FontAwesomeIcon icon={faBars}/>{" Actions"}</span>}>
+                                                <Dropdown.Item onClick={() => that.onEdit(item)}><FontAwesomeIcon icon={faPencilAlt}/>{" Modifier"}</Dropdown.Item>
+                                            </DropdownButton>
+                                        </DataGrid.Body.Cell>
+                                    </DataGrid.Body.Row>
+                                return (row);                                    
+                            }
+                        )}
+                    </DataGrid.Body>
+                </DataGrid>
+
+                {this.state.data.ccCmId > 0 && 
+                        <ModalPersonalNote modalTitle={`Élève: ${this.state.data.username}`} data={this.state.data} onClose={this.onClose} onNextStudent={this.onNextStudent} 
+                                onPreviousStudent={this.onPreviousStudent} navStatus={this.getNavStatus()}/>
+                }
+            </div>;
+
+        return main;
+    }
+    
+    formatText(text){
+        let tmp = document.createElement("div");
+        tmp.innerHTML = text;
+        
+        text = tmp.textContent || tmp.innerText || ""; // Retrieve the text property of the element (cross-browser support)
+
+        return (text.length > 50 ? `${text.substr(0, 50)}...` : text);
+    }
+
+    onEdit(item){
+        if(item === null){ 
+            this.onClose();
+            return; 
+        }
+
+        let data = this.state.data;
+        data.cmId = item.cmId;
+        data.ccCmId = item.ccCmId;
+        data.noteTitle = item.noteTitle;
+        data.userId = item.userId;
+        data.username = item.username;
+        data.personalNoteId = item.personalNoteId;
+
+        this.setState({data: data});
+    }
+
+    onClose(){
+        let data = this.state.data;
+        
+        data.cmId = 0;
+        data.ccCmId = 0;
+        data.noteTitle = "";
+        data.userId = 0;
+        data.username = "";
+        data.personalNoteId = 0;
+        
+        this.setState({data: data});
+    }
+
+    onNextStudent(){
+        let index = JsNx.getItemIndex(this.state.dataProvider, 'personalNoteId', this.state.data.personalNoteId) + 1;
+
+        let item = JsNx.at(this.state.dataProvider, index, null);
+
+        this.onEdit(item);
+    }
+
+    onPreviousStudent(){
+        let index = JsNx.getItemIndex(this.state.dataProvider, 'personalNoteId', this.state.data.personalNoteId) - 1;
+
+        let item = JsNx.at(this.state.dataProvider, index, null);
+
+        this.onEdit(item);
+    }
+
+    getNavStatus(){
+        let index = JsNx.getItemIndex(this.state.dataProvider, 'personalNoteId', this.state.data.personalNoteId);
+        let result = {previous: !(index <= 0), next: !(this.state.dataProvider.length <= (index + 1))};
+        return result;
+    }
+}
+
+class NavActivities extends Component{
+    static defaultProps = {
+        userId: 0,
+        onEdit: null
+    };
+
+    constructor(props){
+        super(props);
+        
+        this.getData = this.getData.bind(this);
+        this.getDataResult = this.getDataResult.bind(this);
+        this.onSelectTab = this.onSelectTab.bind(this);
+
+        this.state = {
+            activeTab: 0, 
+            dataProvider: []
+        };
+    }
+
+    componentDidMount(){
+        $glVars.webApi.addObserver("NavActivities", this.getData, ['savePersonalNote']);        
+        this.getData();
+    }
+
+    componentWillUnmount(){
+        $glVars.webApi.removeObserver("NavActivities");
     }
 
     componentDidUpdate(prevProps){
-        if(this.editorRef.current !== null){
-            this.editorDec.show();        
-            
-            if(!this.editorRef.current.hasChildNodes()){
-                this.editorRef.current.appendChild(this.editorDec.dom);   
-            }
-        }
-
         if(prevProps.userId !== this.props.userId){
             this.getData();
         }
     }
 
     getData(){
-        $glVars.webApi.getPersonalNote(this.props.ccCmId, this.props.cmId, this.props.userId, this.getDataResult);        
-    }
-
-    getDataResult(result){         
-        if(result.success){
-            this.setState(this.prepareNewState(result.data, null));
+        if(this.props.userId === 0){
+            this.setState({dataProvider: []});
+            return;
         }
-        else{
-            $glVars.feedback.showError($glVars.i18n.tags.appname, result.msg);
-        }
-    }
-
-    prepareNewState(data, dropdownLists){
-        data = data || null;
-        dropdownLists = dropdownLists || null;
-        let result = {data: null, dropdownLists: {}};
         
-        if(data !== null){
-            result.data = data;
+        $glVars.webApi.getPersonalNotes($glVars.urlParams.id, this.props.userId, this.getDataResult);
+    }
+
+    getDataResult(result){
+        if(!result.success){
+            FeedbackCtrl.instance.showError($glVars.i18n.appName, result.msg);
+            return;
         }
 
-        return result;
-    }
-
-    render(){
-        if(this.state.data === null){return null;}
-
-        let data = this.state.data;
-        let student = null;
-        let teacher = null;
-        let suggestedNote = null;
-        let styleText = {minHeight: 50, maxHeight: 400, overflowY: "auto", border: "1px solid #ddd", backgroundColor: "#fafafa", padding: 10};
-
-        // it is a student?
-        if(this.state.mode === "s"){
-            this.editorDec.setValue(data.note.text);       
-            student = <div ref={this.editorRef}></div>;
-            teacher = <div style={styleText} dangerouslySetInnerHTML={{__html: data.feedback}}></div>;
-        }
-        // it is a teacher
-        else if(this.state.mode === "t"){
-            this.editorDec.setValue(data.feedback);       
-            teacher = <div ref={this.editorRef}></div>;
-            student =  <div style={styleText} dangerouslySetInnerHTML={{__html: data.note.text}}></div>;
-            suggestedNote = <div style={styleText} dangerouslySetInnerHTML={{__html: data.suggestedNote}}></div>;
-        }
-        else{
-            console.log(this.state);
-            return null;
-        }
-        let styleHeader = {cursor: "pointer"};
-        
-        let main =
-            <div>
-                <h5 className="text-truncate">{`Note: ${this.state.data.noteTitle}`}</h5>
-                <Card>
-                    <Card.Header style={styleHeader} onClick={() => this.onCollapse("note")}>
-                        {"Note de l'élève"}
-                    </Card.Header>
-                    <Collapse in={this.state.collapse.note}>
-                        <Card.Body>{student}</Card.Body>
-                    </Collapse>
-                </Card>
-                <br/>
-                {suggestedNote !== null &&
-                    <div>
-                        <Card>
-                            <Card.Header style={styleHeader} onClick={() => this.onCollapse("suggestedNote")}>
-                                {"Réponse suggérée"}
-                            </Card.Header>
-                            <Collapse in={this.state.collapse.suggestedNote}>
-                                <Card.Body>{suggestedNote}</Card.Body>
-                            </Collapse>
-                        </Card>
-                        <br/>
-                    </div>
-                }
-                <Card>
-                    <Card.Header style={styleHeader} onClick={() => this.onCollapse("feedback")}>{"Rétroaction de l'enseignant"}</Card.Header>
-                    <Collapse in={this.state.collapse.feedback}>
-                        <Card.Body>{teacher}</Card.Body>
-                    </Collapse>
-                </Card>
-            </div>;       
-
-        return (main);
-    }
-   
-    onCollapse(name){
-        let data = this.state.collapse;
-        data[name] = !data[name];
-
-        let tmp = this.onEditorDataChange();
-
-        this.setState({collapse: data, data: tmp.data});
-    }
-
-    onDataChange(event){
-        let data = this.state.data;
-        data[event.target.name] = event.target.value;
-        this.setState({data: data})
-    }
-    
-    onEditorDataChange(){
-        let data = JsNx.clone(this.state.data);
-        let flags = {mode: this.state.mode, teacherFeedbackUpdated: 0};
-
-        if(this.state.mode === "s"){
-            data.note.text = this.editorDec.getValue().text;
-        }
-        // it is a teacher
-        else if(this.state.mode === "t"){
-            let tmp = this.editorDec.getValue().text;
-            flags.teacherFeedbackUpdated = (tmp !== data.feedback ? 1 : 0);
-            data.feedback = tmp;
-        }        
-
-        data.userId = this.props.userId;
-
-        return {data: data, flags: flags};
-    }
-
-    onSave(callback){
-        let tmp = this.onEditorDataChange();
-        
-        $glVars.webApi.savePersonalNote(tmp.data, tmp.flags, (result) => this.onSaveResult(result, callback));
-    }
-
-    onSaveResult(result, callback){
-        if(result.success){
-            this.setState(this.prepareNewState(result.data), () => {
-                callback(result);
-            });
-
-            $glVars.feedback.showInfo($glVars.i18n.tags.appName, $glVars.i18n.tags.msgSuccess, 3);
-        }
-        else{
-            $glVars.feedback.showError($glVars.i18n.tags.appName, result.msg);
-        }
-    }
-}
-
-class ModalPersonalNote extends Component{
-    static defaultProps = {        
-        data: {},
-        onClose: null,
-        onPreviousStudent: null,
-        onNextStudent: null,
-        navStatus: {previous: false, next: false},
-        modalTitle: ""
-    };
-
-    constructor(props){
-        super(props);
-
-        this.onSave = this.onSave.bind(this);
-        this.setOnSave = this.setOnSave.bind(this);
-        this.onClose = this.onClose.bind(this);
-
-        this.state = {onSave: null};
-    }
-
-    render(){
-        let personalNote = <PersonalNoteForm userId={this.props.data.userId} cmId={this.props.data.cmId} setOnSave={this.setOnSave} ccCmId={this.props.data.ccCmId}/>;
-        let footer = 
-            <div className="btn-tollbar" style={{width: "100%", display: "flex", justifyContent: "space-between"}}>
-                <div className="btn-group">
-                    {this.props.onNextStudent && <Button variant="primary" onClick={this.props.onPreviousStudent} disabled={!this.props.navStatus.previous}><FontAwesomeIcon icon={faArrowLeft}/>{" " + $glVars.i18n.tags.previousStudent}</Button>}
-                    {this.props.onPreviousStudent && <Button variant="primary"  onClick={this.props.onNextStudent} disabled={!this.props.navStatus.next}>{$glVars.i18n.tags.nextStudent + " "}<FontAwesomeIcon icon={faArrowRight}/></Button>}
-                </div>
-                <div className="btn-group">
-                    <Button  variant="secondary" onClick={this.onClose}>{"Annuler"}</Button>
-                    {this.props.onNextStudent && <Button  variant="success"  onClick={() => this.onSave(false)}>{"Enregistrer"}</Button>}
-                    <Button  variant="success"  onClick={() => this.onSave(true)}>{"Enregistrer et fermer"}</Button>
-                </div>
-            </div>;
-                
-        let main = <Modal title={this.props.modalTitle} body={personalNote} footer={footer} onClose={this.props.onClose} />;
-
-        return (main);
-    }
-
-    setOnSave(onSave){
-        this.setState({onSave: onSave})
-    }
-
-    onSave(shouldClose){
-        let that = this;
-
-        if(this.state.onSave){
-            this.state.onSave((result) => {
-                if(result.success){
-                    if(shouldClose){
-                        that.onClose();
+        // If the user is trying to load automatically some note by URL
+        if(!$glVars.urlParams.loaded){
+            let item = null;
+            for(let activity of result.data){
+                for(let note of activity){
+                    if((note.ccCmId === $glVars.urlParams.ccCmId) && (note.cmId === $glVars.urlParams.cmId)){
+                        item = note;
                     }
                 }
-            });
+            }
+
+            $glVars.urlParams.loaded = true;
+
+            this.setState({dataProvider: result.data}, () => this.props.onEdit(item));
         }
-    }
-
-    onClose(){
-        this.props.onClose();
-    }
-}
-
-class NavActivities extends Component{
-    static defaultProps = {
-        dataProvider: [],
-        onEdit: null
-    };
-
-    constructor(props){
-        super(props);
-
-        this.onSelectTab = this.onSelectTab.bind(this);
-
-        this.state = {
-            activeTab: 0, 
-        };
+        else{
+            this.setState({dataProvider: result.data});
+        }
     }
 
     render(){
@@ -295,7 +371,7 @@ class NavActivities extends Component{
                 <Row>
                     <Col sm={12}>
                         <Nav variant="pills" className="flex-row">
-                            {this.props.dataProvider.map(function(items, index){
+                            {this.state.dataProvider.map(function(items, index){
                                 let activityName = JsNx.at(items, 0).activityName;
                                 return  <Nav.Item key={index} >
                                             <Nav.Link eventKey={index} className="text-truncate" style={{width: '290px', textAlign: "center"}} title={activityName}>
@@ -310,7 +386,7 @@ class NavActivities extends Component{
                 <Row>
                     <Col sm={12}>
                         <Tab.Content>
-                            {this.props.dataProvider.map(function(items, index){
+                            {this.state.dataProvider.map(function(items, index){
                                 let datagrid = 
                                 <DataGrid orderBy={true}>
                                     <DataGrid.Header>
@@ -325,7 +401,7 @@ class NavActivities extends Component{
                                     <DataGrid.Body>
                                         {items.map((item, index2) => {
                                                 let row = 
-                                                    <DataGrid.Body.Row key={index2} onDbClick={() => that.props.onEdit(item)}>
+                                                    <DataGrid.Body.Row key={index2} onDbClick={() => that.props.onEdit(item)} alert={(item.notifyTeacher === 1 ? "warning" : "")}>
                                                         <DataGrid.Body.Cell>{index2 + 1}</DataGrid.Body.Cell>
                                                         <DataGrid.Body.Cell><FontAwesomeIcon icon={faEye}/>{` ${item.noteTitle}`}</DataGrid.Body.Cell>
                                                         <DataGrid.Body.Cell>{that.formatText(item.note.text)}</DataGrid.Body.Cell>
@@ -365,22 +441,58 @@ class NavActivities extends Component{
     }
 }
 
-class Notebook extends Component{
-    static defaultProps = {
-    };
-
+export class TeacherNotebook extends Component{
     constructor(props){
         super(props);
 
-        this.getData = this.getData.bind(this);
-        this.getDataResult = this.getDataResult.bind(this);
+        this.onDataChange = this.onDataChange.bind(this);
+        this.onSetTab = this.onSetTab.bind(this);
+
+        this.state = {tab: $glVars.urlParams.tab, nbFeedback: 0};
+    }
+    
+    render(){
+        let main = 
+            <div>
+                <Tabs activeKey={this.state.tab} id="tabTeacherNotebook" onSelect={this.onSetTab}>
+                    <Tab eventKey={0} title={<span><FontAwesomeIcon icon={faCompass}/>{" Consulter des notes"}</span>}>
+                        <ViewNavGroupAndStudents style={{padding: "1rem"}}></ViewNavGroupAndStudents>
+                    </Tab>
+                    <Tab eventKey={1} title={<span><FontAwesomeIcon icon={faCommentDots}/>{" Rétroaction manquante "}<Badge variant="light">{this.state.nbFeedback}</Badge></span>}>
+                        <ViewRequiredNotes style={{padding: "1rem"}} onDataChange={this.onDataChange}/>
+                    </Tab>
+                    <Tab eventKey={2} title={<span><FontAwesomeIcon icon={faPrint}/>{" Impression"}</span>}>
+                        <ViewPrintingNotes style={{padding: "1rem"}} />
+                    </Tab>
+                </Tabs>
+            </div>;
+
+        return (main);
+    } 
+
+    onSetTab(tab){
+        this.setState({tab: tab});
+    }
+
+    onDataChange(item){
+        this.setState({nbFeedback: item.nbItems});
+    }
+}
+
+export class StudentNotebook extends Component{
+    static defaultProps = {
+        userId: 0
+    };
+    
+    constructor(props){
+        super(props);
+
         this.onEdit = this.onEdit.bind(this);
         this.onClose = this.onClose.bind(this);
 
         this.state = {
-            dataProvider: [], 
             data: {
-                userId: 0,
+                userId: props.userId,
                 username: "",
                 cmId: 0,
                 noteTitle: "",
@@ -388,53 +500,25 @@ class Notebook extends Component{
             }
         };
     }
-    
-    componentDidMount(){
-        $glVars.webApi.addObserver("Notebook", this.getData, ['savePersonalNote']);        
-        this.getData();
-    }
 
-    componentWillUnmount(){
-        $glVars.webApi.removeObserver("Notebook");
-    }
-
-    getData(){
-        if(this.state.data.userId === 0){
-            this.setState({dataProvider: []});
-            return;
-        }
-        
-        $glVars.webApi.getPersonalNotes($glVars.urlParams.id, this.state.data.userId, this.getDataResult);
-    }
-
-    getDataResult(result){
-        if(!result.success){
-            FeedbackCtrl.instance.showError($glVars.i18n.appName, result.msg);
-            return;
-        }
-
-        // If the user is trying to load automatically some note by URL
-        if(!$glVars.urlParams.loaded){
-            let item = null;
-            for(let activity of result.data){
-                for(let note of activity){
-                    if((note.ccCmId === $glVars.urlParams.ccCmId) && (note.cmId === $glVars.urlParams.cmId)){
-                        item = note;
-                    }
-                }
-            }
-
-            $glVars.urlParams.loaded = true;
-
-            this.setState({dataProvider: result.data}, () => this.onEdit(item));
-        }
-        else{
-            this.setState({dataProvider: result.data});
-        }
-    }
-    
     render(){
-        return (null);
+        let main = 
+            <div>  
+                {this.state.data.userId > 0 &&
+                    <div>
+                        <ActionBar cmId={$glVars.urlParams.id} userId={this.state.data.userId}/>
+
+                        <hr/>
+
+                        <NavActivities userId={this.state.data.userId} onEdit={this.onEdit}/>
+                    
+                        {this.state.data.ccCmId > 0 && 
+                                <ModalPersonalNote modalTitle={`Cahier de traces - Note personnelle`} data={this.state.data} onClose={this.onClose} />}
+                    </div>
+                }
+            </div>;
+
+        return (main);
     }
 
     onEdit(item){
@@ -444,113 +528,18 @@ class Notebook extends Component{
         data.cmId = item.cmId;
         data.ccCmId = item.ccCmId;
         data.noteTitle = item.noteTitle;
+
         this.setState({data: data});
     }
 
     onClose(){
         let data = this.state.data;
+        
         data.cmId = 0;
         data.ccCmId = 0;
         data.noteTitle = "";
+        
         this.setState({data: data});
-    }
-}
-
-export class TeacherNotebook extends Notebook{
-    constructor(props){
-        super(props);
-
-        this.onSelectUser = this.onSelectUser.bind(this);
-        this.onNextStudent = this.onNextStudent.bind(this);
-        this.onPreviousStudent = this.onPreviousStudent.bind(this);
-
-        this.groupUserSelect = React.createRef();
-    }
-    
-    render(){
-        let main = 
-            <div>  
-                <GroupUserSelect ref={this.groupUserSelect} onSelectUser={this.onSelectUser}/>
-
-                {this.state.data.userId > 0 &&
-                    <div>
-                        <hr/>
-                        <ActionBar cmId={$glVars.urlParams.id} userId={this.state.data.userId}/>
-                        <hr/>
-                        <NavActivities dataProvider={this.state.dataProvider} onEdit={this.onEdit}/>
-                    
-                        {this.state.data.ccCmId > 0 && 
-                                <ModalPersonalNote modalTitle={`Élève: ${this.state.data.username}`} data={this.state.data} onClose={this.onClose} onNextStudent={this.onNextStudent} 
-                                        onPreviousStudent={this.onPreviousStudent} navStatus={this.getNavStatus()}/>}
-                    </div>
-                }
-            </div>;
-
-        return (main);
-    }
-
-    onSelectUser(userId, username){
-        console.log(userId, username)
-        let data = this.state.data;
-        data.userId = userId;
-        data.username = username;
-        this.setState({data: data}, this.getData);
-    }
-
-    onNextStudent(){
-        this.groupUserSelect.current.onNext();
-    }
-
-    onPreviousStudent(){
-        this.groupUserSelect.current.onPrevious();
-    }
-
-    getNavStatus(){
-        if(this.groupUserSelect.current){
-            return this.groupUserSelect.current.getNavStatus();
-        }
-    }
-}
-
-export class StudentNotebook extends Notebook{
-    static defaultProps = {
-        userId: 0
-    };
-
-    constructor(props){
-        super(props);
-
-        this.state = {
-            dataProvider: [], 
-            activeTab: 0, 
-            data: {
-                userId: this.props.userId,
-                username: "",
-                cmId: 0,
-                noteTitle: "",
-                ccCmId: 0
-            }
-        };
-    }
-    
-    render(){
-        let main = 
-            <div>  
-                {this.state.data.userId > 0 &&
-                    <div>
-                        <ActionBar cmId={$glVars.urlParams.id} userId={this.state.data.userId}/>
-
-                        <hr/>
-
-                        <NavActivities dataProvider={this.state.dataProvider} onEdit={this.onEdit}/>
-                    
-                        {this.state.data.ccCmId > 0 && 
-                                <ModalPersonalNote modalTitle={`Cahier de traces - Note personnelle`} data={this.state.data} onClose={this.onClose} />}
-                    </div>
-                }
-            </div>;
-
-        return (main);
     }
 }
 
@@ -565,8 +554,6 @@ class ActionBar extends Component{
             <div style={{marginBottom: "1rem"}}>
                 <a href={this.getPrintLink(1)} target="_blank"><FontAwesomeIcon icon={faPrint}/>{" Imprimer des notes"}</a>
             </div>;
-
-//<a href={this.getPrintLink(1)} target="_blank">{"Imprimer des notes + Rétroaction"}</a>
 
         return main;
     }
@@ -598,7 +585,7 @@ class GroupUserSelect extends Component{
     componentDidMount(){
         this.getData();
     }
-    
+   
     getData(){
         $glVars.webApi.getEnrolledUserList($glVars.urlParams.id, this.getDataResult);
     }
@@ -645,25 +632,36 @@ class GroupUserSelect extends Component{
         }
 
         let main = 
-            <Form>
-                <Form.Row>
-                    <Form.Group as={Col}>
-                        <Form.Label>Sélectionnez le groupe:</Form.Label>
-                        <ComboBox placeholder={"Sélectionnez votre option"} options={this.state.groupList} onChange={this.onSelectGroup} value={this.state.selectedGroupId}/>
-                    </Form.Group>
-                </Form.Row>
-                <Form.Row>
-                    <Form.Group  as={Col}>
-                        <Form.Label>Sélectionnez l'utilisateur:</Form.Label>
-                        <ComboBox placeholder={"Sélectionnez votre option"} options={this.state.userListFiltered} onChange={this.onSelectUser} value={value}/>
-                    </Form.Group>
-                </Form.Row>
-                <ButtonGroup style={{textAlign: "center", display: "block"}}>
-                    <Button variant="primary" onClick={this.onPrevious} disabled={(this.state.selectedUserIndex <= -1)}><FontAwesomeIcon icon={faArrowLeft}/>{" " + $glVars.i18n.tags.previousStudent}</Button>
-                    <Button variant="primary" onClick={this.onNext} disabled={(this.state.userListFiltered.length <= (this.state.selectedUserIndex + 1))}>{$glVars.i18n.tags.nextStudent + " "}<FontAwesomeIcon icon={faArrowRight}/></Button>
-                </ButtonGroup>
-            </Form>;
+            <div>
+                <Row>
+                    <Col sm={6}>
+                        <Form.Group as={Col}>
+                            <Form.Label>Sélectionnez le groupe:</Form.Label>
+                            <ComboBox placeholder={"Sélectionnez votre option"} options={this.state.groupList} onChange={this.onSelectGroup} value={this.state.selectedGroupId}/>
+                        </Form.Group>
+                    </Col>
+                    <Col sm={6}>
+                        <Row>
+                            <Col sm={12}>
+                                <Form.Group  as={Col}>
+                                    <Form.Label>Sélectionnez l'élève:</Form.Label>
+                                    <ComboBox placeholder={"Sélectionnez votre option"} options={this.state.userListFiltered} onChange={this.onSelectUser} value={value} style={{float: "left", width: "95%"}}/>
+                                    <ButtonGroup style={{display: "flex"}}>
+                                        <Button variant="link" onClick={this.onPrevious} disabled={(this.state.selectedUserIndex <= -1)}><FontAwesomeIcon icon={faArrowLeft}/></Button>
+                                        <Button variant="link" onClick={this.onNext} disabled={(this.state.userListFiltered.length <= (this.state.selectedUserIndex + 1))}><FontAwesomeIcon icon={faArrowRight}/></Button>
+                                    </ButtonGroup>
+                                </Form.Group>
+                                
+                            </Col>
+                        </Row>
+                    </Col>               
+                </Row>
+            </div>;
 
+/*<ButtonGroup style={{display: "flex", justifyContent: "center"}}>
+                                    <Button variant="secondary" onClick={this.onPrevious} disabled={(this.state.selectedUserIndex <= -1)}><FontAwesomeIcon icon={faArrowLeft}/>{" " + $glVars.i18n.tags.previousStudent}</Button>
+                                    <Button variant="secondary" onClick={this.onNext} disabled={(this.state.userListFiltered.length <= (this.state.selectedUserIndex + 1))}>{$glVars.i18n.tags.nextStudent + " "}<FontAwesomeIcon icon={faArrowRight}/></Button>
+                                </ButtonGroup>*/
         return (main);
     }
 

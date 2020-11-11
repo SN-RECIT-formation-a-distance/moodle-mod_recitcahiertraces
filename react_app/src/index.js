@@ -29,6 +29,7 @@ class App extends Component {
         $glVars.urlParams.ccCmId = parseInt($glVars.urlParams.ccCmId, 10) || 0;
         $glVars.urlParams.cmId = parseInt($glVars.urlParams.cmId, 10) || 0;
         $glVars.urlParams.userId = parseInt($glVars.urlParams.userId, 10) || 0;
+        $glVars.urlParams.tab = parseInt($glVars.urlParams.tab, 10) || 0;
 
         let mode = (UtilsMoodle.checkRoles($glVars.signedUser.roles, UtilsMoodle.rolesL2) ? 't' : 's');
 
@@ -46,11 +47,11 @@ class App extends Component {
     render() {       
         let main =
             <div>
+                <Loading webApi={$glVars.webApi}><FontAwesomeIcon icon={faSpinner} spin/></Loading>
                 {this.state.mode  === 't' ? <TeacherView/> : <StudentView/>}
                 {$glVars.feedback.msg.map((item, index) => {  
                     return (<VisualFeedback key={index} id={index} msg={item.msg} type={item.type} title={item.title} timeout={item.timeout}/>);                                    
                 })}
-                <Loading webApi={$glVars.webApi}><FontAwesomeIcon icon={faSpinner} spin/></Loading>
             </div>
 
         return (main);
