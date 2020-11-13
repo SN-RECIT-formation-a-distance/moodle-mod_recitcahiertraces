@@ -82,6 +82,8 @@ class ViewNavGroupAndStudents extends Component{
                             <ModalPersonalNote modalTitle={`Élève: ${this.state.data.username}`} data={this.state.data} onClose={this.onClose} onNextStudent={this.onNextStudent} 
                                 onPreviousStudent={this.onPreviousStudent} navStatus={this.getNavStatus()}/>
                         }  
+                        <hr/>
+                        <ActionBar cmId={$glVars.urlParams.id} userId={this.state.data.userId}/>
                     </div>                    
                 }            
                           
@@ -373,9 +375,15 @@ class NavActivities extends Component{
                         <Nav variant="pills" className="flex-row">
                             {this.state.dataProvider.map(function(items, index){
                                 let activityName = JsNx.at(items, 0).activityName;
-                                return  <Nav.Item key={index} >
-                                            <Nav.Link eventKey={index} className="text-truncate" style={{width: '290px', textAlign: "center"}} title={activityName}>
-                                                {activityName}
+
+                                let pctProgress = that.getPctProgress(items);
+
+                                return  <Nav.Item key={index} className="m-1 bg-light">
+                                            <Nav.Link eventKey={index}>
+                                                <div  style={{display: "flex", width: '315px', justifyContent: "space-evenly"}} title={`${activityName} (${pctProgress.toFixed(0)}%)`}>
+                                                    <span className="text-truncate" >{`${activityName} `}</span>
+                                                    <Badge pill  variant="light">{` ${pctProgress.toFixed(0)}%`}</Badge>
+                                                </div>
                                             </Nav.Link>
                                         </Nav.Item>;
                             })}
@@ -416,8 +424,14 @@ class NavActivities extends Component{
                                             }
                                         )}
                                     </DataGrid.Body>
-                                </DataGrid>
-                                return <Tab.Pane key={index} eventKey={index}>{datagrid}</Tab.Pane>;
+                                </DataGrid>;
+
+                                let result=
+                                    <Tab.Pane key={index} eventKey={index}>
+                                        {datagrid}
+                                    </Tab.Pane>;
+
+                                return result;
                             })}
                         </Tab.Content>
                     </Col>
@@ -427,6 +441,21 @@ class NavActivities extends Component{
         return main;
     }
     
+    getPctProgress(items){
+        let result = 0;
+
+        let done = 0;
+        for(let item of items){
+            if(item.isTemplate === 0){
+                done++;
+            }
+        }
+
+        result = done / items.length * 100;
+
+        return result;
+    }
+
     formatText(text){
         let tmp = document.createElement("div");
         tmp.innerHTML = text;
@@ -460,9 +489,6 @@ export class TeacherNotebook extends Component{
                     </Tab>
                     <Tab eventKey={1} title={<span><FontAwesomeIcon icon={faCommentDots}/>{" Rétroaction manquante "}<Badge variant="light">{this.state.nbFeedback}</Badge></span>}>
                         <ViewRequiredNotes style={{padding: "1rem"}} onDataChange={this.onDataChange}/>
-                    </Tab>
-                    <Tab eventKey={2} title={<span><FontAwesomeIcon icon={faPrint}/>{" Impression"}</span>}>
-                        <ViewPrintingNotes style={{padding: "1rem"}} />
                     </Tab>
                 </Tabs>
             </div>;
