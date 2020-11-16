@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { ButtonGroup, Form, Button, Col, Tab, DropdownButton, Dropdown, Row, Nav, Tabs, Badge} from 'react-bootstrap';
-import {faArrowLeft, faArrowRight, faPencilAlt, faBars, faEye, faPrint, faCompass, faCommentDots} from '@fortawesome/free-solid-svg-icons';
+import {faArrowLeft, faArrowRight, faPencilAlt, faBars, faEye, faPrint, faCompass, faCommentDots, faTasks, faCheckSquare, faSquare} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {FeedbackCtrl, DataGrid, ComboBox} from '../libs/components/Components';
 import {UtilsMoodle, JsNx} from '../libs/utils/Utils';
@@ -9,6 +9,7 @@ import {$glVars} from '../common/common';
 
 class ViewPrintingNotes extends Component{
     static defaultProps = {
+        enrolledUserList: [],
         style: null
     };
 
@@ -17,15 +18,13 @@ class ViewPrintingNotes extends Component{
 
         this.onSelectUser = this.onSelectUser.bind(this);
 
-        this.groupUserSelect = React.createRef();
-
         this.state = {userId: 0};
     }
 
     render(){
         let main =
             <div style={this.props.style}>
-                <GroupUserSelect ref={this.groupUserSelect} onSelectUser={this.onSelectUser}/>
+                <GroupUserSelect dataProvider={this.props.enrolledUserList} onSelectUser={this.onSelectUser}/>
 
                 <hr/>
                 {this.state.userId > 0 &&
@@ -44,6 +43,7 @@ class ViewPrintingNotes extends Component{
 
 class ViewNavGroupAndStudents extends Component{
     static defaultProps = {
+        enrolledUserList: [],
         style: null
     };
 
@@ -72,7 +72,7 @@ class ViewNavGroupAndStudents extends Component{
     render(){
         let main =
             <div style={this.props.style}>
-                <GroupUserSelect ref={this.groupUserSelect} onSelectUser={this.onSelectUser}/>
+                <GroupUserSelect ref={this.groupUserSelect} dataProvider={this.props.enrolledUserList} onSelectUser={this.onSelectUser}/>
 
                 {this.state.data.userId > 0 &&
                     <div>
@@ -82,8 +82,6 @@ class ViewNavGroupAndStudents extends Component{
                             <ModalPersonalNote modalTitle={`Élève: ${this.state.data.username}`} data={this.state.data} onClose={this.onClose} onNextStudent={this.onNextStudent} 
                                 onPreviousStudent={this.onPreviousStudent} navStatus={this.getNavStatus()}/>
                         }  
-                        <hr/>
-                        <ActionBar cmId={$glVars.urlParams.id} userId={this.state.data.userId}/>
                     </div>                    
                 }            
                           
@@ -200,7 +198,6 @@ class ViewRequiredNotes extends Component{
                             <DataGrid.Header.Cell >{"Activité"}</DataGrid.Header.Cell>
                             <DataGrid.Header.Cell >{"Élève"}</DataGrid.Header.Cell>
                             <DataGrid.Header.Cell >{"Titre de la note"}</DataGrid.Header.Cell>
-                            <DataGrid.Header.Cell style={{width: 300}}>{"Note"}</DataGrid.Header.Cell>
                             <DataGrid.Header.Cell  style={{width: 120}}></DataGrid.Header.Cell>
                         </DataGrid.Header.Row>
                     </DataGrid.Header>
@@ -212,7 +209,6 @@ class ViewRequiredNotes extends Component{
                                         <DataGrid.Body.Cell>{item.activityName}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell>{item.username}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell>{item.noteTitle}</DataGrid.Body.Cell>
-                                        <DataGrid.Body.Cell>{that.formatText(item.note.text)}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell>
                                             <DropdownButton size="sm" title={<span><FontAwesomeIcon icon={faBars}/>{" Actions"}</span>}>
                                                 <Dropdown.Item onClick={() => that.onEdit(item)}><FontAwesomeIcon icon={faPencilAlt}/>{" Modifier"}</Dropdown.Item>
@@ -234,15 +230,6 @@ class ViewRequiredNotes extends Component{
         return main;
     }
     
-    formatText(text){
-        let tmp = document.createElement("div");
-        tmp.innerHTML = text;
-        
-        text = tmp.textContent || tmp.innerText || ""; // Retrieve the text property of the element (cross-browser support)
-
-        return (text.length > 50 ? `${text.substr(0, 50)}...` : text);
-    }
-
     onEdit(item){
         if(item === null){ 
             this.onClose();
@@ -293,6 +280,165 @@ class ViewRequiredNotes extends Component{
         let index = JsNx.getItemIndex(this.state.dataProvider, 'personalNoteId', this.state.data.personalNoteId);
         let result = {previous: !(index <= 0), next: !(this.state.dataProvider.length <= (index + 1))};
         return result;
+    }
+}
+
+class ViewProgression extends Component{
+    static defaultProps = {
+        style: null
+    };
+
+    constructor(props){
+        super(props);
+
+        this.getData = this.getData.bind(this);
+        this.getDataResult = this.getDataResult.bind(this);
+        this.onDetail = this.onDetail.bind(this);
+        this.onBack = this.onBack.bind(this);
+
+        this.state = {dataProvider: [], userId: 0};
+    }
+
+    componentDidMount(){
+        this.getData();
+    }
+
+    componentWillUnmount(){
+    }
+
+    getData(){
+        $glVars.webApi.getStudentsProgression($glVars.urlParams.id, this.getDataResult);
+    }
+
+    getDataResult(result){
+        if(!result.success){
+            FeedbackCtrl.instance.showError($glVars.i18n.appName, result.msg);
+            return;
+        }
+
+        this.setState({dataProvider: result.data});
+    }
+
+    render(){
+        let main = 
+            <div style={this.props.style}>
+                {this.state.userId > 0 ? this.getDetails() : this.getSummary()}
+            </div>;
+
+        return main;
+    }
+
+    getSummary(){
+        let data = {};
+        
+        for(let item of this.state.dataProvider){
+            if(!data.hasOwnProperty(`user${item.userId}`)){
+                data[`user${item.userId}`] = {username: item.username, userId: item.userId, nbDone: 0, nbTotal: 0};
+            }
+
+            data[`user${item.userId}`].nbDone += item.done;
+            data[`user${item.userId}`].nbTotal += 1;
+        }
+
+        let rows = [];
+        for(let attr in data){
+            let pct = (data[attr].nbDone / data[attr].nbTotal * 100);
+            let row = 
+                <DataGrid.Body.Row key={rows.length}>
+                    <DataGrid.Body.Cell>{rows.length + 1}</DataGrid.Body.Cell>
+                    <DataGrid.Body.Cell>{data[attr].username}</DataGrid.Body.Cell>
+                    <DataGrid.Body.Cell sortValue={pct}>
+                        <Button onClick={() => this.onDetail(data[attr].userId)} variant="link">{`${pct.toFixed(0)}%`}</Button>
+                    </DataGrid.Body.Cell>
+                </DataGrid.Body.Row>;
+
+            rows.push(row);
+        }
+
+        let result = 
+        <DataGrid orderBy={true}>
+            <DataGrid.Header>
+                <DataGrid.Header.Row>
+                    <DataGrid.Header.Cell style={{width: 80}}>{"#"}</DataGrid.Header.Cell>
+                    <DataGrid.Header.Cell>{"Élève"}</DataGrid.Header.Cell>
+                    <DataGrid.Header.Cell  style={{width: 120}}>{"Progrès"}</DataGrid.Header.Cell>
+                </DataGrid.Header.Row>
+            </DataGrid.Header>
+            <DataGrid.Body>
+               {rows}
+            </DataGrid.Body>
+        </DataGrid>;
+
+        return result;
+    }
+
+    onDetail(userId){
+        this.setState({userId: userId});
+    }
+
+    getDetails(){
+        let data = {};
+        let lastActivity = null;
+        let username = "";
+
+        for(let item of this.state.dataProvider){
+            if(item.userId !== this.state.userId){ continue; }
+
+            if(username.length === 0){
+                username = item.username;
+            }
+
+            if(lastActivity !== item.cmId){
+                data[`cm${item.cmId}`] = {nbDone: 0, cmName: item.activityName, items: []};
+                lastActivity = item.cmId;
+            }
+
+            data[`cm${item.cmId}`].nbDone += item.done;
+            data[`cm${item.cmId}`].items.push(item);
+        }
+
+        let grids = [];
+        
+        for(let attr in data){
+            let grid = 
+                <DataGrid key={grids.length} orderBy={true} caption={`${data[attr].cmName} (${(data[attr].nbDone/data[attr].items.length*100).toFixed(0)}%)`}>
+                    <DataGrid.Header>
+                        <DataGrid.Header.Row>
+                            <DataGrid.Header.Cell style={{width: 80}}>{"#"}</DataGrid.Header.Cell>
+                            <DataGrid.Header.Cell >{"Titre de la note"}</DataGrid.Header.Cell>
+                            <DataGrid.Header.Cell  style={{width: 80}}></DataGrid.Header.Cell>
+                        </DataGrid.Header.Row>
+                    </DataGrid.Header>
+                    <DataGrid.Body>
+                        {data[attr].items.map((item, index) => {
+                                let row = 
+                                    <DataGrid.Body.Row key={index}>
+                                        <DataGrid.Body.Cell>{index + 1}</DataGrid.Body.Cell>
+                                        <DataGrid.Body.Cell>{item.noteTitle}</DataGrid.Body.Cell>
+                                        <DataGrid.Body.Cell style={{textAlign: "center"}}>{(item.done === 1 ?<FontAwesomeIcon icon={faCheckSquare}/> : <FontAwesomeIcon icon={faSquare}/>)}</DataGrid.Body.Cell>
+                                    </DataGrid.Body.Row>
+                                return (row);                                    
+                            }
+                        )}
+                    </DataGrid.Body>
+                </DataGrid>;
+
+            grids.push(grid);
+        }
+                
+        let main =
+            <div>
+                <Button onClick={this.onBack}><FontAwesomeIcon icon={faArrowLeft}/>{" Retour"}</Button>
+                <br/><br/>
+                <h2>{username}</h2>
+                {grids}
+            </div>;
+
+        return main;
+    }
+
+    onBack(){
+        this.setState({userId: 0})
     }
 }
 
@@ -403,17 +549,21 @@ class NavActivities extends Component{
                                             <DataGrid.Header.Cell >{"Titre de la note"}</DataGrid.Header.Cell>
                                             <DataGrid.Header.Cell style={{width: 300}}>{"Note"}</DataGrid.Header.Cell>
                                             <DataGrid.Header.Cell style={{width: 300}}>{"Rétroaction"}</DataGrid.Header.Cell>
+                                            <DataGrid.Header.Cell style={{width: 80}}></DataGrid.Header.Cell>
                                             <DataGrid.Header.Cell  style={{width: 120}}></DataGrid.Header.Cell>
                                         </DataGrid.Header.Row>
                                     </DataGrid.Header>
                                     <DataGrid.Body>
                                         {items.map((item, index2) => {
                                                 let row = 
-                                                    <DataGrid.Body.Row key={index2} onDbClick={() => that.props.onEdit(item)} alert={(item.notifyTeacher === 1 ? "warning" : "")}>
+                                                    <DataGrid.Body.Row key={index2} onDbClick={() => that.props.onEdit(item)}>
                                                         <DataGrid.Body.Cell>{index2 + 1}</DataGrid.Body.Cell>
                                                         <DataGrid.Body.Cell><FontAwesomeIcon icon={faEye}/>{` ${item.noteTitle}`}</DataGrid.Body.Cell>
                                                         <DataGrid.Body.Cell>{that.formatText(item.note.text)}</DataGrid.Body.Cell>
                                                         <DataGrid.Body.Cell>{that.formatText(item.feedback)}</DataGrid.Body.Cell>
+                                                        <DataGrid.Body.Cell style={{textAlign: "center"}}>{(item.notifyTeacher === 1 ? 
+                                                            <Button title="Rétroaction requise" size="sm" variant="primary"><FontAwesomeIcon icon={faCommentDots}/></Button> : null)}
+                                                        </DataGrid.Body.Cell>
                                                         <DataGrid.Body.Cell>
                                                             <DropdownButton size="sm" title={<span><FontAwesomeIcon icon={faBars}/>{" Actions"}</span>}>
                                                                 <Dropdown.Item onClick={() => that.props.onEdit(item)}><FontAwesomeIcon icon={faPencilAlt}/>{" Modifier"}</Dropdown.Item>
@@ -474,21 +624,46 @@ export class TeacherNotebook extends Component{
     constructor(props){
         super(props);
 
+        this.getData = this.getData.bind(this);
+        this.getDataResult = this.getDataResult.bind(this);
         this.onDataChange = this.onDataChange.bind(this);
         this.onSetTab = this.onSetTab.bind(this);
 
-        this.state = {tab: $glVars.urlParams.tab, nbFeedback: 0};
+        this.state = {tab: $glVars.urlParams.tab.toString(), nbFeedback: "?", enrolledUserList: []};
     }
     
+    componentDidMount(){
+        this.getData();
+    }
+
+    getData(){
+        $glVars.webApi.getEnrolledUserList($glVars.urlParams.id, this.getDataResult);
+    }
+
+    getDataResult(result){
+        if(!result.success){
+            FeedbackCtrl.instance.showError($glVars.i18n.appName, result.msg);
+            return;
+        }
+        
+        this.setState({enrolledUserList: result.data});
+    }
+
     render(){
         let main = 
             <div>
                 <Tabs activeKey={this.state.tab} id="tabTeacherNotebook" onSelect={this.onSetTab}>
-                    <Tab eventKey={0} title={<span><FontAwesomeIcon icon={faCompass}/>{" Consulter des notes"}</span>}>
-                        <ViewNavGroupAndStudents style={{padding: "1rem"}}></ViewNavGroupAndStudents>
+                    <Tab eventKey={"0"} title={<span><FontAwesomeIcon icon={faCompass}/>{" Consulter des notes"}</span>}>
+                        {this.state.tab === "0" && <ViewNavGroupAndStudents style={{padding: "1rem"}} enrolledUserList={this.state.enrolledUserList}></ViewNavGroupAndStudents>}
                     </Tab>
-                    <Tab eventKey={1} title={<span><FontAwesomeIcon icon={faCommentDots}/>{" Rétroaction manquante "}<Badge variant="light">{this.state.nbFeedback}</Badge></span>}>
-                        <ViewRequiredNotes style={{padding: "1rem"}} onDataChange={this.onDataChange}/>
+                    <Tab eventKey={"1"} title={<span><FontAwesomeIcon icon={faCommentDots}/>{" Rétroaction manquante "}<Badge variant="light">{this.state.nbFeedback}</Badge></span>}>
+                        {this.state.tab === "1" && <ViewRequiredNotes style={{padding: "1rem"}} onDataChange={this.onDataChange}/>}
+                    </Tab>
+                    <Tab eventKey={"2"} title={<span><FontAwesomeIcon icon={faTasks}/>{" Progression"}</span>}>
+                        {this.state.tab === "2" && <ViewProgression style={{padding: "1rem"}} enrolledUserList={this.state.enrolledUserList}/>}
+                    </Tab>
+                    <Tab eventKey={"3"} title={<span><FontAwesomeIcon icon={faPrint}/>{" Imprimer"}</span>}>
+                        {this.state.tab === "3" && <ViewPrintingNotes style={{padding: "1rem"}} enrolledUserList={this.state.enrolledUserList}/>}
                     </Tab>
                 </Tabs>
             </div>;
@@ -592,6 +767,7 @@ class ActionBar extends Component{
 
 class GroupUserSelect extends Component{
     static defaultProps = {
+        dataProvider: [],
         onSelectUser: null
     };
 
@@ -602,29 +778,24 @@ class GroupUserSelect extends Component{
         this.onSelectUser = this.onSelectUser.bind(this);
         this.onPrevious = this.onPrevious.bind(this);
         this.onNext = this.onNext.bind(this);
-        this.getData = this.getData.bind(this);
-        this.getDataResult = this.getDataResult.bind(this);
 
         this.state = {selectedUserIndex: -1, selectedGroupId: -1, groupList:[], userList: [], userListFiltered: []};
     }
 
     componentDidMount(){
-        this.getData();
-    }
-   
-    getData(){
-        $glVars.webApi.getEnrolledUserList($glVars.urlParams.id, this.getDataResult);
+        this.prepareData(this.props.dataProvider);
     }
 
-    getDataResult(result){
-        if(!result.success){
-            FeedbackCtrl.instance.showError($glVars.i18n.appName, result.msg);
-            return;
+    componentDidUpdate(prevProps){
+        if(prevProps.dataProvider.length !== this.props.dataProvider.length){
+            this.prepareData(this.props.dataProvider);
         }
-        
+    }
+
+    prepareData(dataProvider){        
         let groupList = [];
         let userList = [];
-        for(let group of result.data){
+        for(let group of dataProvider){
             groupList.push({text: group[0].groupName, value: group[0].groupId, data: group});
             for(let user of group){
                 if(JsNx.getItem(userList, "value", user.userId, null) === null){
