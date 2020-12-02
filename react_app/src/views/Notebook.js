@@ -562,7 +562,7 @@ class NavActivities extends Component{
                                                         <DataGrid.Body.Cell>{that.formatText(item.note.text)}</DataGrid.Body.Cell>
                                                         <DataGrid.Body.Cell>{that.formatText(item.feedback)}</DataGrid.Body.Cell>
                                                         <DataGrid.Body.Cell style={{textAlign: "center"}}>{(item.notifyTeacher === 1 ? 
-                                                            <Button title="Rétroaction requise" size="sm" variant="primary"><FontAwesomeIcon icon={faCommentDots}/></Button> : null)}
+                                                            <Button disabled={true} title="Rétroaction requise" size="sm" variant="warning"><FontAwesomeIcon icon={faCommentDots}/></Button> : null)}
                                                         </DataGrid.Body.Cell>
                                                         <DataGrid.Body.Cell>
                                                             <DropdownButton size="sm" title={<span><FontAwesomeIcon icon={faBars}/>{" Actions"}</span>}>
