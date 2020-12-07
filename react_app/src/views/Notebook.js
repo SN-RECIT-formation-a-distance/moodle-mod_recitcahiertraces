@@ -135,6 +135,7 @@ class ViewNavGroupAndStudents extends Component{
 
 class ViewRequiredNotes extends Component{
     static defaultProps = {
+        show: false,
         style: null,
         onDataChange: null
     };
@@ -171,8 +172,16 @@ class ViewRequiredNotes extends Component{
         $glVars.webApi.removeObserver("ViewRequiredNotes");
     }
 
+    componentDidUpdate(prevProps){
+        if((this.props.show) && (!prevProps.show)){
+            this.getData();
+        }
+    }
+
     getData(){
-        $glVars.webApi.getRequiredNotes($glVars.urlParams.id, this.getDataResult);
+        if(this.props.show){
+            $glVars.webApi.getRequiredNotes($glVars.urlParams.id, this.getDataResult);
+        }
     }
 
     getDataResult(result){
@@ -285,6 +294,7 @@ class ViewRequiredNotes extends Component{
 
 class ViewProgression extends Component{
     static defaultProps = {
+        show: false,
         style: null
     };
 
@@ -306,8 +316,16 @@ class ViewProgression extends Component{
     componentWillUnmount(){
     }
 
+    componentDidUpdate(prevProps){
+        if((this.props.show) && (!prevProps.show)){
+            this.getData();
+        }
+    }
+
     getData(){
-        $glVars.webApi.getStudentsProgression($glVars.urlParams.id, this.getDataResult);
+        if(this.props.show){
+            $glVars.webApi.getStudentsProgression($glVars.urlParams.id, this.getDataResult);
+        }
     }
 
     getDataResult(result){
@@ -654,16 +672,16 @@ export class TeacherNotebook extends Component{
             <div>
                 <Tabs activeKey={this.state.tab} id="tabTeacherNotebook" onSelect={this.onSetTab}>
                     <Tab eventKey={"0"} title={<span><FontAwesomeIcon icon={faCompass}/>{" Consulter des notes"}</span>}>
-                        {this.state.tab === "0" && <ViewNavGroupAndStudents style={{padding: "1rem"}} enrolledUserList={this.state.enrolledUserList}></ViewNavGroupAndStudents>}
+                        <ViewNavGroupAndStudents style={{padding: "1rem"}} enrolledUserList={this.state.enrolledUserList}></ViewNavGroupAndStudents>
                     </Tab>
                     <Tab eventKey={"1"} title={<span><FontAwesomeIcon icon={faCommentDots}/>{" Rétroaction manquante "}<Badge variant="light">{this.state.nbFeedback}</Badge></span>}>
-                        {this.state.tab === "1" && <ViewRequiredNotes style={{padding: "1rem"}} onDataChange={this.onDataChange}/>}
+                        <ViewRequiredNotes show={(this.state.tab === "1")} style={{padding: "1rem"}} onDataChange={this.onDataChange}/>
                     </Tab>
                     <Tab eventKey={"2"} title={<span><FontAwesomeIcon icon={faTasks}/>{" Progression"}</span>}>
-                        {this.state.tab === "2" && <ViewProgression style={{padding: "1rem"}} enrolledUserList={this.state.enrolledUserList}/>}
+                        <ViewProgression show={(this.state.tab === "2")} style={{padding: "1rem"}} enrolledUserList={this.state.enrolledUserList}/>
                     </Tab>
                     <Tab eventKey={"3"} title={<span><FontAwesomeIcon icon={faPrint}/>{" Imprimer"}</span>}>
-                        {this.state.tab === "3" && <ViewPrintingNotes style={{padding: "1rem"}} enrolledUserList={this.state.enrolledUserList}/>}
+                        <ViewPrintingNotes style={{padding: "1rem"}} enrolledUserList={this.state.enrolledUserList}/>
                     </Tab>
                 </Tabs>
             </div>;
