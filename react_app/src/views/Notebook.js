@@ -295,7 +295,9 @@ class ViewRequiredNotes extends Component{
 class ViewProgression extends Component{
     static defaultProps = {
         show: false,
-        style: null
+        style: null,
+        onDetail: null,
+        enrolledUserList: []
     };
 
     constructor(props){
@@ -303,10 +305,11 @@ class ViewProgression extends Component{
 
         this.getData = this.getData.bind(this);
         this.getDataResult = this.getDataResult.bind(this);
-        this.onDetail = this.onDetail.bind(this);
-        this.onBack = this.onBack.bind(this);
+        this.onSelectGroup = this.onSelectGroup.bind(this);
+        //this.onDetail = this.onDetail.bind(this);
+        //this.onBack = this.onBack.bind(this);
 
-        this.state = {dataProvider: [], userId: 0};
+        this.state = {dataProvider: [], groupId: 0}; //, userId: 0
     }
 
     componentDidMount(){
@@ -340,9 +343,11 @@ class ViewProgression extends Component{
     render(){
         let main = 
             <div style={this.props.style}>
-                {this.state.userId > 0 ? this.getDetails() : this.getSummary()}
+                <GroupUserSelect ref={this.groupUserSelect} dataProvider={this.props.enrolledUserList} onSelectGroup={this.onSelectGroup}/>
+                <hr/>
+                {this.getSummary()}
             </div>;
-
+//{this.state.userId > 0 ? this.getDetails() : this.getSummary()}
         return main;
     }
 
@@ -350,6 +355,8 @@ class ViewProgression extends Component{
         let data = {};
         
         for(let item of this.state.dataProvider){
+            if((this.state.groupId > 0) && (!item.groupIds.includes(this.state.groupId))){continue;}
+
             if(!data.hasOwnProperty(`user${item.userId}`)){
                 data[`user${item.userId}`] = {username: item.username, userId: item.userId, nbDone: 0, nbTotal: 0};
             }
@@ -391,10 +398,15 @@ class ViewProgression extends Component{
     }
 
     onDetail(userId){
-        this.setState({userId: userId});
+        //this.setState({userId: userId});
+        this.props.onDetail(userId);
     }
 
-    getDetails(){
+    onSelectGroup(groupId){
+        this.setState({groupId: groupId});
+    }
+
+    /*getDetails(){
         let data = {};
         let lastActivity = null;
         let username = "";
@@ -457,7 +469,7 @@ class ViewProgression extends Component{
 
     onBack(){
         this.setState({userId: 0})
-    }
+    }*/
 }
 
 class NavActivities extends Component{
@@ -510,7 +522,7 @@ class NavActivities extends Component{
         }
 
         // If the user is trying to load automatically some note by URL
-        if(!$glVars.urlParams.loaded){
+        if(!$glVars.urlParams.activityLoaded){
             let item = null;
             for(let activity of result.data){
                 for(let note of activity){
@@ -520,7 +532,7 @@ class NavActivities extends Component{
                 }
             }
 
-            $glVars.urlParams.loaded = true;
+            $glVars.urlParams.activityLoaded = true;
 
             this.setState({dataProvider: result.data}, () => this.props.onEdit(item));
         }
@@ -646,6 +658,7 @@ export class TeacherNotebook extends Component{
         this.getDataResult = this.getDataResult.bind(this);
         this.onDataChange = this.onDataChange.bind(this);
         this.onSetTab = this.onSetTab.bind(this);
+        this.onProgressionDetail = this.onProgressionDetail.bind(this);
 
         this.state = {tab: $glVars.urlParams.tab.toString(), nbFeedback: "?", enrolledUserList: []};
     }
@@ -671,14 +684,14 @@ export class TeacherNotebook extends Component{
         let main = 
             <div>
                 <Tabs activeKey={this.state.tab} id="tabTeacherNotebook" onSelect={this.onSetTab}>
-                    <Tab eventKey={"0"} title={<span><FontAwesomeIcon icon={faCompass}/>{" Consulter des notes"}</span>}>
+                    <Tab eventKey={"0"} title={<span><FontAwesomeIcon icon={faCompass}/>{" Consulter les notes"}</span>}>
                         <ViewNavGroupAndStudents style={{padding: "1rem"}} enrolledUserList={this.state.enrolledUserList}></ViewNavGroupAndStudents>
                     </Tab>
                     <Tab eventKey={"1"} title={<span><FontAwesomeIcon icon={faCommentDots}/>{" Rétroaction manquante "}<Badge variant="light">{this.state.nbFeedback}</Badge></span>}>
                         <ViewRequiredNotes show={(this.state.tab === "1")} style={{padding: "1rem"}} onDataChange={this.onDataChange}/>
                     </Tab>
                     <Tab eventKey={"2"} title={<span><FontAwesomeIcon icon={faTasks}/>{" Progression"}</span>}>
-                        <ViewProgression show={(this.state.tab === "2")} style={{padding: "1rem"}} enrolledUserList={this.state.enrolledUserList}/>
+                        <ViewProgression show={(this.state.tab === "2")} style={{padding: "1rem"}} onDetail={this.onProgressionDetail} enrolledUserList={this.state.enrolledUserList}/>
                     </Tab>
                     <Tab eventKey={"3"} title={<span><FontAwesomeIcon icon={faPrint}/>{" Imprimer"}</span>}>
                         <ViewPrintingNotes style={{padding: "1rem"}} enrolledUserList={this.state.enrolledUserList}/>
@@ -695,6 +708,12 @@ export class TeacherNotebook extends Component{
 
     onDataChange(item){
         this.setState({nbFeedback: item.nbItems});
+    }
+
+    onProgressionDetail(userId){
+        $glVars.urlParams.userLoaded = false;
+        $glVars.urlParams.userId = userId;
+        this.onSetTab("0");
     }
 }
 
@@ -786,7 +805,8 @@ class ActionBar extends Component{
 class GroupUserSelect extends Component{
     static defaultProps = {
         dataProvider: [],
-        onSelectUser: null
+        onSelectUser: null,
+        onSelectGroup: null
     };
 
     constructor(props){
@@ -805,7 +825,7 @@ class GroupUserSelect extends Component{
     }
 
     componentDidUpdate(prevProps){
-        if(prevProps.dataProvider.length !== this.props.dataProvider.length){
+        if((prevProps.dataProvider.length !== this.props.dataProvider.length) || (!$glVars.urlParams.userLoaded)){
             this.prepareData(this.props.dataProvider);
         }
     }
@@ -825,16 +845,22 @@ class GroupUserSelect extends Component{
         groupList.sort((a, b) => { return ('' + a.text).localeCompare(b.text);})
         userList.sort((a, b) => { return ('' + a.text).localeCompare(b.text);})
         
-        if(!$glVars.urlParams.loaded){
-            let item = JsNx.getItem(userList, 'value', $glVars.urlParams.userId, null);
+        if((!$glVars.urlParams.userLoaded) && ($glVars.urlParams.userId > 0)){
 
-            this.setState(
-                {groupList: groupList, userList: userList, userListFiltered: userList, selectedUserIndex: JsNx.getItemIndex(userList, 'value', $glVars.urlParams.userId)}, 
-                (item === null ? null : () => this.props.onSelectUser(parseInt(item.value, 10), item.text))
-            );
+            let item = JsNx.getItem(userList, 'value', $glVars.urlParams.userId, null);
+            
+            if(item !== null){
+                this.setState(
+                    {groupList: groupList, userList: userList, userListFiltered: userList, selectedUserIndex: JsNx.getItemIndex(userList, 'value', $glVars.urlParams.userId)}, 
+                    (item === null ? null : () => this.props.onSelectUser(parseInt(item.value, 10), item.text))
+                );
+
+                $glVars.urlParams.userLoaded = true;
+            }
         }
         else{
-            this.setState({groupList: groupList, userList: userList});
+            this.setState({groupList: groupList, userList: userList, userListFiltered: userList});
+            $glVars.urlParams.userLoaded = true;
         }
     }
 
@@ -855,21 +881,23 @@ class GroupUserSelect extends Component{
                             <ComboBox placeholder={"Sélectionnez votre option"} options={this.state.groupList} onChange={this.onSelectGroup} value={this.state.selectedGroupId}/>
                         </Form.Group>
                     </Col>
-                    <Col sm={6}>
-                        <Row>
-                            <Col sm={12}>
-                                <Form.Group  as={Col}>
-                                    <Form.Label>Sélectionnez l'élève:</Form.Label>
-                                    <ComboBox placeholder={"Sélectionnez votre option"} options={this.state.userListFiltered} onChange={this.onSelectUser} value={value} style={{float: "left", width: "95%"}}/>
-                                    <ButtonGroup style={{display: "flex"}}>
-                                        <Button variant="link" onClick={this.onPrevious} disabled={(this.state.selectedUserIndex <= -1)}><FontAwesomeIcon icon={faArrowLeft}/></Button>
-                                        <Button variant="link" onClick={this.onNext} disabled={(this.state.userListFiltered.length <= (this.state.selectedUserIndex + 1))}><FontAwesomeIcon icon={faArrowRight}/></Button>
-                                    </ButtonGroup>
-                                </Form.Group>
-                                
-                            </Col>
-                        </Row>
-                    </Col>               
+                    {this.props.onSelectUser !== null && 
+                        <Col sm={6}>
+                            <Row>
+                                <Col sm={12}>
+                                    <Form.Group  as={Col}>
+                                        <Form.Label>Sélectionnez l'élève:</Form.Label>
+                                        <ComboBox placeholder={"Sélectionnez votre option"} options={this.state.userListFiltered} onChange={this.onSelectUser} value={value} style={{float: "left", width: "95%"}}/>
+                                        <ButtonGroup style={{display: "flex"}}>
+                                            <Button variant="link" onClick={this.onPrevious} disabled={(this.state.selectedUserIndex <= -1)}><FontAwesomeIcon icon={faArrowLeft}/></Button>
+                                            <Button variant="link" onClick={this.onNext} disabled={(this.state.userListFiltered.length <= (this.state.selectedUserIndex + 1))}><FontAwesomeIcon icon={faArrowRight}/></Button>
+                                        </ButtonGroup>
+                                    </Form.Group>
+                                    
+                                </Col>
+                            </Row>
+                        </Col>       
+                    }        
                 </Row>
             </div>;
 
@@ -890,15 +918,20 @@ class GroupUserSelect extends Component{
             })
         }
 
-
-        this.setState({selectedGroupId: event.target.value, selectedUserIndex: -1, userListFiltered: userListFiltered});
+        this.setState({selectedGroupId: event.target.value, selectedUserIndex: -1, userListFiltered: userListFiltered}, () => {;
+            if(this.props.onSelectGroup){
+                this.props.onSelectGroup(parseInt(event.target.value, 10));
+            }
+        });
     }
 
     onSelectUser(event){
-        let userId = parseInt(event.target.value, 10) || 0;
-        this.setState({selectedUserIndex: event.target.index}, () => 
-            this.props.onSelectUser(this.state.userListFiltered[event.target.index].value, this.state.userListFiltered[event.target.index].text)
-        );
+       // let userId = parseInt(event.target.value, 10) || 0;
+        this.setState({selectedUserIndex: event.target.index}, () => {
+            if(this.props.onSelectUser){
+                this.props.onSelectUser(this.state.userListFiltered[event.target.index].value, this.state.userListFiltered[event.target.index].text)
+            }
+        });
     }
 
     onPrevious(){
@@ -910,7 +943,11 @@ class GroupUserSelect extends Component{
             item.value = parseInt(this.state.userListFiltered[newIndex].value, 10);
         }
 
-        this.setState({selectedUserIndex: newIndex}, this.props.onSelectUser(item.value, item.text));
+        this.setState({selectedUserIndex: newIndex}, () => {
+            if(this.props.onSelectUser){
+                this.props.onSelectUser(item.value, item.text);
+            }
+        });
     }
 
     onNext(){
@@ -923,7 +960,11 @@ class GroupUserSelect extends Component{
             item.value = parseInt(this.state.userListFiltered[newIndex].value, 10);
         }
 
-        this.setState({selectedUserIndex: newIndex}, this.props.onSelectUser(item.value, item.text));
+        this.setState({selectedUserIndex: newIndex}, () => {
+            if(this.props.onSelectUser){
+                this.props.onSelectUser(item.value, item.text);
+            }
+        }); 
     }
 
     getNavStatus(){

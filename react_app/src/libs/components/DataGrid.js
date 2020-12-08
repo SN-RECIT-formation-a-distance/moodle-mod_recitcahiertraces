@@ -125,16 +125,16 @@ class Body extends Component {
         let cell2 = row2.props.children[this.props.orderBy.iCol];
 
         let str1 = "";
-        if((cell1.props.sortValue !== null) && (cell1.props.sortValue.length > 0)){
-            str1 = cell1.props.sortValue;
+        if((cell1.props.sortValue !== null) && (cell1.props.sortValue.toString().length > 0)){
+            str1 = cell1.props.sortValue.toString();
         }
         else if(cell1.props.children !== null){
             str1 =  cell1.props.children.toString();
         }
 
         let str2 = "";
-        if((cell2.props.sortValue !== null) && (cell2.props.sortValue.length > 0)){
-            str2 = cell2.props.sortValue;
+        if((cell2.props.sortValue !== null) && (cell2.props.sortValue.toString().length > 0)){
+            str2 = cell2.props.sortValue.toString();
         }
         else if(cell2.props.children !== null){
             str2 =  cell2.props.children.toString();

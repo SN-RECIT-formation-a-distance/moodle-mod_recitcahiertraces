@@ -30,6 +30,8 @@ class App extends Component {
         $glVars.urlParams.cmId = parseInt($glVars.urlParams.cmId, 10) || 0;
         $glVars.urlParams.userId = parseInt($glVars.urlParams.userId, 10) || 0;
         $glVars.urlParams.tab = parseInt($glVars.urlParams.tab, 10) || 0;
+        $glVars.urlParams.userLoaded = false;
+        $glVars.urlParams.activityLoaded = false;
 
         let mode = (UtilsMoodle.checkRoles($glVars.signedUser.roles, UtilsMoodle.rolesL2) ? 't' : 's');
 
