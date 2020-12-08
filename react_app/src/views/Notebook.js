@@ -886,7 +886,7 @@ class GroupUserSelect extends Component{
                             <Row>
                                 <Col sm={12}>
                                     <Form.Group  as={Col}>
-                                        <Form.Label>Sélectionnez l'élève:</Form.Label>
+                                        <Form.Label>Sélectionnez l'utilisateur:</Form.Label>
                                         <ComboBox placeholder={"Sélectionnez votre option"} options={this.state.userListFiltered} onChange={this.onSelectUser} value={value} style={{float: "left", width: "95%"}}/>
                                         <ButtonGroup style={{display: "flex"}}>
                                             <Button variant="link" onClick={this.onPrevious} disabled={(this.state.selectedUserIndex <= -1)}><FontAwesomeIcon icon={faArrowLeft}/></Button>
