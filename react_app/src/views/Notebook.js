@@ -910,17 +910,17 @@ class GroupUserSelect extends Component{
 
     onSelectGroup(event){
         let userListFiltered = this.state.userList;
-        let selectedGroupId = this.state.selectedGroupId;
+        let selectedGroupId = parseInt(event.target.value || 0, 10);
 
         if(selectedGroupId > 0){
             userListFiltered = this.state.userList.filter(function(item){
-                return (item.data.groupId.toString() === selectedGroupId.toString());
+                return (item.data.groupId === selectedGroupId);
             })
         }
 
-        this.setState({selectedGroupId: event.target.value, selectedUserIndex: -1, userListFiltered: userListFiltered}, () => {;
+        this.setState({selectedGroupId: selectedGroupId, selectedUserIndex: -1, userListFiltered: userListFiltered}, () => {;
             if(this.props.onSelectGroup){
-                this.props.onSelectGroup(parseInt(event.target.value, 10));
+                this.props.onSelectGroup(selectedGroupId);
             }
         });
     }
