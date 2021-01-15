@@ -29,5 +29,5 @@ $plugin->cron      = 0;
 $plugin->dependencies = [    
     'local_recitcommon' => 2020103000
 ];
-$plugin->release = 'R11-V1.11.0'; 
+$plugin->release = 'R11-V1.11.1'; 
 $plugin->maturity = MATURITY_BETA; // MATURITY_ALPHA, MATURITY_BETA, MATURITY_RC or MATURITY_STABLE

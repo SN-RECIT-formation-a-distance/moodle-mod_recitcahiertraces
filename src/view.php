@@ -83,14 +83,13 @@ class RecitCahierCanadaView
         echo $this->output->heading(format_string($this->cm->name), 2);
                         
         $roles = Utils::getUserRoles($this->course->id, $this->user->id);
-        $studentId = (in_array('ad', $roles) ? 0 : $this->user->id);
-
-        echo sprintf("<div id='recit_cahiertraces' data-student-id='%ld' data-roles='%s'></div>", $studentId, implode(",", $roles));
-        
+        $studentId = (in_array('ad', $roles) ? 0 : $this->user->id);      
         
         echo $this->getEditorOption("recit_cahiertraces_editor", 1);        
         echo $this->getEditorOption("recit_cahiertraces_editor", 2);
         echo $this->getEditorOption("recit_cahiertraces_editor", 3);
+
+        echo sprintf("<div id='recit_cahiertraces' data-student-id='%ld' data-roles='%s'></div>", $studentId, implode(",", $roles));
         
         echo $this->output->footer();
     }
