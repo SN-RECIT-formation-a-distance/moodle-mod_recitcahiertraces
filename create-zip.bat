@@ -1,6 +1,6 @@
 echo off
 set zipName=mod_recitcahiertraces
-set pluginName=mod_recitcahiercanada
+set pluginName=recitcahiercanada
 
 rem remove the current 
 del %zipName%
