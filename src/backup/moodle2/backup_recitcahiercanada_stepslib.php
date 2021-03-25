@@ -23,7 +23,7 @@
  */
 
 defined('MOODLE_INTERNAL') || die;
-require_once($CFG->dirroot . "/local/recitcommon/php/PersistCtrlCahierTraces.php");
+require_once($CFG->dirroot . "/mod/recitcahiercanada/classes/PersistCtrlCahierTraces.php");
 
  /**
  * Define the complete recitcahiercanada structure for backup, with file and id annotations

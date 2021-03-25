@@ -1,6 +1,6 @@
 <?php
 require('../../../config.php');
-require_once($CFG->dirroot . "/local/recitcommon/php/PersistCtrlCahierTraces.php");
+require_once($CFG->dirroot . "/mod/recitcahiercanada/classes/PersistCtrlCahierTraces.php");
 require_once($CFG->dirroot . "/local/recitcommon/php/Utils.php");
 
 $cmId = required_param('cmId', PARAM_INT);

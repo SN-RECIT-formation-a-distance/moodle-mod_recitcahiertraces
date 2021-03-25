@@ -23,8 +23,8 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once($CFG->dirroot . "/local/recitcommon/php/PersistCtrlCahierTraces.php");
 require_once($CFG->dirroot . "/local/recitcommon/php/Utils.php");
+require_once(__DIR__ . "/classes/PersistCtrlCahierTraces.php");
 
 /**
  * List of features supported in recitcahiercanada module
