@@ -44,7 +44,7 @@ class backup_recitcahiercanada_activity_structure_step extends backup_activity_s
 
 
         $recitcc_cm_notes = new backup_nested_element('recitcc_cm_notes', array('id'), array(
-            'intcode', 'ccid', 'cmid', 'title', 'slot', 'templatenote', 'suggestednote', 'teachertip', 'lastupdate', 'cmindexpos'));
+            'intcode', 'ccid', 'cmid', 'title', 'slot', 'templatenote', 'suggestednote', 'teachertip', 'notifyteacher', 'lastupdate', 'cmindexpos'));
 
        // $mdl_recitcc_user_notes = new backup_nested_element('recitcc_user_notes', array('id'), array('cccmid', 'userid', 'note', 'feedback', 'grade', 'lastupdate'));
 
