@@ -166,10 +166,17 @@ if (!class_exists('CahierTracesPersistCtrl')) {
             }
         }
 
-        public function getCmNotes($ccCmId = 0, $cmId = 0){
+        /**
+         * Fetch a cmNote (by unique ID = ccCmId) or a set of cmNotes (cmId+ccId = cmId and CahierCanada ID)
+         */
+        public function getCmNotes($ccCmId = 0, $cmId = 0, $ccId = 0){
             $ccCmIdStmt = ($ccCmId == 0 ? "1" : " t1.id = $ccCmId");
-            $cmStmt = ($cmId == 0 ? "1" : " t1.cmid = $cmId");
 
+            $cmStmt = "1";
+            if($cmId > 0){
+                $cmStmt = " (t1.cmid = $cmId and t1.ccid = $ccId)";
+            }
+            
             $query = "select t1.id as ccCmId, coalesce(t1.intcode, '') as intCode, t1.ccid as ccId, t1.cmid as cmId, t1.title as noteTitle, t1.slot, t1.templatenote as templateNote, t1.suggestednote as suggestedNote, 
                         t1.teachertip as teacherTip, t1.lastupdate as lastUpdate,  t1.notifyteacher as notifyTeacher,
                         GROUP_CONCAT(t2.id) as tagList
@@ -317,6 +324,12 @@ if (!class_exists('CahierTracesPersistCtrl')) {
                         $item->activityName = $activity->name;
                         break;
                     }
+                }
+            }
+
+            foreach($ccCmList as $item){
+                if(empty($item->activityName)){
+                    $item->activityName = "Erreur : L'activité #$item->cmId appartient à une autre section";
                 }
             }
         }

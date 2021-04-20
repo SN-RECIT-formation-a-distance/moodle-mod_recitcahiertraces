@@ -98,10 +98,11 @@ if (!class_exists('CahierTracesApi')) {
         public function getCmNotes($request){
             try{
                 $cmId = intval($request['cmId']);
+                $ccId = (isset($request['ccId']) ? intval($request['ccId']) : 0);
 
                 $this->canUserAccess('a', $cmId);
 
-                $result = CahierTracesPersistCtrl::getInstance()->getCmNotes(0, $cmId);
+                $result = CahierTracesPersistCtrl::getInstance()->getCmNotes(0, $cmId, $ccId);
                 $this->prepareJson($result);
                 return new WebApiResult(true, $result);
             }

@@ -338,7 +338,7 @@ export class EditionMode extends Component{
         }
         
         if(this.state.ccCm !== null){ 
-            $glVars.webApi.getCmNotes(this.state.ccCm.cmId, callback);
+            $glVars.webApi.getCmNotes(this.state.ccCm.cmId, this.state.ccCm.ccId, callback);
         }
         else{
             this.setState({cmNoteList: []});

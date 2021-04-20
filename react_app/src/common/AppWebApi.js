@@ -61,8 +61,8 @@ export class AppWebApi extends WebApi
         this.post(this.gateway, data, onSuccess);
     }
 
-    getCmNotes(cmId, onSuccess){
-        let data = {cmId: cmId, service: "getCmNotes"};
+    getCmNotes(cmId, ccId, onSuccess){
+        let data = {cmId: cmId, ccId: (ccId || 0), service: "getCmNotes"};
         this.post(this.gateway, data, onSuccess);
     }
 
