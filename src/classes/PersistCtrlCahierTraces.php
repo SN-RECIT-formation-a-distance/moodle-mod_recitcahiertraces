@@ -447,7 +447,25 @@ if (!class_exists('CahierTracesPersistCtrl')) {
                 $groupIds = $this->signedUser->groupmember[$courseId];
             }
             
-            $recipients = CahierTracesPersistCtrl::getInstance()->getCourseTeachers($courseId, $groupIds);
+            $allCourseTeachers = CahierTracesPersistCtrl::getInstance()->getCourseTeachers($courseId);
+
+            /*
+             * Si le prof est dans un groupe il est notifié par les élèves qui font parti de son groupe.
+             * Si le groupe n'a pas de prof, on notifie tous les prof du cours
+             * Si l'élève n'a pas de groupe, on notifie tous les prof du cours
+             */
+            $recipients = array();
+            foreach($allCourseTeachers as $teacher){
+                $teacherBelongingToStudentGroup = array_intersect($teacher->groupIds, $groupIds);
+                
+                if(!empty($teacherBelongingToStudentGroup)){
+                    $recipients[] = $teacher;
+                }
+            }
+
+            if(empty($recipients)){
+                $recipients = $allCourseTeachers;
+            }
 
             $result = array();
             foreach($recipients as $recipient){
