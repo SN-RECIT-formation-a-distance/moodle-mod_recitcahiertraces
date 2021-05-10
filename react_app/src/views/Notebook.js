@@ -207,7 +207,7 @@ class ViewRequiredNotes extends Component{
                             <DataGrid.Header.Cell >{"Activité"}</DataGrid.Header.Cell>
                             <DataGrid.Header.Cell >{"Élève"}</DataGrid.Header.Cell>
                             <DataGrid.Header.Cell >{"Titre de la note"}</DataGrid.Header.Cell>
-                            <DataGrid.Header.Cell  style={{width: 120}}></DataGrid.Header.Cell>
+                            <DataGrid.Header.Cell  style={{width: 80}}></DataGrid.Header.Cell>
                         </DataGrid.Header.Row>
                     </DataGrid.Header>
                     <DataGrid.Body>
@@ -218,10 +218,10 @@ class ViewRequiredNotes extends Component{
                                         <DataGrid.Body.Cell>{item.activityName}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell>{item.username}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell>{item.noteTitle}</DataGrid.Body.Cell>
-                                        <DataGrid.Body.Cell>
-                                            <DropdownButton size="sm" title={<span><FontAwesomeIcon icon={faBars}/>{" Actions"}</span>}>
-                                                <Dropdown.Item onClick={() => that.onEdit(item)}><FontAwesomeIcon icon={faPencilAlt}/>{" Modifier"}</Dropdown.Item>
-                                            </DropdownButton>
+                                        <DataGrid.Body.Cell style={{textAlign: 'center'}}>
+                                            <ButtonGroup size="sm">
+                                                <Button onClick={() => that.onEdit(item)} title="Modifier" variant="primary"><FontAwesomeIcon icon={faPencilAlt}/></Button>
+                                            </ButtonGroup>
                                         </DataGrid.Body.Cell>
                                     </DataGrid.Body.Row>
                                 return (row);                                    
@@ -580,7 +580,7 @@ class NavActivities extends Component{
                                             <DataGrid.Header.Cell style={{width: 300}}>{"Note"}</DataGrid.Header.Cell>
                                             <DataGrid.Header.Cell style={{width: 300}}>{"Rétroaction"}</DataGrid.Header.Cell>
                                             <DataGrid.Header.Cell style={{width: 80}}></DataGrid.Header.Cell>
-                                            <DataGrid.Header.Cell  style={{width: 120}}></DataGrid.Header.Cell>
+                                            <DataGrid.Header.Cell  style={{width: 80}}></DataGrid.Header.Cell>
                                         </DataGrid.Header.Row>
                                     </DataGrid.Header>
                                     <DataGrid.Body>
@@ -594,10 +594,10 @@ class NavActivities extends Component{
                                                         <DataGrid.Body.Cell style={{textAlign: "center"}}>{(item.notifyTeacher === 1 ? 
                                                             <Button disabled={true} title="Rétroaction requise" size="sm" variant="warning"><FontAwesomeIcon icon={faCommentDots}/></Button> : null)}
                                                         </DataGrid.Body.Cell>
-                                                        <DataGrid.Body.Cell>
-                                                            <DropdownButton size="sm" title={<span><FontAwesomeIcon icon={faBars}/>{" Actions"}</span>}>
-                                                                <Dropdown.Item onClick={() => that.props.onEdit(item)}><FontAwesomeIcon icon={faPencilAlt}/>{" Modifier"}</Dropdown.Item>
-                                                            </DropdownButton>
+                                                        <DataGrid.Body.Cell style={{textAlign: 'center'}}>
+                                                            <ButtonGroup size="sm">
+                                                                <Button onClick={() => that.props.onEdit(item)} title="Modifier" variant="primary"><FontAwesomeIcon icon={faPencilAlt}/></Button>
+                                                            </ButtonGroup>
                                                         </DataGrid.Body.Cell>
                                                     </DataGrid.Body.Row>
                                                 return (row);                                    
@@ -834,7 +834,12 @@ class GroupUserSelect extends Component{
         let groupList = [];
         let userList = [];
         for(let group of dataProvider){
-            groupList.push({text: group[0].groupName, value: group[0].groupId, data: group});
+
+             // groupId = 0 means no groupe
+            if(group[0].groupId > 0){ 
+                groupList.push({text: group[0].groupName, value: group[0].groupId, data: group});
+            }
+            
             for(let user of group){
                 if(JsNx.getItem(userList, "value", user.userId, null) === null){
                     userList.push({text: user.userName, value: user.userId, data: user});
@@ -887,7 +892,7 @@ class GroupUserSelect extends Component{
                                 <Col sm={12}>
                                     <Form.Group  as={Col}>
                                         <Form.Label>Sélectionnez l'utilisateur:</Form.Label>
-                                        <ComboBox placeholder={"Sélectionnez votre option"} options={this.state.userListFiltered} onChange={this.onSelectUser} value={value} style={{float: "left", width: "95%"}}/>
+                                        <ComboBox placeholder={"Sélectionnez votre option"} options={this.state.userListFiltered} onChange={this.onSelectUser} value={value} style={{float: "left", width: "90%"}}/>
                                         <ButtonGroup style={{display: "flex"}}>
                                             <Button variant="link" onClick={this.onPrevious} disabled={(this.state.selectedUserIndex <= -1)}><FontAwesomeIcon icon={faArrowLeft}/></Button>
                                             <Button variant="link" onClick={this.onNext} disabled={(this.state.userListFiltered.length <= (this.state.selectedUserIndex + 1))}><FontAwesomeIcon icon={faArrowRight}/></Button>
@@ -912,7 +917,7 @@ class GroupUserSelect extends Component{
         let userListFiltered = this.state.userList;
         let selectedGroupId = parseInt(event.target.value || 0, 10);
 
-        if(selectedGroupId > 0){
+        if(selectedGroupId > 0){            
             userListFiltered = this.state.userList.filter(function(item){
                 return (item.data.groupId === selectedGroupId);
             })
@@ -926,10 +931,17 @@ class GroupUserSelect extends Component{
     }
 
     onSelectUser(event){
-       // let userId = parseInt(event.target.value, 10) || 0;
-        this.setState({selectedUserIndex: event.target.index}, () => {
+        let index = event.target.index;
+        let item = {text: "", value: 0};
+
+        if(this.state.userListFiltered[index]){
+            item.text = this.state.userListFiltered[index].text;
+            item.value = parseInt(this.state.userListFiltered[index].value, 10);
+        }
+        
+        this.setState({selectedUserIndex: index}, () => {
             if(this.props.onSelectUser){
-                this.props.onSelectUser(this.state.userListFiltered[event.target.index].value, this.state.userListFiltered[event.target.index].text)
+                this.props.onSelectUser(item.value, item.text);
             }
         });
     }

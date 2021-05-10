@@ -380,12 +380,12 @@ export class EditionMode extends Component{
                                         <DataGrid.Body.Cell>{item.slot}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell>{item.noteTitle}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell>{item.intCode}</DataGrid.Body.Cell>
-                                        <DataGrid.Body.Cell>
-                                            <DropdownButton size="sm" title={<span><FontAwesomeIcon icon={faBars}/>{" Actions"}</span>}>
-                                                <Dropdown.Item onClick={() => this.onEdit(item.ccCmId)}><FontAwesomeIcon icon={faPencilAlt}/>{" Modifier"}</Dropdown.Item>
-                                                <Dropdown.Item onClick={() => this.onRemove(item)}><FontAwesomeIcon icon={faTrashAlt}/>{" Supprimer"}</Dropdown.Item>
-                                                <Dropdown.Item onClick={() => this.onCopy(item.intCode)}><FontAwesomeIcon icon={faCopy}/>{" Code d'intégration"}</Dropdown.Item>
-                                            </DropdownButton>
+                                        <DataGrid.Body.Cell style={{textAlign: 'center'}}>
+                                            <ButtonGroup size="sm">
+                                                <Button onClick={() => this.onEdit(item.ccCmId)} title="Modifier" variant="primary"><FontAwesomeIcon icon={faPencilAlt}/></Button>
+                                                <Button onClick={() => this.onRemove(item)} title="Supprimer" variant="primary"><FontAwesomeIcon icon={faTrashAlt}/></Button>
+                                                <Button onClick={() => this.onCopy(item.intCode)} title="Code d'intégration" variant="primary"><FontAwesomeIcon icon={faCopy}/></Button>
+                                            </ButtonGroup>
                                         </DataGrid.Body.Cell>
                                     </DataGrid.Body.RowDraggable>
                                 return (row);
