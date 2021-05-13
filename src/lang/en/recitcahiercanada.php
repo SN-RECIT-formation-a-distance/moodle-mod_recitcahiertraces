@@ -35,6 +35,7 @@ $string['recitcahiercanada:view'] = "View";
 $string['recitcahiercanada:addinstance'] = "Add instance";
 $string['printNotes'] = "Print Notes";
 $string['note'] = "Note";
+$string['suggestednote'] = "Suggested Note";
 $string['timestamp'] = "Timestamp";
 $string['printedOn'] = "Printed on";
 $string['forbiddenAccess'] = "Forbidden access";

@@ -199,6 +199,40 @@ if (!class_exists('CahierTracesPersistCtrl')) {
             return $result;
         }
 
+        /**
+         * Fetch a cmNote (by unique ID = ccCmId) or a set of cmNotes (cmId+ccId = cmId and CahierCanada ID)
+         */
+        public function getCmSuggestedNotes($cId = 0, $cmId = 0){
+            $cIdStmt = ($cId == 0 ? "1" : " t1_1.course = $cId");
+
+            $cmStmt = "1";
+            if($cmId > 0){
+                $cmStmt = " (t1.cmid = $cmId)";
+            }
+            
+            $query = "select t1.id as ccCmId, coalesce(t1.intcode, '') as intCode, t1.ccid as ccId, t1.cmid as cmId, t1.title as noteTitle, t1.slot, t1.templatenote as templateNote, t1.suggestednote as suggestedNote, 
+                        t1.teachertip as teacherTip, t1.lastupdate as lastUpdate,  t1.notifyteacher as notifyTeacher,
+                        GROUP_CONCAT(t2.id) as tagList
+                        from {$this->prefix}recitcc_cm_notes as t1
+                        inner join {$this->prefix}recitcahiercanada as t1_1 on t1.ccid = t1_1.id
+                        left join {$this->prefix}tag_instance as t2 on t1.id = t2.itemid and itemtype = 'cccmnote' and component = 'mod_cahiercanada'
+                        where $cIdStmt and $cmStmt
+                        group by t1.id
+                        order by slot asc";
+
+            $tmp = $this->mysqlConn->execSQLAndGetObjects($query, 'CmNote');
+                    
+            $this->setSectionActivitiesName(current($tmp)->cmId, $tmp);
+
+            // index by activity
+            $result = array();
+            foreach($tmp as $item){
+                $result[$item->cmId][] = $item;
+            }
+
+            return array_values($result); // reset the array indexes
+        }
+
         public function getCcCmNote($ccCmId){
             $result = $this->getCmNotes($ccCmId);
             $result = array_shift($result);

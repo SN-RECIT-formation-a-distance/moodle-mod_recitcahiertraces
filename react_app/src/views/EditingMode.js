@@ -1,10 +1,10 @@
 
 import React, { Component } from 'react';
 import {ButtonGroup, Button, Form, Col, Tabs, Tab, DropdownButton, Dropdown} from 'react-bootstrap';
-import {faPencilAlt, faPlusCircle, faWrench, faTrashAlt, faCopy, faBars, faGripVertical} from '@fortawesome/free-solid-svg-icons';
+import {faPencilAlt, faPlusCircle, faWrench, faTrashAlt, faCopy, faBars, faPrint, faGripVertical} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {ComboBox, FeedbackCtrl, DataGrid, InputNumber, ToggleButtons, Modal} from '../libs/components/Components';
-import {JsNx} from '../libs/utils/Utils';
+import {JsNx, UtilsMoodle} from '../libs/utils/Utils';
 import {$glVars} from '../common/common';
 
 export class BtnModeEdition extends Component{
@@ -397,9 +397,16 @@ export class EditionMode extends Component{
                 {this.state.ccCmId >= 0 && <NoteForm ccCmId={this.state.ccCmId} ccCm={this.state.ccCm} onClose={this.onClose}/>}
 
                 {this.state.copyIC.length > 0 && <ModalGenerateIntCode onClose={this.onClose} onCopy={this.onClose} intCode={this.state.copyIC} />}
+                <hr/>
+                <a href={this.getSuggestedNotesPrintLink()} target="_blank"><FontAwesomeIcon icon={faPrint}/>{" Imprimer les réponses suggérées"}</a>
             </div> 
 
         return (main);
+    }
+
+    getSuggestedNotesPrintLink(){
+        let selectedCmId = (this.state.ccCm !== null ? this.state.ccCm.cmId : 0);
+        return UtilsMoodle.wwwRoot()+`/mod/recitcahiercanada/classes/ReportSuggestedNotes.php?cmId=${selectedCmId}&cId=${$glVars.urlParams.id}`;
     }
 
     onDragRow(item, index){
