@@ -360,6 +360,7 @@ export class EditionMode extends Component{
                 </Form>
                 <ButtonGroup>
                     <Button variant="primary" disabled={this.state.ccCm === null} onClick={this.onAdd}><FontAwesomeIcon icon={faPlusCircle}/>{" Ajouter une nouvelle note"}</Button>                    
+                    <a className="btn btn-link" href={this.getSuggestedNotesPrintLink()} target="_blank"><FontAwesomeIcon icon={faPrint}/>{" Imprimer les réponses suggérées"}</a>
                 </ButtonGroup>
                 <br/><br/>
                 <DataGrid orderBy={true}>
@@ -396,9 +397,7 @@ export class EditionMode extends Component{
                                 
                 {this.state.ccCmId >= 0 && <NoteForm ccCmId={this.state.ccCmId} ccCm={this.state.ccCm} onClose={this.onClose}/>}
 
-                {this.state.copyIC.length > 0 && <ModalGenerateIntCode onClose={this.onClose} onCopy={this.onClose} intCode={this.state.copyIC} />}
-                <hr/>
-                <a href={this.getSuggestedNotesPrintLink()} target="_blank"><FontAwesomeIcon icon={faPrint}/>{" Imprimer les réponses suggérées"}</a>
+                {this.state.copyIC.length > 0 && <ModalGenerateIntCode onClose={this.onClose} onCopy={this.onClose} intCode={this.state.copyIC} />}                
             </div> 
 
         return (main);

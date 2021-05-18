@@ -211,17 +211,19 @@ if (!class_exists('CahierTracesPersistCtrl')) {
             }
             
             $query = "select t1.id as ccCmId, coalesce(t1.intcode, '') as intCode, t1.ccid as ccId, t1.cmid as cmId, t1.title as noteTitle, t1.slot, t1.templatenote as templateNote, t1.suggestednote as suggestedNote, 
-                        t1.teachertip as teacherTip, t1.lastupdate as lastUpdate,  t1.notifyteacher as notifyTeacher,
-                        GROUP_CONCAT(t2.id) as tagList
+                        t1.teachertip as teacherTip, t1.lastupdate as lastUpdate,  t1.notifyteacher as notifyTeacher
                         from {$this->prefix}recitcc_cm_notes as t1
                         inner join {$this->prefix}recitcahiercanada as t1_1 on t1.ccid = t1_1.id
-                        left join {$this->prefix}tag_instance as t2 on t1.id = t2.itemid and itemtype = 'cccmnote' and component = 'mod_cahiercanada'
                         where $cIdStmt and $cmStmt
                         group by t1.id
                         order by slot asc";
 
             $tmp = $this->mysqlConn->execSQLAndGetObjects($query, 'CmNote');
-                    
+
+            if(empty($tmp)){
+                return $tmp;
+            }
+
             $this->setSectionActivitiesName(current($tmp)->cmId, $tmp);
 
             // index by activity

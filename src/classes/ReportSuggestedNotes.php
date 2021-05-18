@@ -75,6 +75,10 @@ $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahie
 
             echo "</div>";
         }
+
+        if(empty($pNotes)){
+            echo "<h5>Aucune information disponible.</h5>";
+        }
     ?>
 
         <footer>
