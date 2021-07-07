@@ -66,7 +66,7 @@ class App extends Component {
 
 document.addEventListener('DOMContentLoaded', function(){ 
     const domContainer = document.getElementById('recit_cahiertraces');
-    let signedUser = {userId: domContainer.getAttribute('data-student-id'), roles: domContainer.getAttribute('data-roles').split(",")};
+    let signedUser = {userId: domContainer.getAttribute('data-student-id'), roles: domContainer.getAttribute('data-roles').split(","), portfolioUrl: domContainer.getAttribute('data-portfolio-url')};
     ReactDOM.render(<App signedUser={signedUser}/>, domContainer);
 //	document.body.style.backgroundColor = 'transparent';
 }, false);

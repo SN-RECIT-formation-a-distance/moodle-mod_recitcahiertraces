@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { ButtonGroup, Form, Button, Col, Tab, DropdownButton, Dropdown, Row, Nav, Tabs, Badge} from 'react-bootstrap';
-import {faArrowLeft, faArrowRight, faPencilAlt, faBars, faEye, faPrint, faCompass, faCommentDots, faTasks, faCheckSquare, faSquare} from '@fortawesome/free-solid-svg-icons';
+import {faArrowLeft, faArrowRight, faPencilAlt, faBars, faEye, faPrint, faCompass, faCommentDots, faTasks, faCheckSquare, faSquare, faFileExport} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {FeedbackCtrl, DataGrid, ComboBox} from '../libs/components/Components';
 import {UtilsMoodle, JsNx} from '../libs/utils/Utils';
@@ -787,10 +787,21 @@ class ActionBar extends Component{
         userId: 0
     };
 
+    constructor(props){
+        super(props);
+        let url = $glVars.signedUser.portfolioUrl;
+        if (url && url.length > 0){
+            this.exportUrl = url;
+        }else{
+            this.exportUrl = null;
+        }
+    }
+
     render(){
         let main = 
             <div style={{marginBottom: "1rem"}}>
                 <a href={this.getPrintLink(1)} target="_blank"><FontAwesomeIcon icon={faPrint}/>{" Imprimer des notes"}</a>
+                {this.exportUrl && <a href={this.exportUrl} target="_blank" style={{marginLeft:'15px'}}><FontAwesomeIcon icon={faFileExport}/>{" Exporter des notes vers portfolio"}</a>}
             </div>;
 
         return main;
@@ -835,7 +846,7 @@ class GroupUserSelect extends Component{
         let userList = [];
         for(let group of dataProvider){
 
-             // groupId = 0 means no groupe
+             // groupId = 0 means no group
             if(group[0].groupId > 0){ 
                 groupList.push({text: group[0].groupName, value: group[0].groupId, data: group});
             }

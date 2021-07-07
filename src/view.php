@@ -23,6 +23,7 @@
 
 require('../../config.php');
 require_once($CFG->dirroot . "/local/recitcommon/php/Utils.php");
+require_once($CFG->libdir . '/portfoliolib.php');
 
 $id = required_param('id', PARAM_INT);
 list ($course, $cm) = get_course_and_cm_from_cmid($id, 'recitcahiercanada');
@@ -83,13 +84,14 @@ class RecitCahierCanadaView
         echo $this->output->heading(format_string($this->cm->name), 2);
                         
         $roles = Utils::getUserRoles($this->course->id, $this->user->id);
-        $studentId = (in_array('ad', $roles) ? 0 : $this->user->id);      
+        $studentId = (in_array('ad', $roles) ? 0 : $this->user->id);
+        $portfolioUrl = $this->getPortfolioUrl();
         
         echo $this->getEditorOption("recit_cahiertraces_editor", 1);        
         echo $this->getEditorOption("recit_cahiertraces_editor", 2);
         echo $this->getEditorOption("recit_cahiertraces_editor", 3);
 
-        echo sprintf("<div id='recit_cahiertraces' data-student-id='%ld' data-roles='%s'></div>", $studentId, implode(",", $roles));
+        echo sprintf("<div id='recit_cahiertraces' data-student-id='%ld' data-roles='%s' data-portfolio-url='%s'></div>", $studentId, implode(",", $roles), $portfolioUrl);
         
         echo $this->output->footer();
     }
@@ -103,5 +105,13 @@ class RecitCahierCanadaView
         else{
             return Utils::createEditorHtml(false, "{$name}_container_{$index}", "{$name}_{$index}", "", 15, $context, 0, 0);
         }
+    }
+
+    protected function getPortfolioUrl(){
+        global $CFG;
+        if (empty($CFG->enableportfolios)) return '';
+        $button = new portfolio_add_button();
+        $button->set_callback_options('recitcahiertraces_portfolio_caller', array('id' => $this->cm->id), 'mod_recitcahiercanada');
+        return $button->to_html(PORTFOLIO_ADD_MOODLE_URL);
     }
 }
