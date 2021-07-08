@@ -787,21 +787,11 @@ class ActionBar extends Component{
         userId: 0
     };
 
-    constructor(props){
-        super(props);
-        let url = $glVars.signedUser.portfolioUrl;
-        if (url && url.length > 0){
-            this.exportUrl = url;
-        }else{
-            this.exportUrl = null;
-        }
-    }
-
     render(){
         let main = 
             <div style={{marginBottom: "1rem"}}>
                 <a href={this.getPrintLink(1)} target="_blank"><FontAwesomeIcon icon={faPrint}/>{" Imprimer des notes"}</a>
-                {this.exportUrl && <a href={this.exportUrl} target="_blank" style={{marginLeft:'15px'}}><FontAwesomeIcon icon={faFileExport}/>{" Exporter des notes vers portfolio"}</a>}
+                {$glVars.signedUser.portfolioUrl && <a href={$glVars.signedUser.portfolioUrl} target="_blank" style={{marginLeft:'15px'}}><FontAwesomeIcon icon={faFileExport}/>{" Exporter des notes vers portfolio"}</a>}
             </div>;
 
         return main;

@@ -91,7 +91,7 @@ class RecitCahierCanadaView
         echo $this->getEditorOption("recit_cahiertraces_editor", 2);
         echo $this->getEditorOption("recit_cahiertraces_editor", 3);
 
-        echo sprintf("<div id='recit_cahiertraces' data-student-id='%ld' data-roles='%s' data-portfolio-url='%s'></div>", $studentId, implode(",", $roles), $portfolioUrl);
+        echo sprintf("<div id='recit_cahiertraces' data-student-id='%ld' data-roles='%s' %s></div>", $studentId, implode(",", $roles), $portfolioUrl);
         
         echo $this->output->footer();
     }
@@ -109,9 +109,13 @@ class RecitCahierCanadaView
 
     protected function getPortfolioUrl(){
         global $CFG;
-        if (empty($CFG->enableportfolios)) return '';
-        $button = new portfolio_add_button();
+        
+        if (empty($CFG->enableportfolios)){
+            return '';
+        }
+            
+        $button = new \portfolio_add_button();
         $button->set_callback_options('recitcahiertraces_portfolio_caller', array('id' => $this->cm->id), 'mod_recitcahiercanada');
-        return $button->to_html(PORTFOLIO_ADD_MOODLE_URL);
+        return sprintf('data-portfolio-url="%s"', $button->to_html(PORTFOLIO_ADD_MOODLE_URL));
     }
 }
