@@ -366,6 +366,7 @@ if (!class_exists('CahierTracesPersistCtrl')) {
             foreach($ccCmList as $item){
                 if(empty($item->activityName)){
                     $item->activityName = "Erreur : L'activité #$item->cmId appartient à une autre section";
+                    $item->garbage = 1;
                 }
             }
         }

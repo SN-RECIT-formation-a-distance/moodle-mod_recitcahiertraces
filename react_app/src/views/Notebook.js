@@ -656,11 +656,13 @@ export class TeacherNotebook extends Component{
 
         this.getData = this.getData.bind(this);
         this.getDataResult = this.getDataResult.bind(this);
+        this.getNotesResult = this.getNotesResult.bind(this);
+        this.onRemoveGarbage = this.onRemoveGarbage.bind(this);
         this.onDataChange = this.onDataChange.bind(this);
         this.onSetTab = this.onSetTab.bind(this);
         this.onProgressionDetail = this.onProgressionDetail.bind(this);
 
-        this.state = {tab: $glVars.urlParams.tab.toString(), nbFeedback: "?", enrolledUserList: []};
+        this.state = {tab: $glVars.urlParams.tab.toString(), nbFeedback: "?", enrolledUserList: [], garbage: []};
     }
     
     componentDidMount(){
@@ -669,6 +671,7 @@ export class TeacherNotebook extends Component{
 
     getData(){
         $glVars.webApi.getEnrolledUserList($glVars.urlParams.id, this.getDataResult);
+        $glVars.webApi.getPersonalNotes($glVars.urlParams.id, 0, this.getNotesResult);
     }
 
     getDataResult(result){
@@ -680,9 +683,56 @@ export class TeacherNotebook extends Component{
         this.setState({enrolledUserList: result.data});
     }
 
+
+    getNotesResult(result){
+        if(!result.success){
+            FeedbackCtrl.instance.showError($glVars.i18n.appName, result.msg);
+            return;
+        }
+
+        let garbage = [];
+        for (let notes of result.data){
+            for (let note of notes){
+                if (note.garbage){
+                    garbage.push(note);
+                }
+            }
+        }
+        this.setState({garbage:garbage});
+    }
+
+    getGarbageWarnings(){
+        let html = [];
+        let k = 0;
+        for (let n of this.state.garbage){
+            k++;
+            html.push(<div className="box py-3 activity-content errorbox alert alert-danger p-0 p-sm-3" key={k}>
+                <p className="errormessage">La note "{n.noteTitle}" (activité #{n.cmId}) n'a plus de relation avec aucune activité (l'activité ou le cahier de traces a été changé de section). <a href="#" onClick={() => this.onRemoveGarbage(n)}>Supprimer la note</a></p>
+            </div>);
+        }
+        return html;
+    }
+    
+    onRemoveGarbage(item){
+        let callback = function(result){
+            if(result.success){
+                $glVars.feedback.showInfo($glVars.i18n.tags.appName, $glVars.i18n.tags.msgSuccess, 3);
+                this.getData();
+            }
+            else{
+                $glVars.feedback.showError($glVars.i18n.tags.appName, result.msg);
+            }
+        }
+
+        if(window.confirm($glVars.i18n.tags.msgConfirmDeletion+"\nCela supprimera tous les données de l'élève. La suppression est irreversible.")){
+            $glVars.webApi.removeCcCmNote(item.ccCmId, item.cmId, callback.bind(this));
+        }
+    }    
+
     render(){
         let main = 
             <div>
+                {this.getGarbageWarnings()}
                 <Tabs activeKey={this.state.tab} id="tabTeacherNotebook" onSelect={this.onSetTab}>
                     <Tab eventKey={"0"} title={<span><FontAwesomeIcon icon={faCompass}/>{" Consulter les notes"}</span>}>
                         <ViewNavGroupAndStudents style={{padding: "1rem"}} enrolledUserList={this.state.enrolledUserList}></ViewNavGroupAndStudents>
