@@ -34,10 +34,11 @@ if (!class_exists('CahierTracesApi')) {
             try{
                 $cmId = intval($request['cmId']);
                 $userId = intval($request['userId']);
+                $garbage = (isset($request['garbage']) ? intval($request['garbage']) : 0) == 1;
 
                 $this->canUserAccess('s', $cmId, $userId);
 
-                $result = CahierTracesPersistCtrl::getInstance()->getPersonalNotes($cmId, $userId);
+                $result = CahierTracesPersistCtrl::getInstance()->getPersonalNotes($cmId, $userId, $garbage);
                 $this->prepareJson($result);
                 return new WebApiResult(true, $result);
             }

@@ -45,7 +45,7 @@ if (!class_exists('CahierTracesPersistCtrl')) {
             parent::__construct($mysqlConn, $signedUser);
         }
 
-        public function getPersonalNotes($cmId, $userId){
+        public function getPersonalNotes($cmId, $userId, $garbage = false){
             $query = "select t1.instance, t4.id as ccCmId, t4.ccid as ccId, t4.cmid as cmId, t4.title as noteTitle, t4.slot, t5.id as personalNoteId, 
                     coalesce(t5.note, '') as note,
                     coalesce(t5.userid, 0) as userId, coalesce(t5.feedback, '') as feedback, 
@@ -78,7 +78,9 @@ if (!class_exists('CahierTracesPersistCtrl')) {
             // index by activity
             $result = array();
             foreach($tmp as $item){
-                $result[$item->cmId][] = $item;
+                if (!$garbage || isset($item->garbage)){
+                    $result[$item->cmId][] = $item;
+                }
             }
 
             return array_values($result); // reset the array indexes

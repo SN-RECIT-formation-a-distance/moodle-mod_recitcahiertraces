@@ -512,7 +512,7 @@ class NavActivities extends Component{
             return;
         }
         
-        $glVars.webApi.getPersonalNotes($glVars.urlParams.id, this.props.userId, this.getDataResult);
+        $glVars.webApi.getPersonalNotes($glVars.urlParams.id, this.props.userId, 0, this.getDataResult);
     }
 
     getDataResult(result){
@@ -671,7 +671,7 @@ export class TeacherNotebook extends Component{
 
     getData(){
         $glVars.webApi.getEnrolledUserList($glVars.urlParams.id, this.getDataResult);
-        $glVars.webApi.getPersonalNotes($glVars.urlParams.id, 0, this.getNotesResult);
+        $glVars.webApi.getPersonalNotes($glVars.urlParams.id, 0, 1, this.getNotesResult);
     }
 
     getDataResult(result){
