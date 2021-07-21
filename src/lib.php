@@ -113,7 +113,7 @@ function recitcahiercanada_delete_instance($id) {
  * @return bool false if the file was not found, just send the file otherwise and do not return anything
  */
 function mod_recitcahiercanada_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options=array()) {
-    global $CFG, $USER;
+    global $CFG, $USER, $DB;
 
     /*if ($context->contextlevel != CONTEXT_MODULE) {
         return false;
@@ -123,7 +123,8 @@ function mod_recitcahiercanada_pluginfile($course, $cm, $context, $filearea, $ar
     //require_once($CFG->dirroot . "/mod/wiki/locallib.php");
 
     if ($filearea == 'personalnote') {
-        $ownerId = (int) array_shift($args);
+        $itemId = (int) array_shift($args);
+        $ownerId = CahierTracesPersistCtrl::getInstance($DB, $USER)->getUserFromItemId($itemId);
         
         $roles = Utils::getUserRoles($course->id, $USER->id);
         if((Utils::isAdminRole($roles) == false) && ($USER->id != $ownerId)){
@@ -138,7 +139,7 @@ function mod_recitcahiercanada_pluginfile($course, $cm, $context, $filearea, $ar
 
         $relativepath = implode('/', $args);
 
-        $fullpath = "/$context->id/mod_recitcahiercanada/personalnote/$ownerId/$relativepath";
+        $fullpath = "/$context->id/mod_recitcahiercanada/personalnote/$itemId/$relativepath";
 
         $fs = get_file_storage();
 		$file = $fs->get_file_by_hash(sha1($fullpath));		

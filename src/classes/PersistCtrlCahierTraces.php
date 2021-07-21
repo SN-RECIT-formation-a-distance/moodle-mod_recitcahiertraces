@@ -66,7 +66,7 @@ if (!class_exists('CahierTracesPersistCtrl')) {
             
                 foreach($tmp as $item){
                     $obj = new stdClass();
-                    $obj->text = file_rewrite_pluginfile_urls($item->note, 'pluginfile.php', $context->id, 'mod_recitcahiercanada', 'personalnote', $item->userId);
+                    $obj->text = file_rewrite_pluginfile_urls($item->note, 'pluginfile.php', $context->id, 'mod_recitcahiercanada', 'personalnote', $item->noteItemId);
                     $obj->itemid = $item->noteItemId;
                     $item->note = $obj;
                     unset($item->noteItemId);	
@@ -84,6 +84,16 @@ if (!class_exists('CahierTracesPersistCtrl')) {
             }
 
             return array_values($result); // reset the array indexes
+        }
+
+        public function getUserFromItemId($itemId){
+            
+            //(case length(recit_strip_tags(coalesce(t2.note, ''))) when 0 then t1.templatenote else t2.note end) as note,
+            $query = "select userId FROM {$this->prefix}recitcc_user_notes where note_itemid = $itemId";
+            
+            $result = $this->mysqlConn->execSQLAndGetObject($query);
+            if (!$result) return 0;
+            return $result->userId;
         }
 
         /**
@@ -125,7 +135,7 @@ if (!class_exists('CahierTracesPersistCtrl')) {
             
             //$result->note = file_rewrite_pluginfile_urls($result->note, 'pluginfile.php', $context->id, 'mod_recitcahiercanada', 'personalnote', $result->ccCmId);
             $obj = new stdClass();
-            $obj->text = file_rewrite_pluginfile_urls($result->note, 'pluginfile.php', $context->id, 'mod_recitcahiercanada', 'personalnote', $result->userId);
+            $obj->text = file_rewrite_pluginfile_urls($result->note, 'pluginfile.php', $context->id, 'mod_recitcahiercanada', 'personalnote', $result->noteItemId);
             $obj->itemid = $result->noteItemId;
             $result->note = $obj;
             unset($result->noteItemId);
@@ -138,7 +148,7 @@ if (!class_exists('CahierTracesPersistCtrl')) {
                 $context = context_course::instance($data->courseId);
         
                 if($flag == "s"){
-                    $data->note->text = file_save_draft_area_files($data->note->itemid, $context->id, 'mod_recitcahiercanada', 'personalnote', $data->userId, array('subdirs'=>true), $data->note->text);	
+                    $data->note->text = file_save_draft_area_files($data->note->itemid, $context->id, 'mod_recitcahiercanada', 'personalnote', $data->note->itemid, array('subdirs'=>true), $data->note->text);	
 
                     $data->lastUpdate = time();
                     $fields = array("cccmid", "userid", "note", "note_itemid", "lastupdate");
