@@ -51,7 +51,7 @@ class RecitCahierCanadaView
     protected $db = null;
     protected $cfg = null;
 
-    protected $editorOption = "1"; // 1 = atto, 2 = recit editor
+ //   protected $editorOption = "1"; // 1 = atto, 2 = recit editor
 
     public function __construct($page, $course, $cm, $output, $user, $db, $cfg){
         $this->page = $page;
@@ -73,10 +73,10 @@ class RecitCahierCanadaView
         $this->page->requires->js(new moodle_url('./react_app_build/index.js'), true);
         $this->page->requires->js(new moodle_url("{$this->cfg->wwwroot}/local/recitcommon/js/Components.js"), true);
 
-        if($this->editorOption == "2"){
+       /* if($this->editorOption == "2"){
             $this->page->requires->css(new moodle_url("{$this->cfg->wwwroot}/local/recitcommon/js/recit_rich_editor/build/index.css"), true);
             $this->page->requires->js(new moodle_url("{$this->cfg->wwwroot}/local/recitcommon/js/recit_rich_editor/build/index.js"), true);
-        }
+        }*/
 
         //$this->page->requires->js(new moodle_url('/lib/editor/atto/yui/build/moodle-editor_atto-editor/moodle-editor_atto-editor-min.js'), true);
 
@@ -99,12 +99,12 @@ class RecitCahierCanadaView
     protected function getEditorOption($name, $index){
         $context = context_course::instance($this->course->id);
 
-        if($this->editorOption == "2"){
+        /*if($this->editorOption == "2"){
             return "<div id='{$name}_container_{$index}' data-format='recit_rich_editor' style='display: none;'></div>";
         }
-        else{
+        else{*/
             return Utils::createEditorHtml(false, "{$name}_container_{$index}", "{$name}_{$index}", "", 15, $context, 0, 0);
-        }
+        //}
     }
 
     protected function getPortfolioUrl(){
