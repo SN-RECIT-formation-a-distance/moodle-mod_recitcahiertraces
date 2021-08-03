@@ -153,6 +153,7 @@ function mod_recitcahiertraces_pluginfile($course, $cm, $context, $filearea, $ar
 
     if ($filearea == 'usernote') {
         $itemId = (int) array_shift($args);
+
         $ownerId = PersistCtrl::getInstance($DB, $USER)->getUserFromItemId($itemId);
         
         $roles = Utils::getUserRoles($course->id, $USER->id);
