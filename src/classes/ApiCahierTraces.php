@@ -22,12 +22,12 @@
 require_once "$CFG->dirroot/local/recitcommon/php/WebApi.php";
 require_once 'PersistCtrlCahierTraces.php';
 
-if (!class_exists('CahierTracesApi')) {
-    class CahierTracesApi extends MoodleApi
+if (!class_exists('CahierCanadaApi')) {
+    class CahierCanadaApi extends MoodleApi
     {
         public function __construct($DB, $COURSE, $USER){
             parent::__construct($DB, $COURSE, $USER);
-            CahierTracesPersistCtrl::getInstance($DB, $USER);
+            CahierCanadaPersistCtrl::getInstance($DB, $USER);
         }
 
         public function getPersonalNotes($request){
@@ -38,7 +38,7 @@ if (!class_exists('CahierTracesApi')) {
 
                 $this->canUserAccess('s', $cmId, $userId);
 
-                $result = CahierTracesPersistCtrl::getInstance()->getPersonalNotes($cmId, $userId, $garbage);
+                $result = CahierCanadaPersistCtrl::getInstance()->getPersonalNotes($cmId, $userId, $garbage);
                 $this->prepareJson($result);
                 return new WebApiResult(true, $result);
             }
@@ -55,7 +55,7 @@ if (!class_exists('CahierTracesApi')) {
 
                 $this->canUserAccess('s', $cmId, $userId);
                 
-                $result = CahierTracesPersistCtrl::getInstance()->getPersonalNote($ccCmId, $userId);
+                $result = CahierCanadaPersistCtrl::getInstance()->getPersonalNote($ccCmId, $userId);
 
                 $this->prepareJson($result);
                 return new WebApiResult(true, $result);
@@ -75,18 +75,18 @@ if (!class_exists('CahierTracesApi')) {
 
                 $this->canUserAccess('s', 0, $data->userId, $data->courseId);
 
-                $result = CahierTracesPersistCtrl::getInstance()->savePersonalNote($data, $flags->mode);
+                $result = CahierCanadaPersistCtrl::getInstance()->savePersonalNote($data, $flags->mode);
                 $this->prepareJson($result);
 
                 if(($flags->mode == "s") && ($result->notifyTeacher == 1)){
                     $url = sprintf("%s/mod/recitcahiercanada/view.php?id=%ld&ccCmId=%ld&cmId=%ld&userId=%ld", $CFG->wwwroot, $result->mcmId, $result->ccCmId, $result->cmId, $result->userId);
                     $msg = sprintf("Nouvelle mise à jour dans la note: « <a href='%s' target='_blank'>%s</a> »", $url, $result->noteTitle);
-                    CahierTracesPersistCtrl::getInstance()->sendInstantMessagesToTeachers($result->courseId, $msg);
+                    CahierCanadaPersistCtrl::getInstance()->sendInstantMessagesToTeachers($result->courseId, $msg);
                 }
                 else if(($flags->mode == "t") && ($flags->teacherFeedbackUpdated == 1)){
                     $url = sprintf("%s/mod/recitcahiercanada/view.php?id=%ld&ccCmId=%ld&cmId=%ld&userId=%ld", $CFG->wwwroot, $result->mcmId, $result->ccCmId, $result->cmId, $result->userId);
                     $msg = sprintf("Nouvelle mise à jour dans la note: « <a href='%s' target='_blank'>%s</a> »", $url, $result->noteTitle);
-                    CahierTracesPersistCtrl::getInstance()->sendInstantMessagesToStudents(array($result->userId), $result->courseId, $msg);
+                    CahierCanadaPersistCtrl::getInstance()->sendInstantMessagesToStudents(array($result->userId), $result->courseId, $msg);
                 }
                 
                 return new WebApiResult(true, $result);
@@ -103,7 +103,7 @@ if (!class_exists('CahierTracesApi')) {
 
                 $this->canUserAccess('a', $cmId);
 
-                $result = CahierTracesPersistCtrl::getInstance()->getCmNotes(0, $cmId, $ccId);
+                $result = CahierCanadaPersistCtrl::getInstance()->getCmNotes(0, $cmId, $ccId);
                 $this->prepareJson($result);
                 return new WebApiResult(true, $result);
             }
@@ -126,11 +126,11 @@ if (!class_exists('CahierTracesApi')) {
                     $result->data->cmId = $cmId;
                 }
                 else{
-                    $result->data = CahierTracesPersistCtrl::getInstance()->getCcCmNote($ccCmId);
+                    $result->data = CahierCanadaPersistCtrl::getInstance()->getCcCmNote($ccCmId);
                 }
 
-                $result->tagList = CahierTracesPersistCtrl::getInstance()->getTagList($result->data->cmId);
-                $result->activityList = CahierTracesPersistCtrl::getInstance()->getSectionCmList($result->data->cmId);
+                $result->tagList = CahierCanadaPersistCtrl::getInstance()->getTagList($result->data->cmId);
+                $result->activityList = CahierCanadaPersistCtrl::getInstance()->getSectionCmList($result->data->cmId);
 
                 $this->prepareJson($result);
                 return new WebApiResult(true, $result);
@@ -147,7 +147,7 @@ if (!class_exists('CahierTracesApi')) {
 
                 $this->canUserAccess('a', $cmId);
                 
-                CahierTracesPersistCtrl::getInstance()->removeCcCmNote($ccCmId);
+                CahierCanadaPersistCtrl::getInstance()->removeCcCmNote($ccCmId);
                 return new WebApiResult(true);
             }
             catch(Exception $ex){
@@ -162,8 +162,8 @@ if (!class_exists('CahierTracesApi')) {
 
                 $this->canUserAccess('a', $data->cmId);
 
-                $result = CahierTracesPersistCtrl::getInstance()->saveCcCmNote($data);
-                //CahierTracesPersistCtrl::getInstance()->moodleTagItem($result, $tagMetadata);
+                $result = CahierCanadaPersistCtrl::getInstance()->saveCcCmNote($data);
+                //CahierCanadaPersistCtrl::getInstance()->moodleTagItem($result, $tagMetadata);
                 $this->prepareJson($result);
                 return new WebApiResult(true, $result);
             }
@@ -178,7 +178,7 @@ if (!class_exists('CahierTracesApi')) {
 
                 $from = intval($request['from']);
                 $to = intval($request['to']);
-                CahierTracesPersistCtrl::getInstance()->switchCcCmNoteSlot($from, $to);
+                CahierCanadaPersistCtrl::getInstance()->switchCcCmNoteSlot($from, $to);
                 return new WebApiResult(true);
             }
             catch(Exception $ex){
@@ -190,7 +190,7 @@ if (!class_exists('CahierTracesApi')) {
             try{
                 $cmId = intval($request['cmId']);
                 $this->canUserAccess('a', $cmId);
-                $result = CahierTracesPersistCtrl::getInstance()->checkCCSeqPos($cmId);
+                $result = CahierCanadaPersistCtrl::getInstance()->checkCCSeqPos($cmId);
                 return new WebApiResult(true, $result);
             }
             catch(Exception $ex){
@@ -206,7 +206,7 @@ if (!class_exists('CahierTracesApi')) {
 
                 $result = new stdClass();
 
-                $result->data = CahierTracesPersistCtrl::getInstance()->getRequiredNotes($cmId);
+                $result->data = CahierCanadaPersistCtrl::getInstance()->getRequiredNotes($cmId);
                 $this->prepareJson($result);
                 return new WebApiResult(true, $result->data);
             }
@@ -223,7 +223,7 @@ if (!class_exists('CahierTracesApi')) {
 
                 $result = new stdClass();
 
-                $result->data = CahierTracesPersistCtrl::getInstance()->getStudentsProgression($cmId);
+                $result->data = CahierCanadaPersistCtrl::getInstance()->getStudentsProgression($cmId);
                 $this->prepareJson($result);
                 return new WebApiResult(true, $result->data);
             }
@@ -236,7 +236,7 @@ if (!class_exists('CahierTracesApi')) {
             try{
                 $this->canUserAccess('a');
 
-                $result = CahierTracesPersistCtrl::getInstance()->sendInstantMessagesToTeachers(7, 'test api');
+                $result = CahierCanadaPersistCtrl::getInstance()->sendInstantMessagesToTeachers(7, 'test api');
 
                 return new WebApiResult(true, $result);
             }

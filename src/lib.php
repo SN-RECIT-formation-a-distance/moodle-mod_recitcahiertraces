@@ -94,7 +94,7 @@ function recitcahiercanada_delete_instance($id) {
 
     $DB->delete_records('recitcahiercanada', array('id'=>$recitcahiercanada->id));*/
 
-    return CahierTracesPersistCtrl::getInstance($DB, $USER)->removeCcInstance($id);
+    return CahierCanadaPersistCtrl::getInstance($DB, $USER)->removeCcInstance($id);
 }
 
 
@@ -124,7 +124,7 @@ function mod_recitcahiercanada_pluginfile($course, $cm, $context, $filearea, $ar
 
     if ($filearea == 'personalnote') {
         $itemId = (int) array_shift($args);
-        $ownerId = CahierTracesPersistCtrl::getInstance($DB, $USER)->getUserFromItemId($itemId);
+        $ownerId = CahierCanadaPersistCtrl::getInstance($DB, $USER)->getUserFromItemId($itemId);
         
         $roles = Utils::getUserRoles($course->id, $USER->id);
         if((Utils::isAdminRole($roles) == false) && ($USER->id != $ownerId)){

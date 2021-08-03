@@ -24,8 +24,8 @@ require_once "$CFG->dirroot/local/recitcommon/php/PersistCtrl.php";
 /**
  * Singleton class
  */
-if (!class_exists('CahierTracesPersistCtrl')) {
-    class CahierTracesPersistCtrl extends MoodlePersistCtrl
+if (!class_exists('CahierCanadaPersistCtrl')) {
+    class CahierCanadaPersistCtrl extends MoodlePersistCtrl
     {
         protected static $instance = null;
         
@@ -496,7 +496,7 @@ if (!class_exists('CahierTracesPersistCtrl')) {
                 $groupIds = $this->signedUser->groupmember[$courseId];
             }
             
-            $allCourseTeachers = CahierTracesPersistCtrl::getInstance()->getCourseTeachers($courseId);
+            $allCourseTeachers = CahierCanadaPersistCtrl::getInstance()->getCourseTeachers($courseId);
 
             /*
              * Si le prof est dans un groupe il est notifié par les élèves qui font parti de son groupe.
