@@ -16,33 +16,33 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    mod_recitcahiercanada
+ * @package    mod_recitcahiertraces
  * @subpackage backup-moodle2
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 /**
- * Define all the restore steps that will be used by the restore_recitcahiercanada_activity_task
+ * Define all the restore steps that will be used by the restore_recitcahiertraces_activity_task
  */
 
-require_once($CFG->dirroot . "/mod/recitcahiercanada/classes/PersistCtrlCahierTraces.php");
+require_once($CFG->dirroot . "/mod/recitcahiertraces/classes/PersistCtrlCahierTraces.php");
 
 /**
- * Structure step to restore one recitcahiercanada activity
+ * Structure step to restore one recitcahiertraces activity
  */
-class restore_recitcahiercanada_activity_structure_step extends restore_activity_structure_step {
+class restore_recitcahiertraces_activity_structure_step extends restore_activity_structure_step {
     protected function define_structure() {
 
         $paths = array();
-        $paths[] = new restore_path_element('recitcahiercanada', '/activity/recitcahiercanada');
-        $paths[] = new restore_path_element('recitcc_cm_notes', '/activity/recitcahiercanada/recitcc_cm_notes');
-     //   $paths[] = new restore_path_element('recitcc_user_notes', '/activity/recitcahiercanada/recitcc_cm_notes/recitcc_user_notes');
+        $paths[] = new restore_path_element('recitcahiertraces', '/activity/recitcahiertraces');
+        $paths[] = new restore_path_element('recitct_cm_notes', '/activity/recitcahiertraces/recitct_cm_notes');
+     //   $paths[] = new restore_path_element('recitct_user_notes', '/activity/recitcahiertraces/recitct_cm_notes/recitct_user_notes');
 
         // Return the paths wrapped into standard activity structure
         return $this->prepare_activity_structure($paths);
     }
 
-    protected function process_recitcahiercanada($data) {
+    protected function process_recitcahiertraces($data) {
         global $DB, $USER;
 
         $data = (object)$data;
@@ -52,15 +52,15 @@ class restore_recitcahiercanada_activity_structure_step extends restore_activity
         // Any changes to the list of dates that needs to be rolled should be same during course restore and course reset.
         // See MDL-9367.
 
-        // insert the recitcahiercanada record
-        $newitemid = $DB->insert_record('recitcahiercanada', $data);     
+        // insert the recitcahiertraces record
+        $newitemid = $DB->insert_record('recitcahiertraces', $data);     
         
         // immediately after inserting "activity" record, call this
         $this->apply_activity_instance($newitemid);
-        $this->set_mapping('recitcahiercanada', $oldId, $newitemid, true); // Has related files.
+        $this->set_mapping('recitcahiertraces', $oldId, $newitemid, true); // Has related files.
     }
 
-    protected function process_recitcc_cm_notes($data) {
+    protected function process_recitct_cm_notes($data) {
         global $DB, $USER;
 
         //fwrite($fp, print_r($data, true) . chr(10));
@@ -68,18 +68,18 @@ class restore_recitcahiercanada_activity_structure_step extends restore_activity
         $data = (object)$data;
         $oldid = $data->id;
         
-        $data->ccid = $this->get_mappingid('recitcahiercanada', $data->ccid);
+        $data->ccid = $this->get_mappingid('recitcahiertraces', $data->ccid);
         $data->cmid = CahierTracesPersistCtrl::getInstance($DB, $USER)->getCmIdFromIndexPos($data->ccid, $data->cmindexpos);
 
         if($data->cmid > 0){
-            $newitemid = $DB->insert_record('recitcc_cm_notes', $data); // insert the recitcc_cm_notes record
-            $this->set_mapping('recitcc_cm_notes', $oldid, $newitemid, true); 
+            $newitemid = $DB->insert_record('recitct_cm_notes', $data); // insert the recitct_cm_notes record
+            $this->set_mapping('recitct_cm_notes', $oldid, $newitemid, true); 
         }
         
         /*
         // get the new courseModuleId according to their position in the section. To find out the section, it uses the previous ccId
         $oldSectionCmSeq = CahierTracesPersistCtrl::getInstance($DB, $USER)->getCmSequenceFromSection($data->ccid);
-        $data->ccid = $this->get_mappingid('recitcahiercanada', $data->ccid);
+        $data->ccid = $this->get_mappingid('recitcahiertraces', $data->ccid);
         $newSectionCmSeq = CahierTracesPersistCtrl::getInstance($DB, $USER)->getCmSequenceFromSection($data->ccid);
 
         // both the sequences must have be identical because it is a course backup, so we can use the index to look for the new cmId
@@ -91,29 +91,29 @@ class restore_recitcahiercanada_activity_structure_step extends restore_activity
 
         if(isset($newSectionCmSeq->sequence[$key])){
             $data->cmid = $newSectionCmSeq->sequence[$key];
-            $newitemid = $DB->insert_record('recitcc_cm_notes', $data); // insert the recitcc_cm_notes record
-            $this->set_mapping('recitcc_cm_notes', $oldid, $newitemid, true); 
+            $newitemid = $DB->insert_record('recitct_cm_notes', $data); // insert the recitct_cm_notes record
+            $this->set_mapping('recitct_cm_notes', $oldid, $newitemid, true); 
         }*/       
 
         //fwrite($fp, $data->cmid . chr(10));
         //fclose($fp);
     }
 
-   /* protected function process_recitcc_user_notes($data) {
+   /* protected function process_recitct_user_notes($data) {
         global $DB;
 
         $data = (object)$data;
-        $data->cccmid = $this->get_mappingid('recitcc_cm_notes', $data->cccmid);
+        $data->cccmid = $this->get_mappingid('recitct_cm_notes', $data->cccmid);
 
-        // insert the recitcc_user_notes record
-        $newitemid = $DB->insert_record('recitcc_user_notes', $data);
+        // insert the recitct_user_notes record
+        $newitemid = $DB->insert_record('recitct_user_notes', $data);
     }*/
 
     protected function after_execute() {
-        // Add recitcahiercanada related files, no need to match by itemname (just internally handled context)
-        $this->add_related_files('mod_recitcahiercanada', 'intro', null);
-        //$this->add_related_files('mod_recitcc_user_notes', 'note', null);
-        //$this->add_related_files('mod_recitcc_user_notes', 'feedback', null);
+        // Add recitcahiertraces related files, no need to match by itemname (just internally handled context)
+        $this->add_related_files('mod_recitcahiertraces', 'intro', null);
+        //$this->add_related_files('mod_recitct_user_notes', 'note', null);
+        //$this->add_related_files('mod_recitct_user_notes', 'feedback', null);
     }
 }
 

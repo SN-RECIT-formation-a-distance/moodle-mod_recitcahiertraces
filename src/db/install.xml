@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/recitcahiercanada/db" VERSION="20190303" COMMENT="XMLDB file for URL module"
+<XMLDB PATH="mod/recitcahiertraces/db" VERSION="20190303" COMMENT="XMLDB file for URL module"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
   <TABLES>
-    <TABLE NAME="recitcahiercanada" COMMENT="Main table for the RecitCahierCanada (course module)">
+    <TABLE NAME="recitcahiertraces" COMMENT="Main table for the recitcahiertraces (course module)">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
@@ -20,7 +20,7 @@
       </KEYS>
     </TABLE>
 
-     <TABLE NAME="recitcc_cm_notes" COMMENT="It keeps the course modules which have notes to be taken by the users">
+     <TABLE NAME="recitct_cm_notes" COMMENT="It keeps the course modules which have notes to be taken by the users">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="intcode" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="integration code"/>
@@ -36,12 +36,12 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="fkccid" TYPE="foreign" FIELDS="ccid" REFTABLE="recitcahiercanada" REFFIELDS ="id"/>
+        <KEY NAME="fkccid" TYPE="foreign" FIELDS="ccid" REFTABLE="recitcahiertraces" REFFIELDS ="id"/>
         <KEY NAME="fkcmid" TYPE="foreign" FIELDS="cmid" REFTABLE="course_modules" REFFIELDS ="id"/>
       </KEYS>
     </TABLE>
 
-    <TABLE NAME="recitcc_user_notes" COMMENT="It keeps the personal notes taken by the users">
+    <TABLE NAME="recitct_user_notes" COMMENT="It keeps the personal notes taken by the users">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="cccmid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Cahier Canada Course Module Id"/>
@@ -54,7 +54,7 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="fkcccm" TYPE="foreign" FIELDS="cccmid" REFTABLE="recitcc_cm_notes" REFFIELDS ="id"/>
+        <KEY NAME="fkcccm" TYPE="foreign" FIELDS="cccmid" REFTABLE="recitct_cm_notes" REFFIELDS ="id"/>
         <KEY NAME="fkuser" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS ="id"/>
       </KEYS>
       <INDEXES>

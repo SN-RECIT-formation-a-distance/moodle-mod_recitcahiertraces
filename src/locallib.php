@@ -46,8 +46,8 @@ class recitcahiertraces_portfolio_caller extends portfolio_module_caller_base {
     public function load_data() {
         global $DB, $USER;
 
-        if (!$this->cm = get_coursemodule_from_id('recitcahiercanada', $this->id)) {
-            throw new portfolio_caller_exception('invalidid', 'recitcahiercanada');
+        if (!$this->cm = get_coursemodule_from_id('recitcahiertraces', $this->id)) {
+            throw new portfolio_caller_exception('invalidid', 'recitcahiertraces');
         }
         
         $this->notes = CahierTracesPersistCtrl::getInstance($DB, $USER)->getPersonalNotes($this->id, $USER->id);
@@ -91,21 +91,21 @@ class recitcahiertraces_portfolio_caller extends portfolio_module_caller_base {
             $notea = current($notes);
             $content .= '<div class="activity-container">';
 
-            $content .= sprintf("<h4 class='activity-name'>%s: %s</h4>", get_string('activity', 'mod_recitcahiercanada'), $notea->activityName);
+            $content .= sprintf("<h4 class='activity-name'>%s: %s</h4>", get_string('activity', 'mod_recitcahiertraces'), $notea->activityName);
 
             foreach($notes as $note){
                 // overflow = hidden for the notes that overflow the page dimensions
                 $content .= "<div class='note-container'>";
-                $content .= sprintf("<h5 class='text-muted note-title'>%s: %s</h5>",  get_string('note', 'mod_recitcahiercanada'), $note->noteTitle);
+                $content .= sprintf("<h5 class='text-muted note-title'>%s: %s</h5>",  get_string('note', 'mod_recitcahiertraces'), $note->noteTitle);
                 
                 $content .= sprintf("<div class='alert alert-secondary student-note'>%s</div>", $note->note->text);
 
                 $content .= '<blockquote class="blockquote mb-0">';
-                $content .= sprintf('<span class="blockquote-footer">%s: %s</span>',  get_string('timestamp', 'mod_recitcahiercanada'), $note->lastUpdateFormat());
+                $content .= sprintf('<span class="blockquote-footer">%s: %s</span>',  get_string('timestamp', 'mod_recitcahiertraces'), $note->lastUpdateFormat());
                 $content .= '</blockquote>';
                 
                 if(strlen($note->feedback) > 0){
-                    $content .= sprintf('<div class="alert alert-primary teacher-feedback" role="alert"><strong>%s:</strong><br/>%s</div>', get_string('teacherFeedback', 'mod_recitcahiercanada'), $note->feedback);
+                    $content .= sprintf('<div class="alert alert-primary teacher-feedback" role="alert"><strong>%s:</strong><br/>%s</div>', get_string('teacherFeedback', 'mod_recitcahiertraces'), $note->feedback);
                 }
                 
                 $content .= "</div>";
@@ -123,7 +123,7 @@ class recitcahiertraces_portfolio_caller extends portfolio_module_caller_base {
      * @return string
      */
     public static function display_name() {
-        return get_string('modulename', 'mod_recitcahiercanada');
+        return get_string('modulename', 'mod_recitcahiertraces');
     }
 
     /**
@@ -133,6 +133,6 @@ class recitcahiertraces_portfolio_caller extends portfolio_module_caller_base {
     public function get_return_url() {
         global $CFG, $USER;
 
-        return $CFG->wwwroot . "/mod/recitcahiercanada/classes/ReportStudentNotes.php?cmId={$this->cm->id}&userId={$USER->id}&sf=1";
+        return $CFG->wwwroot . "/mod/recitcahiertraces/classes/ReportStudentNotes.php?cmId={$this->cm->id}&userId={$USER->id}&sf=1";
     }
 }

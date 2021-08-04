@@ -24,7 +24,6 @@ require_once "$CFG->dirroot/local/recitcommon/php/PersistCtrl.php";
 /**
  * Singleton class
  */
-if (!class_exists('CahierTracesPersistCtrl')) {
     class CahierTracesPersistCtrl extends MoodlePersistCtrl
     {
         protected static $instance = null;
@@ -53,9 +52,9 @@ if (!class_exists('CahierTracesPersistCtrl')) {
                     t3.course as courseId, coalesce(t5.note_itemid,0) as noteItemId, t4.notifyteacher as notifyTeacher, if(t5.id > 0 and length(t5.note) > 0, 0, 1) as isTemplate
                     from {$this->prefix}course_modules as t1 
                     inner join {$this->prefix}course_sections as t2 on t1.section = t2.id 
-                    inner join {$this->prefix}recitcahiercanada as t3 on t1.instance = t3.id                
-                    inner join {$this->prefix}recitcc_cm_notes as t4 on t3.id = t4.ccid
-                    left join {$this->prefix}recitcc_user_notes as t5 on t4.id = t5.cccmid and t5.userId = $userId
+                    inner join {$this->prefix}recitcahiertraces as t3 on t1.instance = t3.id                
+                    inner join {$this->prefix}recitct_cm_notes as t4 on t3.id = t4.ccid
+                    left join {$this->prefix}recitct_user_notes as t5 on t4.id = t5.cccmid and t5.userId = $userId
                     where t1.id = $cmId and exists(select id from {$this->prefix}course_modules cm where id = t4.cmid and deletioninprogress = 0) -- avoid to fetch deleted activities
                     order by length(orderByCustom) asc, orderByCustom asc";
                     
@@ -66,7 +65,7 @@ if (!class_exists('CahierTracesPersistCtrl')) {
             
                 foreach($tmp as $item){
                     $obj = new stdClass();
-                    $obj->text = file_rewrite_pluginfile_urls($item->note, 'pluginfile.php', $context->id, 'mod_recitcahiercanada', 'personalnote', $item->noteItemId);
+                    $obj->text = file_rewrite_pluginfile_urls($item->note, 'pluginfile.php', $context->id, 'mod_recitcahiertraces', 'personalnote', $item->noteItemId);
                     $obj->itemid = $item->noteItemId;
                     $item->note = $obj;
                     unset($item->noteItemId);	
@@ -89,7 +88,7 @@ if (!class_exists('CahierTracesPersistCtrl')) {
         public function getUserFromItemId($itemId){
             
             //(case length(recit_strip_tags(coalesce(t2.note, ''))) when 0 then t1.templatenote else t2.note end) as note,
-            $query = "select userId FROM {$this->prefix}recitcc_user_notes where note_itemid = $itemId";
+            $query = "select userId FROM {$this->prefix}recitct_user_notes where note_itemid = $itemId";
             
             $result = $this->mysqlConn->execSQLAndGetObject($query);
             if (!$result) return 0;
@@ -118,10 +117,10 @@ if (!class_exists('CahierTracesPersistCtrl')) {
             if(t2.id > 0 and length(t2.note) > 0, t2.note, t1.templatenote) as note, coalesce(t2.note_itemid,0) as noteItemId, if(t2.id > 0 and length(t2.note) > 0, 0, 1) as isTemplate,
             t1.teachertip as teacherTip, t1.suggestednote as suggestedNote, coalesce(t2.feedback, '') as feedback, t2.grade, t2.lastupdate as lastUpdate,
             t1_1.course as courseId, t1.notifyteacher as notifyTeacher,
-            (select id from {$this->prefix}course_modules where instance = t1_1.id and module = (select id from {$this->prefix}modules where name = 'recitcahiercanada')) as mcmId
-            from {$this->prefix}recitcc_cm_notes as t1 
-            inner join {$this->prefix}recitcahiercanada as t1_1 on t1.ccid = t1_1.id
-            left join {$this->prefix}recitcc_user_notes as t2 on t1.id = t2.cccmid and t2.userid = $userId
+            (select id from {$this->prefix}course_modules where instance = t1_1.id and module = (select id from {$this->prefix}modules where name = 'recitcahiertraces')) as mcmId
+            from {$this->prefix}recitct_cm_notes as t1 
+            inner join {$this->prefix}recitcahiertraces as t1_1 on t1.ccid = t1_1.id
+            left join {$this->prefix}recitct_user_notes as t2 on t1.id = t2.cccmid and t2.userid = $userId
             where $whereStmt";
             
             $result = $this->mysqlConn->execSQLAndGetObject($query, 'PersonalNote');
@@ -133,9 +132,9 @@ if (!class_exists('CahierTracesPersistCtrl')) {
             //list($course, $cm) = get_course_and_cm_from_cmid($result->cmId);
             $context = context_course::instance($result->courseId);
             
-            //$result->note = file_rewrite_pluginfile_urls($result->note, 'pluginfile.php', $context->id, 'mod_recitcahiercanada', 'personalnote', $result->ccCmId);
+            //$result->note = file_rewrite_pluginfile_urls($result->note, 'pluginfile.php', $context->id, 'mod_recitcahiertraces', 'personalnote', $result->ccCmId);
             $obj = new stdClass();
-            $obj->text = file_rewrite_pluginfile_urls($result->note, 'pluginfile.php', $context->id, 'mod_recitcahiercanada', 'personalnote', $result->noteItemId);
+            $obj->text = file_rewrite_pluginfile_urls($result->note, 'pluginfile.php', $context->id, 'mod_recitcahiertraces', 'personalnote', $result->noteItemId);
             $obj->itemid = $result->noteItemId;
             $result->note = $obj;
             unset($result->noteItemId);
@@ -148,7 +147,7 @@ if (!class_exists('CahierTracesPersistCtrl')) {
                 $context = context_course::instance($data->courseId);
         
                 if($flag == "s"){
-                    $data->note->text = file_save_draft_area_files($data->note->itemid, $context->id, 'mod_recitcahiercanada', 'personalnote', $data->note->itemid, array('subdirs'=>true), $data->note->text);	
+                    $data->note->text = file_save_draft_area_files($data->note->itemid, $context->id, 'mod_recitcahiertraces', 'personalnote', $data->note->itemid, array('subdirs'=>true), $data->note->text);	
 
                     $data->lastUpdate = time();
                     $fields = array("cccmid", "userid", "note", "note_itemid", "lastupdate");
@@ -160,14 +159,14 @@ if (!class_exists('CahierTracesPersistCtrl')) {
                 }
 
                 if($data->personalNoteId == 0){
-                    $query = $this->mysqlConn->prepareStmt("insertorupdate", "{$this->prefix}recitcc_user_notes", $fields, $values);
+                    $query = $this->mysqlConn->prepareStmt("insertorupdate", "{$this->prefix}recitct_user_notes", $fields, $values);
                     $this->mysqlConn->execSQL($query);
 
-                    //$obj = $this->mysqlConn->execSQLAndGetObject("select id from {$this->prefix}recitcc_user_notes where cccmid = $data->ccCmId and userid = $data->userId");
+                    //$obj = $this->mysqlConn->execSQLAndGetObject("select id from {$this->prefix}recitct_user_notes where cccmid = $data->ccCmId and userid = $data->userId");
                     //$data->personalNoteId = $obj->id;
                 }
                 else{
-                    $query = $this->mysqlConn->prepareStmt("update", "{$this->prefix}recitcc_user_notes", $fields, $values, array("id"), array($data->personalNoteId));
+                    $query = $this->mysqlConn->prepareStmt("update", "{$this->prefix}recitct_user_notes", $fields, $values, array("id"), array($data->personalNoteId));
                     $this->mysqlConn->execSQL($query);
                 }
                 
@@ -192,7 +191,7 @@ if (!class_exists('CahierTracesPersistCtrl')) {
             $query = "select t1.id as ccCmId, coalesce(t1.intcode, '') as intCode, t1.ccid as ccId, t1.cmid as cmId, t1.title as noteTitle, t1.slot, t1.templatenote as templateNote, t1.suggestednote as suggestedNote, 
                         t1.teachertip as teacherTip, t1.lastupdate as lastUpdate,  t1.notifyteacher as notifyTeacher,
                         GROUP_CONCAT(t2.id) as tagList
-                        from {$this->prefix}recitcc_cm_notes as t1
+                        from {$this->prefix}recitct_cm_notes as t1
                         left join {$this->prefix}tag_instance as t2 on t1.id = t2.itemid and itemtype = 'cccmnote' and component = 'mod_cahiercanada'
                         where $ccCmIdStmt and $cmStmt
                         group by t1.id                
@@ -224,8 +223,8 @@ if (!class_exists('CahierTracesPersistCtrl')) {
             
             $query = "select t1.id as ccCmId, coalesce(t1.intcode, '') as intCode, t1.ccid as ccId, t1.cmid as cmId, t1.title as noteTitle, t1.slot, t1.templatenote as templateNote, t1.suggestednote as suggestedNote, 
                         t1.teachertip as teacherTip, t1.lastupdate as lastUpdate,  t1.notifyteacher as notifyTeacher
-                        from {$this->prefix}recitcc_cm_notes as t1
-                        inner join {$this->prefix}recitcahiercanada as t1_1 on t1.ccid = t1_1.id
+                        from {$this->prefix}recitct_cm_notes as t1
+                        inner join {$this->prefix}recitcahiertraces as t1_1 on t1.ccid = t1_1.id
                         where $cIdStmt and $cmStmt
                         group by t1.id
                         order by slot asc";
@@ -257,10 +256,10 @@ if (!class_exists('CahierTracesPersistCtrl')) {
             try{  
                 $this->mysqlConn->beginTransaction();
 
-                $query = "delete from {$this->prefix}recitcc_user_notes where cccmid = $ccCmId";
+                $query = "delete from {$this->prefix}recitct_user_notes where cccmid = $ccCmId";
                 $this->mysqlConn->execSQL($query);
 
-                $query = "delete from {$this->prefix}recitcc_cm_notes where id = $ccCmId";
+                $query = "delete from {$this->prefix}recitct_cm_notes where id = $ccCmId";
                 $this->mysqlConn->execSQL($query);
                 
                 $this->mysqlConn->commitTransaction();
@@ -286,19 +285,19 @@ if (!class_exists('CahierTracesPersistCtrl')) {
                 $values = array($data->ccId, $data->cmId, $data->noteTitle, $data->templateNote, $data->suggestedNote, $data->teacherTip, $data->lastUpdate, $data->intCode, $data->notifyTeacher);
 
                 if($data->ccCmId == 0){
-                    $curSlot = $this->mysqlConn->execSQLAndGetObject("select slot from {$this->prefix}recitcc_cm_notes where cmid = $data->cmId order by slot desc limit 1");
+                    $curSlot = $this->mysqlConn->execSQLAndGetObject("select slot from {$this->prefix}recitct_cm_notes where cmid = $data->cmId order by slot desc limit 1");
                     $fields[] = "slot";
                     $values[] = (empty($curSlot) ? 1 : $curSlot->slot + 1);
 
-                    $query = $this->mysqlConn->prepareStmt("insert", "{$this->prefix}recitcc_cm_notes", $fields, $values);
+                    $query = $this->mysqlConn->prepareStmt("insert", "{$this->prefix}recitct_cm_notes", $fields, $values);
                     $this->mysqlConn->execSQL($query);
-                    $data->ccCmId = $this->mysqlConn->getLastInsertId("{$this->prefix}recitcc_cm_notes", "id");
+                    $data->ccCmId = $this->mysqlConn->getLastInsertId("{$this->prefix}recitct_cm_notes", "id");
                 }
                 else{
                     $fields[] = "slot";
                     $values[] = $data->slot;
 
-                    $query = $this->mysqlConn->prepareStmt("update", "{$this->prefix}recitcc_cm_notes", $fields, $values, array("id"), array($data->ccCmId));
+                    $query = $this->mysqlConn->prepareStmt("update", "{$this->prefix}recitct_cm_notes", $fields, $values, array("id"), array($data->ccCmId));
                     $this->mysqlConn->execSQL($query);
                 }
                 
@@ -312,7 +311,7 @@ if (!class_exists('CahierTracesPersistCtrl')) {
     /* public function reorderCcCmNotesSlots($cmId){
             try{
                 $this->mysqlConn->beginTransaction();
-                $tmp = $this->mysqlConn->execSQLAndGetObjects("select slot from {$this->prefix}recitcc_cm_notes where id in ($from, $to) order by FIELD(id, $from, $to)");
+                $tmp = $this->mysqlConn->execSQLAndGetObjects("select slot from {$this->prefix}recitct_cm_notes where id in ($from, $to) order by FIELD(id, $from, $to)");
 
                 // $tmp[0] = from
                 // $tmp[1] = to
@@ -320,10 +319,10 @@ if (!class_exists('CahierTracesPersistCtrl')) {
                     throw new Exception("Unknown slots");
                 }
 
-                $query = sprintf("update {$this->prefix}recitcc_cm_notes set slot = %d where id = %d", $tmp[1]->slot, $from);
+                $query = sprintf("update {$this->prefix}recitct_cm_notes set slot = %d where id = %d", $tmp[1]->slot, $from);
                 $this->mysqlConn->execSQL($query);
 
-                $query = sprintf("update {$this->prefix}recitcc_cm_notes set slot = %d where id = %d", $tmp[0]->slot, $to);
+                $query = sprintf("update {$this->prefix}recitct_cm_notes set slot = %d where id = %d", $tmp[0]->slot, $to);
                 $this->mysqlConn->execSQL($query);
 
                 $this->mysqlConn->commitTransaction();
@@ -339,7 +338,7 @@ if (!class_exists('CahierTracesPersistCtrl')) {
         public function switchCcCmNoteSlot($from, $to){
             try{
                 $this->mysqlConn->beginTransaction();
-                $tmp = $this->mysqlConn->execSQLAndGetObjects("select slot from {$this->prefix}recitcc_cm_notes where id in ($from, $to) order by FIELD(id, $from, $to)");
+                $tmp = $this->mysqlConn->execSQLAndGetObjects("select slot from {$this->prefix}recitct_cm_notes where id in ($from, $to) order by FIELD(id, $from, $to)");
 
                 // $tmp[0] = from
                 // $tmp[1] = to
@@ -347,10 +346,10 @@ if (!class_exists('CahierTracesPersistCtrl')) {
                     throw new Exception("Unknown slots");
                 }
 
-                $query = sprintf("update {$this->prefix}recitcc_cm_notes set slot = %d where id = %d", $tmp[1]->slot, $from);
+                $query = sprintf("update {$this->prefix}recitct_cm_notes set slot = %d where id = %d", $tmp[1]->slot, $from);
                 $this->mysqlConn->execSQL($query);
 
-                $query = sprintf("update {$this->prefix}recitcc_cm_notes set slot = %d where id = %d", $tmp[0]->slot, $to);
+                $query = sprintf("update {$this->prefix}recitct_cm_notes set slot = %d where id = %d", $tmp[0]->slot, $to);
                 $this->mysqlConn->execSQL($query);
 
                 $this->mysqlConn->commitTransaction();
@@ -384,9 +383,9 @@ if (!class_exists('CahierTracesPersistCtrl')) {
         }
 
         /*public function getCmSequenceFromSection($ccId){
-            $query = "select t1.id as ccId, t2.id as cmId, t4.sequence from {$this->prefix}recitcahiercanada as t1
+            $query = "select t1.id as ccId, t2.id as cmId, t4.sequence from {$this->prefix}recitcahiertraces as t1
             inner join {$this->prefix}course_modules as t2 on t1.course = t2.course and t1.id = t2.instance
-            inner join {$this->prefix}modules as t3 on t2.module = t3.id and t3.name = 'recitcahiercanada'
+            inner join {$this->prefix}modules as t3 on t2.module = t3.id and t3.name = 'recitcahiertraces'
             inner join {$this->prefix}course_sections as t4 on t2.section = t4.id
             where t1.id = $ccId";
             $obj = $this->mysqlConn->execSQLAndGetObject($query);
@@ -395,9 +394,9 @@ if (!class_exists('CahierTracesPersistCtrl')) {
         }*/
         
         public function getCmIdFromIndexPos($ccId, $cmIndexPos){
-            $query = "select t1.id as ccId, t2.id as cmId, t4.sequence from {$this->prefix}recitcahiercanada as t1
+            $query = "select t1.id as ccId, t2.id as cmId, t4.sequence from {$this->prefix}recitcahiertraces as t1
             inner join {$this->prefix}course_modules as t2 on t1.course = t2.course and t1.id = t2.instance
-            inner join {$this->prefix}modules as t3 on t2.module = t3.id and t3.name = 'recitcahiercanada'
+            inner join {$this->prefix}modules as t3 on t2.module = t3.id and t3.name = 'recitcahiertraces'
             inner join {$this->prefix}course_sections as t4 on t2.section = t4.id
             where t1.id = $ccId";
             $obj = $this->mysqlConn->execSQLAndGetObject($query);
@@ -423,8 +422,8 @@ if (!class_exists('CahierTracesPersistCtrl')) {
         }
 
         public function createBackupViews(){
-            $query = "create or replace view {$this->prefix}vw_recitcc_cm_notes as 
-                        SELECT t1.*, (FIND_IN_SET(t1.cmid, t3.sequence) - 1) as cmindexpos FROM `{$this->prefix}recitcc_cm_notes` as t1 
+            $query = "create or replace view {$this->prefix}vw_recitct_cm_notes as 
+                        SELECT t1.*, (FIND_IN_SET(t1.cmid, t3.sequence) - 1) as cmindexpos FROM `{$this->prefix}recitct_cm_notes` as t1 
                         inner join {$this->prefix}course_modules as t2 on t1.cmid = t2.id
                         inner join {$this->prefix}course_sections as t3 on t2.section = t3.id";
             $this->mysqlConn->execSQL($query);
@@ -432,9 +431,9 @@ if (!class_exists('CahierTracesPersistCtrl')) {
         
         public function removeCcInstance($id){
             $query = "DELETE t1, t2, t3
-            FROM {$this->prefix}recitcahiercanada as t1
-            left JOIN {$this->prefix}recitcc_cm_notes as t2 ON t1.id = t2.ccid
-            left JOIN {$this->prefix}recitcc_user_notes as t3 ON t2.id = t3.cccmid
+            FROM {$this->prefix}recitcahiertraces as t1
+            left JOIN {$this->prefix}recitct_cm_notes as t2 ON t1.id = t2.ccid
+            left JOIN {$this->prefix}recitct_user_notes as t3 ON t2.id = t3.cccmid
             WHERE t1.id = $id";
 
             $result = $this->mysqlConn->execSQL($query);
@@ -453,7 +452,7 @@ if (!class_exists('CahierTracesPersistCtrl')) {
             }*/
         }
 
-        public function createInstantMessage($userFrom, $userTo, $courseId, $msg, $component = 'mod_recitcahiercanada', $name = 'note_updated', $subject = 'Notification Cahier de Traces', $notification = '1'){
+        public function createInstantMessage($userFrom, $userTo, $courseId, $msg, $component = 'mod_recitcahiertraces', $name = 'note_updated', $subject = 'Notification Cahier de Traces', $notification = '1'){
             $message = new \core\message\message();
             $message->component = $component;
             $message->name = $name;
@@ -542,9 +541,9 @@ if (!class_exists('CahierTracesPersistCtrl')) {
             t3.course as courseId, concat(t6.firstname, ' ', t6.lastname) as username
             from {$this->prefix}course_modules as t1 
             inner join {$this->prefix}course_sections as t2 on t1.section = t2.id 
-            inner join {$this->prefix}recitcahiercanada as t3 on t1.instance = t3.id                
-            inner join {$this->prefix}recitcc_cm_notes as t4 on t3.id = t4.ccid
-            inner join {$this->prefix}recitcc_user_notes as t5 on t4.id = t5.cccmid
+            inner join {$this->prefix}recitcahiertraces as t3 on t1.instance = t3.id                
+            inner join {$this->prefix}recitct_cm_notes as t4 on t3.id = t4.ccid
+            inner join {$this->prefix}recitct_user_notes as t5 on t4.id = t5.cccmid
             inner join {$this->prefix}user as t6 on t6.id = t5.userid
             where t1.id = $cmId and t4.notifyTeacher = 1 and 
             if(t5.id > 0 and length(t5.note) > 0 and length(REGEXP_REPLACE(trim(coalesce(t5.feedback, '')), '<[^>]*>+', '')) = 0, 1, 0) = 1 and
@@ -569,12 +568,12 @@ if (!class_exists('CahierTracesPersistCtrl')) {
             group_concat(DISTINCT t9.groupid) as groupIds
             from {$this->prefix}course_modules as t1 
             inner join {$this->prefix}course_sections as t2 on t1.section = t2.id 
-            inner join {$this->prefix}recitcahiercanada as t3 on t1.instance = t3.id 
-            inner join {$this->prefix}recitcc_cm_notes as t4 on t3.id = t4.ccid
+            inner join {$this->prefix}recitcahiertraces as t3 on t1.instance = t3.id 
+            inner join {$this->prefix}recitct_cm_notes as t4 on t3.id = t4.ccid
             inner join {$this->prefix}enrol as t7 on t7.courseid = t1.course
             inner join {$this->prefix}user_enrolments as t8 on t7.id = t8.enrolid
             inner join {$this->prefix}user as t6 on t6.id = t8.userid
-            left join {$this->prefix}recitcc_user_notes as t5 on t4.id = t5.cccmid and t5.userid = t6.id
+            left join {$this->prefix}recitct_user_notes as t5 on t4.id = t5.cccmid and t5.userid = t6.id
             left join {$this->prefix}groups_members as t9 on t9.userid = t6.id
             where t1.id = $cmId and %s
             and exists(select id from {$this->prefix}course_modules cm where id = t4.cmid and deletioninprogress = 0) 
@@ -593,4 +592,3 @@ if (!class_exists('CahierTracesPersistCtrl')) {
             return $result;
         }
     }
-}

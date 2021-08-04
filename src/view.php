@@ -16,7 +16,7 @@
 
 /**
  *
- * @package   mod_recitcahiercanada
+ * @package   mod_recitcahiertraces
  * @copyright 2019 RÉCIT FAD
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -26,19 +26,19 @@ require_once($CFG->dirroot . "/local/recitcommon/php/Utils.php");
 require_once($CFG->libdir . '/portfoliolib.php');
 
 $id = required_param('id', PARAM_INT);
-list ($course, $cm) = get_course_and_cm_from_cmid($id, 'recitcahiercanada');
+list ($course, $cm) = get_course_and_cm_from_cmid($id, 'recitcahiertraces');
 
 //require_course_login($course, true, $cm);
 require_login();
 
 //$context = context_module::instance($cm->id);
-//require_capability('mod/recitcahiercanada:view', $context);
-$view = new RecitCahierCanadaView($PAGE, $course, $cm, $OUTPUT, $USER, $DB, $CFG);
+//require_capability('mod/recitcahiertraces:view', $context);
+$view = new recitcahiertracesView($PAGE, $course, $cm, $OUTPUT, $USER, $DB, $CFG);
 
-//$modeAdmin = intval(has_capability('mod/recitcahiercanada:viewadmin', context_system::instance()));
+//$modeAdmin = intval(has_capability('mod/recitcahiertraces:viewadmin', context_system::instance()));
 $view->display();
 
-class RecitCahierCanadaView
+class recitcahiertracesView
 {
     protected $viewMode = null;
     protected $data = null;
@@ -65,7 +65,7 @@ class RecitCahierCanadaView
 
     public function display(){
         $this->page->set_cm($this->cm);
-        $this->page->set_url('/mod/recitcahiercanada/view.php', array('id' => $this->cm->id));
+        $this->page->set_url('/mod/recitcahiertraces/view.php', array('id' => $this->cm->id));
         $this->page->set_pagelayout('incourse');
         $this->page->set_title($this->course->shortname.': '.$this->cm->name);
         $this->page->set_heading($this->course->fullname);
@@ -115,7 +115,7 @@ class RecitCahierCanadaView
         }
             
         $button = new \portfolio_add_button();
-        $button->set_callback_options('recitcahiertraces_portfolio_caller', array('id' => $this->cm->id), 'mod_recitcahiercanada');
+        $button->set_callback_options('recitcahiertraces_portfolio_caller', array('id' => $this->cm->id), 'mod_recitcahiertraces');
         return sprintf('data-portfolio-url="%s"', $button->to_html(PORTFOLIO_ADD_MOODLE_URL));
     }
 }

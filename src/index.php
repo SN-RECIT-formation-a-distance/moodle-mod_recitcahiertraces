@@ -16,7 +16,7 @@
 
 /**
  *
- * @package   mod_recitcahiercanada
+ * @package   mod_recitcahiertraces
  * @copyright 2019 RÉCIT FAD
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

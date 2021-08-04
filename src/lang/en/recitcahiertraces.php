@@ -1,7 +1,7 @@
 <?php
-$string['pluginname'] = 'Cahier de traces';
+$string['pluginname'] = 'Cahier de traces v2';
 $string['userpreferences'] = 'User preferences';
-$string['modulename'] = 'Cahier de traces';
+$string['modulename'] = 'Cahier de traces v2';
 $string['modulenameplural'] = "Cahier de traces";
 $string['modulename_help'] = "L'activité \"Cahier de traces\" doit être la DERNIÈRE ACTIVITÉ DE LA LISTE dans chaque section du cours. Les paramètres de cette activité déterminent la présence ou non d'un espace de prise de note pour chaque activité de la section. Elle contient toutes les notes de l'élève relatives à cette section.";
 $string['pluginadministration'] = "Cahier de traces module administration";
@@ -30,9 +30,9 @@ $string['msgActionCompleted'] = "The action has been completed successfully";
 $string['msgConfirmDeletion'] = "Do you confirm the deletion?";
 $string['msgDeletionExtraInfo'] = "This action will delete all the students notes related to this item.";
 $string['noData'] = "No data";
-$string['recitcahiercanada:viewadmin'] = "View Admin";
-$string['recitcahiercanada:view'] = "View";
-$string['recitcahiercanada:addinstance'] = "Add instance";
+$string['recitcahiertraces:viewadmin'] = "View Admin";
+$string['recitcahiertraces:view'] = "View";
+$string['recitcahiertraces:addinstance'] = "Add instance";
 $string['printNotes'] = "Print Notes";
 $string['note'] = "Note";
 $string['suggestednote'] = "Suggested Notes";

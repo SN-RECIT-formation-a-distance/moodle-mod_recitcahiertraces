@@ -1,8 +1,8 @@
 <?php
-$string['pluginname'] = 'Cahier de traces';
+$string['pluginname'] = 'Cahier de traces v2';
 $string['userpreferences'] = "Préférences de l'utilisateur";
-$string['modulename'] = 'Cahier de traces';
-$string['modulenameplural'] = "Cahier de traces";
+$string['modulename'] = 'Cahier de traces v2';
+$string['modulenameplural'] = "Cahiers de traces";
 $string['modulename_help'] = "L'activité \"Cahier de traces\" doit être la DERNIÈRE ACTIVITÉ DE LA LISTE dans chaque section du cours. Les paramètres de cette activité déterminent la présence ou non d'un espace de prise de note pour chaque activité de la section. Elle contient toutes les notes de l'élève relatives à cette section.";
 $string['pluginadministration'] = "Cahier de traces module administration";
 $string['sectionActivities'] = "Section Activités";
@@ -30,9 +30,9 @@ $string['msgActionCompleted'] = "L'action a été complétée avec succès";
 $string['msgConfirmDeletion'] = "Confirmez-vous la suppression?";
 $string['msgDeletionExtraInfo'] = "TCette action supprimera toutes les notes des élèves relatives à cet élément.";
 $string['noData'] = "Pas de données";
-$string['recitcahiercanada:viewadmin'] = "Vue Admin";
-$string['recitcahiercanada:view'] = "Vue";
-$string['recitcahiercanada:addinstance'] = "Ajouter instance";
+$string['recitcahiertraces:viewadmin'] = "Vue Admin";
+$string['recitcahiertraces:view'] = "Vue";
+$string['recitcahiertraces:addinstance'] = "Ajouter instance";
 $string['printNotes'] = "Imprimer des notes";
 $string['note'] = "Note";
 $string['suggestednote'] = "Réponses suggérées";

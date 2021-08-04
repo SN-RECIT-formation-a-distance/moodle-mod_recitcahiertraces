@@ -16,20 +16,20 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package    mod_recitcahiercanada
+ * @package    mod_recitcahiertraces
  * @subpackage backup-moodle2
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/mod/recitcahiercanada/backup/moodle2/restore_recitcahiercanada_stepslib.php'); // Because it exists (must)
+require_once($CFG->dirroot . '/mod/recitcahiertraces/backup/moodle2/restore_recitcahiertraces_stepslib.php'); // Because it exists (must)
 
 /**
- * recitcahiercanada restore task that provides all the settings and steps to perform one
+ * recitcahiertraces restore task that provides all the settings and steps to perform one
  * complete restore of the activity
  */
-class restore_recitcahiercanada_activity_task extends restore_activity_task {
+class restore_recitcahiertraces_activity_task extends restore_activity_task {
 
     /**
      * Define (add) particular settings this activity can have
@@ -42,8 +42,8 @@ class restore_recitcahiercanada_activity_task extends restore_activity_task {
      * Define (add) particular steps this activity can have
      */
     protected function define_my_steps() {
-        // recitcahiercanada only has one structure step
-        $this->add_step(new restore_recitcahiercanada_activity_structure_step('recitcahiercanada_structure', 'recitcahiercanada.xml'));
+        // recitcahiertraces only has one structure step
+        $this->add_step(new restore_recitcahiertraces_activity_structure_step('recitcahiertraces_structure', 'recitcahiertraces.xml'));
     }
 
     /**
@@ -53,7 +53,7 @@ class restore_recitcahiercanada_activity_task extends restore_activity_task {
     static public function define_decode_contents() {
         $contents = array();
 
-        $contents[] = new restore_decode_content('recitcahiercanada', array('intro'), 'recitcahiercanada');
+        $contents[] = new restore_decode_content('recitcahiertraces', array('intro'), 'recitcahiertraces');
 
         return $contents;
     }
@@ -65,8 +65,8 @@ class restore_recitcahiercanada_activity_task extends restore_activity_task {
     static public function define_decode_rules() {
         $rules = array();
 
-        $rules[] = new restore_decode_rule('RECITCAHIERCANADAINDEX', '/mod/recitcahiercanada/index.php?id=$1', 'course');
-        $rules[] = new restore_decode_rule('RECITCAHIERCANADAVIEWBYID', '/mod/recitcahiercanada/view.php?id=$1', 'course_module');
+        $rules[] = new restore_decode_rule('RECITCAHIERTRACESINDEX', '/mod/recitcahiertraces/index.php?id=$1', 'course');
+        $rules[] = new restore_decode_rule('RECITCAHIERTRACESVIEWBYID', '/mod/recitcahiertraces/view.php?id=$1', 'course_module');
 
         return $rules;
 
@@ -75,15 +75,15 @@ class restore_recitcahiercanada_activity_task extends restore_activity_task {
     /**
      * Define the restore log rules that will be applied
      * by the {@link restore_logs_processor} when restoring
-     * RECITCAHIERCANADA logs. It must return one array
+     * recitcahiertraces logs. It must return one array
      * of {@link restore_log_rule} objects
      */
     static public function define_restore_log_rules() {
         $rules = array();
 
-        $rules[] = new restore_log_rule('RECITCAHIERCANADA', 'add', 'view.php?id={course_module}', '{recitcahiercanada}');
-        $rules[] = new restore_log_rule('RECITCAHIERCANADA', 'update', 'view.php?id={course_module}', '{recitcahiercanada}');
-        $rules[] = new restore_log_rule('RECITCAHIERCANADA', 'view', 'view.php?id={course_module}', '{recitcahiercanada}');
+        $rules[] = new restore_log_rule('recitcahiertraces', 'add', 'view.php?id={course_module}', '{recitcahiertraces}');
+        $rules[] = new restore_log_rule('recitcahiertraces', 'update', 'view.php?id={course_module}', '{recitcahiertraces}');
+        $rules[] = new restore_log_rule('recitcahiertraces', 'view', 'view.php?id={course_module}', '{recitcahiertraces}');
 
         return $rules;
     }
@@ -101,7 +101,7 @@ class restore_recitcahiercanada_activity_task extends restore_activity_task {
     static public function define_restore_log_rules_for_course() {
         $rules = array();
 
-        $rules[] = new restore_log_rule('recitcahiercanada', 'view all', 'index.php?id={course}', null);
+        $rules[] = new restore_log_rule('recitcahiertraces', 'view all', 'index.php?id={course}', null);
 
         return $rules;
     }

@@ -16,7 +16,7 @@
 
 /**
  *
- * @package   mod_recitcahiercanada
+ * @package   mod_recitcahiertraces
  * @copyright 2019 RÉCIT FAD
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -24,7 +24,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $plugin->version   = 2021050400;        // The current module version (Date: YYYYMMDDXX)
 $plugin->requires  = 2018050800;    // Requires this Moodle version
-$plugin->component = 'mod_recitcahiercanada';        // Full name of the plugin (used for diagnostics)
+$plugin->component = 'mod_recitcahiertraces';        // Full name of the plugin (used for diagnostics)
 $plugin->cron      = 0;
 $plugin->dependencies = [    
     'local_recitcommon' => 2021050400

@@ -16,7 +16,7 @@
 
 /**
  *
- * @package   mod_recitcahiercanada
+ * @package   mod_recitcahiertraces
  * @copyright 2019 RÉCIT FAD
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -27,11 +27,11 @@ require_once($CFG->dirroot . "/local/recitcommon/php/Utils.php");
 require_once(__DIR__ . "/classes/PersistCtrlCahierTraces.php");
 
 /**
- * List of features supported in recitcahiercanada module
+ * List of features supported in recitcahiertraces module
  * @param string $feature FEATURE_xx constant for requested feature
  * @return mixed True if module supports feature, false if not, null if doesn't know
  */
-function recitcahiercanada_supports($feature) {
+function recitcahiertraces_supports($feature) {
     switch($feature) {
         //case FEATURE_MOD_ARCHETYPE:           return MOD_ARCHETYPE_RESOURCE;
         //case FEATURE_GROUPS:                  return false;
@@ -48,51 +48,51 @@ function recitcahiercanada_supports($feature) {
 }
 
 /**
- * Add RecitCahierCanada instance.
+ * Add recitcahiertraces instance.
  * @param object $data
  * @param object $mform
- * @return int new RecitCahierCanada instance id
+ * @return int new recitcahiertraces instance id
  */
-function recitcahiercanada_add_instance($data, $mform) {
+function recitcahiertraces_add_instance($data, $mform) {
     global $CFG, $DB;
 
     $data->timemodified = time();
-    $data->id = $DB->insert_record('recitcahiercanada', $data);
+    $data->id = $DB->insert_record('recitcahiertraces', $data);
     return $data->id;
 }
 
 /**
- * Update RecitCahierCanada instance.
+ * Update recitcahiertraces instance.
  * @param object $data
  * @param object $mform
  * @return bool true
  */
-function recitcahiercanada_update_instance($data, $mform) {
+function recitcahiertraces_update_instance($data, $mform) {
     global $CFG, $DB;
 
     $data->timemodified = time();
     $data->id           = $data->instance;
 
-    $DB->update_record('recitcahiercanada', $data);
+    $DB->update_record('recitcahiertraces', $data);
 
     return true;
 }
 
 /**
- * Delete RecitCahierCanada instance.
+ * Delete recitcahiertraces instance.
  * @param int $id
  * @return bool true
  */
-function recitcahiercanada_delete_instance($id) {
+function recitcahiertraces_delete_instance($id) {
     global $DB, $USER;
 
-   /* if (!$recitcahiercanada = $DB->get_record('recitcahiercanada', array('id'=>$id))) {
+   /* if (!$recitcahiertraces = $DB->get_record('recitcahiertraces', array('id'=>$id))) {
         return false;
     }
 
-    $cm = get_coursemodule_from_instance('recitcahiercanada', $id);
+    $cm = get_coursemodule_from_instance('recitcahiertraces', $id);
 
-    $DB->delete_records('recitcahiercanada', array('id'=>$recitcahiercanada->id));*/
+    $DB->delete_records('recitcahiertraces', array('id'=>$recitcahiertraces->id));*/
 
     return CahierTracesPersistCtrl::getInstance($DB, $USER)->removeCcInstance($id);
 }
@@ -101,7 +101,7 @@ function recitcahiercanada_delete_instance($id) {
 /**
  * file serving callback
  *
- * @package  mod_recitcahiercanada
+ * @package  mod_recitcahiertraces
  * @category files
  * @param stdClass $course course object
  * @param stdClass $cm course module object
@@ -112,7 +112,7 @@ function recitcahiercanada_delete_instance($id) {
  * @param array $options additional options affecting the file serving
  * @return bool false if the file was not found, just send the file otherwise and do not return anything
  */
-function mod_recitcahiercanada_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options=array()) {
+function mod_recitcahiertraces_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options=array()) {
     global $CFG, $USER, $DB;
 
     /*if ($context->contextlevel != CONTEXT_MODULE) {
@@ -139,7 +139,7 @@ function mod_recitcahiercanada_pluginfile($course, $cm, $context, $filearea, $ar
 
         $relativepath = implode('/', $args);
 
-        $fullpath = "/$context->id/mod_recitcahiercanada/personalnote/$itemId/$relativepath";
+        $fullpath = "/$context->id/mod_recitcahiertraces/personalnote/$itemId/$relativepath";
 
         $fs = get_file_storage();
 		$file = $fs->get_file_by_hash(sha1($fullpath));		

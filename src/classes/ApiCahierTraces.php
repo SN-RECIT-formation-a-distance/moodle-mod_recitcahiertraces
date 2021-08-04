@@ -22,7 +22,6 @@
 require_once "$CFG->dirroot/local/recitcommon/php/WebApi.php";
 require_once 'PersistCtrlCahierTraces.php';
 
-if (!class_exists('CahierTracesApi')) {
     class CahierTracesApi extends MoodleApi
     {
         public function __construct($DB, $COURSE, $USER){
@@ -79,12 +78,12 @@ if (!class_exists('CahierTracesApi')) {
                 $this->prepareJson($result);
 
                 if(($flags->mode == "s") && ($result->notifyTeacher == 1)){
-                    $url = sprintf("%s/mod/recitcahiercanada/view.php?id=%ld&ccCmId=%ld&cmId=%ld&userId=%ld", $CFG->wwwroot, $result->mcmId, $result->ccCmId, $result->cmId, $result->userId);
+                    $url = sprintf("%s/mod/recitcahiertraces/view.php?id=%ld&ccCmId=%ld&cmId=%ld&userId=%ld", $CFG->wwwroot, $result->mcmId, $result->ccCmId, $result->cmId, $result->userId);
                     $msg = sprintf("Nouvelle mise à jour dans la note: « <a href='%s' target='_blank'>%s</a> »", $url, $result->noteTitle);
                     CahierTracesPersistCtrl::getInstance()->sendInstantMessagesToTeachers($result->courseId, $msg);
                 }
                 else if(($flags->mode == "t") && ($flags->teacherFeedbackUpdated == 1)){
-                    $url = sprintf("%s/mod/recitcahiercanada/view.php?id=%ld&ccCmId=%ld&cmId=%ld&userId=%ld", $CFG->wwwroot, $result->mcmId, $result->ccCmId, $result->cmId, $result->userId);
+                    $url = sprintf("%s/mod/recitcahiertraces/view.php?id=%ld&ccCmId=%ld&cmId=%ld&userId=%ld", $CFG->wwwroot, $result->mcmId, $result->ccCmId, $result->cmId, $result->userId);
                     $msg = sprintf("Nouvelle mise à jour dans la note: « <a href='%s' target='_blank'>%s</a> »", $url, $result->noteTitle);
                     CahierTracesPersistCtrl::getInstance()->sendInstantMessagesToStudents(array($result->userId), $result->courseId, $msg);
                 }
@@ -245,4 +244,3 @@ if (!class_exists('CahierTracesApi')) {
             }        
         }*/
     }
-}

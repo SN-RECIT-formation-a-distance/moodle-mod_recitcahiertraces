@@ -16,21 +16,21 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Defines backup_recitcahiercanada_activity_task class
+ * Defines backup_recitcahiertraces_activity_task class
  *
- * @package     mod_recitcahiercanada
+ * @package     mod_recitcahiertraces
  * @category    backup
  * @license     http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once($CFG->dirroot . '/mod/recitcahiercanada/backup/moodle2/backup_recitcahiercanada_stepslib.php');
+require_once($CFG->dirroot . '/mod/recitcahiertraces/backup/moodle2/backup_recitcahiertraces_stepslib.php');
 
 /**
  * Provides all the settings and steps to perform one complete backup of the activity
  */
-class backup_recitcahiercanada_activity_task extends backup_activity_task {
+class backup_recitcahiertraces_activity_task extends backup_activity_task {
 
     /**
      * No specific settings for this activity
@@ -39,10 +39,10 @@ class backup_recitcahiercanada_activity_task extends backup_activity_task {
     }
 
     /**
-     * Defines a backup step to store the instance data in the recitcahiercanada.xml file
+     * Defines a backup step to store the instance data in the recitcahiertraces.xml file
      */
     protected function define_my_steps() {
-        $this->add_step(new backup_recitcahiercanada_activity_structure_step('recitcahiercanada_structure', 'recitcahiercanada.xml'));
+        $this->add_step(new backup_recitcahiertraces_activity_structure_step('recitcahiertraces_structure', 'recitcahiertraces.xml'));
     }
 
     /**
@@ -54,16 +54,16 @@ class backup_recitcahiercanada_activity_task extends backup_activity_task {
     static public function encode_content_links($content) {
         global $CFG;
 
-        $base = preg_quote($CFG->wwwroot.'/mod/recitcahiercanada','#');
+        $base = preg_quote($CFG->wwwroot.'/mod/recitcahiertraces','#');
 
         //Access a list of all links in a course
         $pattern = '#('.$base.'/index\.php\?id=)([0-9]+)#';
-        $replacement = '$@RECITCAHIERCANADAINDEX*$2@$';
+        $replacement = '$@RECITCAHIERTRACESINDEX*$2@$';
         $content = preg_replace($pattern, $replacement, $content);
 
         //Access the link supplying a course module id
         $pattern = '#('.$base.'/view\.php\?id=)([0-9]+)#';
-        $replacement = '$@RECITCAHIERCANADAVIEWBYID*$2@$';
+        $replacement = '$@RECITCAHIERTRACESVIEWBYID*$2@$';
         $content = preg_replace($pattern, $replacement, $content);
 
         return $content;

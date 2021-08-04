@@ -18,16 +18,16 @@
 /**
  * Provides support for the conversion of moodle1 backup to the moodle2 format
  *
- * @package    mod_recitcahiercanada
+ * @package    mod_recitcahiertraces
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * recitcahiercanada conversion handler. This resource handler is called by moodle1_mod_resource_handler
+ * recitcahiertraces conversion handler. This resource handler is called by moodle1_mod_resource_handler
  */
-class moodle1_mod_recitcahiercanada_handler extends moodle1_resource_successor_handler {
+class moodle1_mod_recitcahiertraces_handler extends moodle1_resource_successor_handler {
 
     /** @var moodle1_file_manager instance */
     protected $fileman = null;

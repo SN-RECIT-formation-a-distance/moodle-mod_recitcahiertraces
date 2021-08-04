@@ -16,7 +16,7 @@
 
 /**
  *
- * @package   mod_recitcahiercanada
+ * @package   mod_recitcahiertraces
  * @copyright 2019 RÉCIT FAD
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -27,7 +27,7 @@ if (!defined('MOODLE_INTERNAL')) {
 
 require_once ($CFG->dirroot.'/course/moodleform_mod.php');
 
-class mod_recitcahiercanada_mod_form extends moodleform_mod {
+class mod_recitcahiertraces_mod_form extends moodleform_mod {
     public function definition() {
         //$config = get_config('url');
         $this->displayGeneralOptions();      

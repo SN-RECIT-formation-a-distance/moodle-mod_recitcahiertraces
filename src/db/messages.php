@@ -17,7 +17,7 @@
 /**
  * Defines message providers (types of messages being sent)
  *
- * @package mod_recitcahiercanada
+ * @package mod_recitcahiertraces
  * @copyright 2019 RÉCIT
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,7 +30,7 @@ $messageproviders = array (
             'email' => MESSAGE_DISALLOWED
         ],
          // no capability means that the notifications are available to all users
-        //'capability'  => 'mod/recitcahiercanada:emailnotifysubmission'
+        //'capability'  => 'mod/recitcahiertraces:emailnotifysubmission'
     ),
 
 );
