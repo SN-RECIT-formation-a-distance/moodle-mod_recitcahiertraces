@@ -49,7 +49,7 @@ if (!class_exists('CahierCanadaPersistCtrl')) {
             $query = "select t1.instance, t4.id as ccCmId, t4.ccid as ccId, t4.cmid as cmId, t4.title as noteTitle, t4.slot, t5.id as personalNoteId, 
                     coalesce(t5.note, '') as note,
                     coalesce(t5.userid, 0) as userId, coalesce(t5.feedback, '') as feedback, 
-                    t5.grade, t5.lastupdate as lastUpdate, concat(find_in_set(t4.cmId, t2.sequence), t4.slot) as orderByCustom, t3.name as ccName,
+                    t5.grade, t5.lastupdate as lastUpdate, concat(find_in_set(t4.cmId, t2.sequence), t4.slot) as orderByCustom, t3.name as ccName, t4.templatenote as templateNote,
                     t3.course as courseId, coalesce(t5.note_itemid,0) as noteItemId, t4.notifyteacher as notifyTeacher, if(t5.id > 0 and length(t5.note) > 0, 0, 1) as isTemplate
                     from {$this->prefix}course_modules as t1 
                     inner join {$this->prefix}course_sections as t2 on t1.section = t2.id 
