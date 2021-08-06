@@ -3,8 +3,8 @@ require('../../../config.php');
 require_once($CFG->dirroot . "/mod/recitcahiertraces/classes/PersistCtrlCahierTraces.php");
 require_once($CFG->dirroot . "/local/recitcommon/php/Utils.php");
 
-$cmId = required_param('cmId', PARAM_INT);
-$cId = required_param('cId', PARAM_INT);
+$gId = required_param('gId', PARAM_INT);
+$cId = required_param('cmId', PARAM_INT);
 
 require_login();
 
@@ -12,7 +12,7 @@ require_login();
 
 $theme = theme_config::load('recit');
 
-list ($course, $cm) = get_course_and_cm_from_cmid($cId, 'recitcahiertraces');
+list ($course, $cm) = get_course_and_cm_from_cmId($cId);
 
 $brandImage = "{$CFG->wwwroot}/mod/recitcahiertraces/pix/recit-logo.png";
 $customerLogo = $theme->setting_file_url('logo', 'logo');
@@ -31,7 +31,7 @@ if(!Utils::isAdminRole($roles)){
 }
 
 
-$pNotes = CahierTracesPersistCtrl::getInstance($DB, $USER)->getCmSuggestedNotes($course->id, $cmId);
+$pNotes = CahierTracesPersistCtrl::getInstance($DB, $USER)->getCmSuggestedNotes($course->id, $gId);
 
 $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahiertraces'), get_string('suggestednote', 'mod_recitcahiertraces'), get_string('printedOn', 'mod_recitcahiertraces'), date('Y-m-d H:i:s'));
 ?>
@@ -40,7 +40,7 @@ $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahie
 <html>
 <head>
     <title><?php echo $pageTitle; ?></title>    
-    <link rel="stylesheet" type="text/css" href="<?php echo $CFG->wwwroot . "/theme/recit/style/bootstrap.css"?>">
+    <link rel="stylesheet" type="text/css" href="<?php echo $CFG->wwwroot . "/theme/styles.php/{$CFG->theme}/{$CFG->themerev}_1/all"?>">
     <link rel="stylesheet" type="text/css" href="<?php echo $CFG->wwwroot . "/local/recitcommon/css/report.css"; ?>">
     <link rel="icon" href="../pix/icon.png?v=2"  />
 </head>

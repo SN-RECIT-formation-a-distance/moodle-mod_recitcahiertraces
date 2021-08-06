@@ -33,11 +33,10 @@ require_once 'PersistCtrlCahierTraces.php';
             try{
                 $cmId = intval($request['cmId']);
                 $userId = intval($request['userId']);
-                $garbage = (isset($request['garbage']) ? intval($request['garbage']) : 0) == 1;
 
                 $this->canUserAccess('s', $cmId, $userId);
 
-                $result = CahierTracesPersistCtrl::getInstance()->getPersonalNotes($cmId, $userId, $garbage);
+                $result = CahierTracesPersistCtrl::getInstance()->getPersonalNotes($cmId, $userId);
                 $this->prepareJson($result);
                 return new WebApiResult(true, $result);
             }
@@ -48,13 +47,13 @@ require_once 'PersistCtrlCahierTraces.php';
 
         public function getPersonalNote($request){
             try{
-                $cmId = intval($request['cmId']);
-                $ccCmId = intval($request['ccCmId']);
+                $nId = intval($request['nid']);
                 $userId = intval($request['userId']);
+                $cmId = intval($request['cmId']);
 
                 $this->canUserAccess('s', $cmId, $userId);
                 
-                $result = CahierTracesPersistCtrl::getInstance()->getPersonalNote($ccCmId, $userId);
+                $result = CahierTracesPersistCtrl::getInstance()->getPersonalNote($nId, $userId);
 
                 $this->prepareJson($result);
                 return new WebApiResult(true, $result);
@@ -78,12 +77,12 @@ require_once 'PersistCtrlCahierTraces.php';
                 $this->prepareJson($result);
 
                 if(($flags->mode == "s") && ($result->notifyTeacher == 1)){
-                    $url = sprintf("%s/mod/recitcahiertraces/view.php?id=%ld&ccCmId=%ld&cmId=%ld&userId=%ld", $CFG->wwwroot, $result->mcmId, $result->ccCmId, $result->cmId, $result->userId);
+                    $url = sprintf("%s/mod/recitcahiertraces/view.php?id=%ld&nid=%ld&gId=%ld&userId=%ld", $CFG->wwwroot, $result->mgId, $result->nid, $result->gId, $result->userId);
                     $msg = sprintf("Nouvelle mise à jour dans la note: « <a href='%s' target='_blank'>%s</a> »", $url, $result->noteTitle);
                     CahierTracesPersistCtrl::getInstance()->sendInstantMessagesToTeachers($result->courseId, $msg);
                 }
                 else if(($flags->mode == "t") && ($flags->teacherFeedbackUpdated == 1)){
-                    $url = sprintf("%s/mod/recitcahiertraces/view.php?id=%ld&ccCmId=%ld&cmId=%ld&userId=%ld", $CFG->wwwroot, $result->mcmId, $result->ccCmId, $result->cmId, $result->userId);
+                    $url = sprintf("%s/mod/recitcahiertraces/view.php?id=%ld&nid=%ld&gId=%ld&userId=%ld", $CFG->wwwroot, $result->mgId, $result->nid, $result->gId, $result->userId);
                     $msg = sprintf("Nouvelle mise à jour dans la note: « <a href='%s' target='_blank'>%s</a> »", $url, $result->noteTitle);
                     CahierTracesPersistCtrl::getInstance()->sendInstantMessagesToStudents(array($result->userId), $result->courseId, $msg);
                 }
@@ -95,14 +94,11 @@ require_once 'PersistCtrlCahierTraces.php';
             } 
         }
 
-        public function getCmNotes($request){
+        public function getGroupNotes($request){
             try{
-                $cmId = intval($request['cmId']);
-                $ccId = (isset($request['ccId']) ? intval($request['ccId']) : 0);
+                $gid = intval($request['gId']);
 
-                $this->canUserAccess('a', $cmId);
-
-                $result = CahierTracesPersistCtrl::getInstance()->getCmNotes(0, $cmId, $ccId);
+                $result = CahierTracesPersistCtrl::getInstance()->getGroupNotes($gid);
                 $this->prepareJson($result);
                 return new WebApiResult(true, $result);
             }
@@ -111,25 +107,39 @@ require_once 'PersistCtrlCahierTraces.php';
             }     
         }
 
-        public function getCcCmNoteFormKit($request){
+        public function getGroupList($request){
             try{
-                $ccCmId = intval($request['ccCmId']);
+                $cmId = intval($request['cmId']);
+
+                $result = CahierTracesPersistCtrl::getInstance()->getGroupList($cmId);
+                $this->prepareJson($result);
+                return new WebApiResult(true, $result);
+            }
+            catch(Exception $ex){
+                return new WebApiResult(false, null, $ex->GetMessage());
+            }     
+        }
+
+        public function getGroupNoteFormKit($request){
+            try{
+                $nid = intval($request['nId']);
                 $cmId = intval($request['cmId']);
 
                 $this->canUserAccess('a', $cmId);
 
                 $result = new stdClass();
 
-                if($ccCmId == 0 ){
+                if($nid == 0){
                     $result->data = new CmNote();
-                    $result->data->cmId = $cmId;
+                    $result->data->nid = 0;
+                    $result->data->gId = 0;
                 }
                 else{
-                    $result->data = CahierTracesPersistCtrl::getInstance()->getCcCmNote($ccCmId);
+                    $result->data = CahierTracesPersistCtrl::getInstance()->getGroupNotes($cmId);
                 }
 
-                $result->tagList = CahierTracesPersistCtrl::getInstance()->getTagList($result->data->cmId);
-                $result->activityList = CahierTracesPersistCtrl::getInstance()->getSectionCmList($result->data->cmId);
+                $result->tagList = CahierTracesPersistCtrl::getInstance()->getTagList($cmId);
+                $result->groupList = CahierTracesPersistCtrl::getInstance()->getGroupList($cmId);
 
                 $this->prepareJson($result);
                 return new WebApiResult(true, $result);
@@ -139,14 +149,14 @@ require_once 'PersistCtrlCahierTraces.php';
             }     
         }
         
-        public function removeCcCmNote($request){
+        public function removeNote($request){
             try{
-                $ccCmId = intval($request['ccCmId']);
+                $nid = intval($request['nid']);
                 $cmId = intval($request['cmId']);
 
                 $this->canUserAccess('a', $cmId);
                 
-                CahierTracesPersistCtrl::getInstance()->removeCcCmNote($ccCmId);
+                CahierTracesPersistCtrl::getInstance()->removeNote($nid);
                 return new WebApiResult(true);
             }
             catch(Exception $ex){
@@ -154,14 +164,61 @@ require_once 'PersistCtrlCahierTraces.php';
             }     
         }
         
-        public function saveCcCmNote($request){        
+        public function removeGroup($request){
+            try{
+                $gId = intval($request['gId']);
+                $cmId = intval($request['cmId']);
+
+                $this->canUserAccess('a', $cmId);
+                
+                CahierTracesPersistCtrl::getInstance()->removeGroup($gId);
+                return new WebApiResult(true);
+            }
+            catch(Exception $ex){
+                return new WebApiResult(false, null, $ex->GetMessage());
+            }     
+        }
+        
+        public function addGroup($request){
+            try{
+                $name = $request['name'];
+                $cmId = intval($request['cmId']);
+
+                $this->canUserAccess('a', $cmId);
+                
+                $ctId = CahierTracesPersistCtrl::getInstance()->getCtIdFromCmId($cmId);
+                CahierTracesPersistCtrl::getInstance()->addGroup($ctId, $name);
+                return new WebApiResult(true);
+            }
+            catch(Exception $ex){
+                return new WebApiResult(false, null, $ex->GetMessage());
+            }     
+        }
+        
+        public function renameGroup($request){
+            try{
+                $name = $request['name'];
+                $cmId = intval($request['cmId']);
+                $gId = intval($request['gId']);
+
+                $this->canUserAccess('a', $cmId);
+                
+                CahierTracesPersistCtrl::getInstance()->renameGroup($gId, $name);
+                return new WebApiResult(true);
+            }
+            catch(Exception $ex){
+                return new WebApiResult(false, null, $ex->GetMessage());
+            }     
+        }
+        
+        public function saveNote($request){        
             try{            
                 $data = json_decode(json_encode($request['data']), FALSE);
                 //$tagMetadata = json_decode(json_encode($request['tagMetadata']), FALSE);
 
                 $this->canUserAccess('a', $data->cmId);
 
-                $result = CahierTracesPersistCtrl::getInstance()->saveCcCmNote($data);
+                $result = CahierTracesPersistCtrl::getInstance()->saveNote($data);
                 //CahierTracesPersistCtrl::getInstance()->moodleTagItem($result, $tagMetadata);
                 $this->prepareJson($result);
                 return new WebApiResult(true, $result);
@@ -170,31 +227,75 @@ require_once 'PersistCtrlCahierTraces.php';
                 return new WebApiResult(false, null, $ex->GetMessage());
             } 
         }
+        
+        public function getCCList($request){        
+            try{            
+                $cmId = intval($request['cmId']);
 
-        public function switchCcCmNoteSlot($request){
+                $this->canUserAccess('a', $cmId);
+                
+                list ($course, $cm) = get_course_and_cm_from_cmId($cmId);
+                $result = array();
+                $modinfo = get_fast_modinfo($course->id);
+
+                foreach ($modinfo->cms as $cm){
+                    if ($cm->modname == 'recitcahiercanada'){
+                        $result[] = array('id' => $cm->id, 'name' => $cm->name);
+                    }
+                }
+                
+                $this->prepareJson($result);
+                return new WebApiResult(true, $result);
+            }
+            catch(Exception $ex){
+                return new WebApiResult(false, null, $ex->GetMessage());
+            } 
+        }
+        
+        public function importCC($request){
+            global $DB, $USER, $CFG;
+            try{            
+                $cmId = intval($request['cmId']);
+                $importcmId = intval($request['importcmid']);
+
+                $this->canUserAccess('a', $cmId);
+                $this->canUserAccess('a', $importcmId);
+
+                require_once($CFG->dirroot . "/mod/recitcahiercanada/classes/PersistCtrlCahierTraces.php");
+                $data = CahierCanadaPersistCtrl::getInstance($DB, $USER)->getPersonalNotes($importcmId, 0);
+                $ct = CahierTracesPersistCtrl::getInstance();
+                $ctId = $ct->getCtIdFromCmId($cmId);
+
+                foreach ($data as $g){
+                    foreach ($g as $n){
+                        $gname = $n->activityName . " (importé)";
+                        $gid = $ct->getGroupIdFromName($ctId, $gname);
+                        if (!$gid) $gid = $ct->addGroup($ctId, $gname);
+                        $n->gId = $gid;
+                        $n->nid = 0;
+                        $ct->saveNote($n);
+                    }
+                }
+                
+                return new WebApiResult(true);
+            }
+            catch(Exception $ex){
+                return new WebApiResult(false, null, $ex->GetMessage());
+            } 
+        }
+
+        public function switchNoteSlot($request){
             try{
                 $this->canUserAccess('a');
 
                 $from = intval($request['from']);
                 $to = intval($request['to']);
-                CahierTracesPersistCtrl::getInstance()->switchCcCmNoteSlot($from, $to);
+                CahierTracesPersistCtrl::getInstance()->switchNoteSlot($from, $to);
                 return new WebApiResult(true);
             }
             catch(Exception $ex){
                 return new WebApiResult(false, null, $ex->GetMessage());
             }     
-        }
-
-        public function checkCCSeqPos($request){
-            try{
-                $cmId = intval($request['cmId']);
-                $this->canUserAccess('a', $cmId);
-                $result = CahierTracesPersistCtrl::getInstance()->checkCCSeqPos($cmId);
-                return new WebApiResult(true, $result);
-            }
-            catch(Exception $ex){
-                return new WebApiResult(false, null, $ex->GetMessage());
-            }  
         }
 
         public function getRequiredNotes($request){

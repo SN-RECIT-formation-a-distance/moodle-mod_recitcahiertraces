@@ -9,8 +9,8 @@ import {$glVars} from '../common/common';
 class PersonalNoteForm extends Component{
     static defaultProps = {        
         userId: 0,
-        cmId: 0,
-        ccCmId: 0,
+        gId: 0,
+        nid: 0,
         setOnSave: null,
     };
 
@@ -60,13 +60,13 @@ class PersonalNoteForm extends Component{
             }
         }
 
-        if((prevProps.userId !== this.props.userId) || (prevProps.ccCmId !== this.props.ccCmId)){
+        if((prevProps.userId !== this.props.userId) || (prevProps.nid !== this.props.nid)){
             this.getData();
         }
     }
 
     getData(){
-        $glVars.webApi.getPersonalNote(this.props.ccCmId, this.props.cmId, this.props.userId, this.getDataResult);        
+        $glVars.webApi.getPersonalNote($glVars.urlParams.id, this.props.nid, this.props.gId, this.props.userId, this.getDataResult);        
     }
 
     getDataResult(result){         
@@ -229,7 +229,7 @@ export class ModalPersonalNote extends Component{
     }
 
     render(){
-        let personalNote = <PersonalNoteForm userId={this.props.data.userId} cmId={this.props.data.cmId} setOnSave={this.setOnSave} ccCmId={this.props.data.ccCmId}/>;
+        let personalNote = <PersonalNoteForm userId={this.props.data.userId} gId={this.props.data.gId} setOnSave={this.setOnSave} nid={this.props.data.nid}/>;
         let footer = 
             <div className="btn-tollbar" style={{width: "100%", display: "flex", justifyContent: "space-between", flexWrap: "wrap"}}>
                 <div className="btn-group" style={{flexWrap: "wrap"}}>

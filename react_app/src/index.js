@@ -26,8 +26,8 @@ class App extends Component {
         $glVars.signedUser = this.props.signedUser;
         $glVars.urlParams = Utils.getUrlVars();
         $glVars.urlParams.id = parseInt($glVars.urlParams.id, 10) || 0;
-        $glVars.urlParams.ccCmId = parseInt($glVars.urlParams.ccCmId, 10) || 0;
         $glVars.urlParams.cmId = parseInt($glVars.urlParams.cmId, 10) || 0;
+        $glVars.urlParams.gId = parseInt($glVars.urlParams.gId, 10) || 0;
         $glVars.urlParams.userId = parseInt($glVars.urlParams.userId, 10) || 0;
         $glVars.urlParams.tab = parseInt($glVars.urlParams.tab, 10) || 0;
         $glVars.urlParams.userLoaded = false;

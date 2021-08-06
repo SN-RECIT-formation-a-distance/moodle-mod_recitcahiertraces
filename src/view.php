@@ -26,7 +26,7 @@ require_once($CFG->dirroot . "/local/recitcommon/php/Utils.php");
 require_once($CFG->libdir . '/portfoliolib.php');
 
 $id = required_param('id', PARAM_INT);
-list ($course, $cm) = get_course_and_cm_from_cmid($id, 'recitcahiertraces');
+list ($course, $cm) = get_course_and_cm_from_cmId($id, 'recitcahiertraces');
 
 //require_course_login($course, true, $cm);
 require_login();

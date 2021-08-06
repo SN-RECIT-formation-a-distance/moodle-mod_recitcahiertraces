@@ -9,7 +9,7 @@ $showFeedback = (intval(required_param('sf', PARAM_INT)) == 1 ? true : false);
 
 require_login();
 
-list ($course, $cm) = get_course_and_cm_from_cmid($cmId, 'recitcahiertraces');
+list ($course, $cm) = get_course_and_cm_from_cmId($cmId);
 
 //$PAGE->set_context(context_module::instance($cm->id));
 
@@ -43,7 +43,7 @@ $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahie
 <html>
 <head>
     <title><?php echo $pageTitle; ?></title>    
-    <link rel="stylesheet" type="text/css" href="<?php echo $CFG->wwwroot . "/theme/recit/style/bootstrap.css"?>">
+    <link rel="stylesheet" type="text/css" href="<?php echo $CFG->wwwroot . "/theme/styles.php/{$CFG->theme}/{$CFG->themerev}_1/all"?>">
     <link rel="stylesheet" type="text/css" href="<?php echo $CFG->wwwroot . "/local/recitcommon/css/report.css"; ?>">
     <link rel="icon" href="../pix/icon.png?v=2"  />
 </head>

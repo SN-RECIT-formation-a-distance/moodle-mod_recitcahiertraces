@@ -35,8 +35,8 @@ class restore_recitcahiertraces_activity_structure_step extends restore_activity
 
         $paths = array();
         $paths[] = new restore_path_element('recitcahiertraces', '/activity/recitcahiertraces');
-        $paths[] = new restore_path_element('recitct_cm_notes', '/activity/recitcahiertraces/recitct_cm_notes');
-     //   $paths[] = new restore_path_element('recitct_user_notes', '/activity/recitcahiertraces/recitct_cm_notes/recitct_user_notes');
+        $paths[] = new restore_path_element('recitct_groups', '/activity/recitcahiertraces/recitct_groups');
+        $paths[] = new restore_path_element('recitct_notes', '/activity/recitcahiertraces/recitct_groups/recitct_notes');
 
         // Return the paths wrapped into standard activity structure
         return $this->prepare_activity_structure($paths);
@@ -60,54 +60,28 @@ class restore_recitcahiertraces_activity_structure_step extends restore_activity
         $this->set_mapping('recitcahiertraces', $oldId, $newitemid, true); // Has related files.
     }
 
-    protected function process_recitct_cm_notes($data) {
+    protected function process_recitct_groups($data) {
         global $DB, $USER;
-
-        //fwrite($fp, print_r($data, true) . chr(10));
 
         $data = (object)$data;
         $oldid = $data->id;
         
-        $data->ccid = $this->get_mappingid('recitcahiertraces', $data->ccid);
-        $data->cmid = CahierTracesPersistCtrl::getInstance($DB, $USER)->getCmIdFromIndexPos($data->ccid, $data->cmindexpos);
-
-        if($data->cmid > 0){
-            $newitemid = $DB->insert_record('recitct_cm_notes', $data); // insert the recitct_cm_notes record
-            $this->set_mapping('recitct_cm_notes', $oldid, $newitemid, true); 
-        }
-        
-        /*
-        // get the new courseModuleId according to their position in the section. To find out the section, it uses the previous ccId
-        $oldSectionCmSeq = CahierTracesPersistCtrl::getInstance($DB, $USER)->getCmSequenceFromSection($data->ccid);
-        $data->ccid = $this->get_mappingid('recitcahiertraces', $data->ccid);
-        $newSectionCmSeq = CahierTracesPersistCtrl::getInstance($DB, $USER)->getCmSequenceFromSection($data->ccid);
-
-        // both the sequences must have be identical because it is a course backup, so we can use the index to look for the new cmId
-        $key = array_search((string) $data->cmid, $oldSectionCmSeq->sequence);
-        
-        //fwrite($fp, print_r($oldSectionCmSeq, true) . chr(10));
-        //fwrite($fp, print_r($newSectionCmSeq, true) . chr(10));
-        //fwrite($fp, $key . chr(10));
-
-        if(isset($newSectionCmSeq->sequence[$key])){
-            $data->cmid = $newSectionCmSeq->sequence[$key];
-            $newitemid = $DB->insert_record('recitct_cm_notes', $data); // insert the recitct_cm_notes record
-            $this->set_mapping('recitct_cm_notes', $oldid, $newitemid, true); 
-        }*/       
-
-        //fwrite($fp, $data->cmid . chr(10));
-        //fclose($fp);
+        $data->ctid = $this->get_mappingid('recitcahiertraces', $data->ctid);
+        $newitemid = $DB->insert_record('recitct_groups', $data); // insert the recitct_notes record
+        $this->set_mapping('recitct_groups', $oldid, $newitemid, true); 
     }
 
-   /* protected function process_recitct_user_notes($data) {
-        global $DB;
+    protected function process_recitct_notes($data) {
+        global $DB, $USER;
 
         $data = (object)$data;
-        $data->cccmid = $this->get_mappingid('recitct_cm_notes', $data->cccmid);
+        $oldid = $data->id;
+        
+        $data->gid = $this->get_mappingid('recitct_groups', $data->gid);
 
-        // insert the recitct_user_notes record
-        $newitemid = $DB->insert_record('recitct_user_notes', $data);
-    }*/
+        $newitemid = $DB->insert_record('recitct_notes', $data); // insert the recitct_notes record
+        $this->set_mapping('recitct_notes', $oldid, $newitemid, true);        
+    }
 
     protected function after_execute() {
         // Add recitcahiertraces related files, no need to match by itemname (just internally handled context)

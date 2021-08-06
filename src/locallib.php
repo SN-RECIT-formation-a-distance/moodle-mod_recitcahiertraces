@@ -78,7 +78,7 @@ class recitcahiertraces_portfolio_caller extends portfolio_module_caller_base {
         foreach($this->notes as $notes){
             $notea = current($notes);
             foreach($notes as $note){
-                $str .= $notea->activityName . ',' . $note->noteTitle . ',' . $note->note->text . ',' . $note->lastUpdateFormat();
+                $str .= $notea->groupName . ',' . $note->noteTitle . ',' . $note->note->text . ',' . $note->lastUpdateFormat();
             }
         }
         return sha1($str);
@@ -133,6 +133,6 @@ class recitcahiertraces_portfolio_caller extends portfolio_module_caller_base {
     public function get_return_url() {
         global $CFG, $USER;
 
-        return $CFG->wwwroot . "/mod/recitcahiertraces/classes/ReportStudentNotes.php?cmId={$this->cm->id}&userId={$USER->id}&sf=1";
+        return $CFG->wwwroot . "/mod/recitcahiertraces/classes/ReportStudentNotes.php?gId={$this->cm->id}&userId={$USER->id}&sf=1";
     }
 }

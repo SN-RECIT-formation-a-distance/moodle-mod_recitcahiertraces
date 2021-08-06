@@ -44,42 +44,45 @@ require_once "$CFG->dirroot/local/recitcommon/php/PersistCtrl.php";
             parent::__construct($mysqlConn, $signedUser);
         }
 
-        public function getPersonalNotes($cmId, $userId, $garbage = false){
-            $query = "select t1.instance, t4.id as ccCmId, t4.ccid as ccId, t4.cmid as cmId, t4.title as noteTitle, t4.slot, t5.id as personalNoteId, 
-                    coalesce(t5.note, '') as note,
-                    coalesce(t5.userid, 0) as userId, coalesce(t5.feedback, '') as feedback, 
-                    t5.grade, t5.lastupdate as lastUpdate, concat(find_in_set(t4.cmId, t2.sequence), t4.slot) as orderByCustom, t3.name as ccName,
+        public function getPersonalNotes($cmId, $userId){
+            $query = "select t1.instance as cmId, t4.id as gid, t2.ctid as ctid, t4.title as noteTitle, t4.slot, t5.id as personalNoteId, 
+                    coalesce(t5.note, '') as note, t2.name as groupName, t4.id as nid, t5.cmid as ncmid,
+                    coalesce(t5.userid, 0) as userId, coalesce(t5.feedback, '') as feedback, t4.templatenote as templateNote, 
+                    t5.grade, t5.lastupdate as lastUpdate, concat(find_in_set(t4.gId, t2.name), t4.slot) as orderByCustom, t3.name as ccName,
                     t3.course as courseId, coalesce(t5.note_itemid,0) as noteItemId, t4.notifyteacher as notifyTeacher, if(t5.id > 0 and length(t5.note) > 0, 0, 1) as isTemplate
                     from {$this->prefix}course_modules as t1 
-                    inner join {$this->prefix}course_sections as t2 on t1.section = t2.id 
-                    inner join {$this->prefix}recitcahiertraces as t3 on t1.instance = t3.id                
-                    inner join {$this->prefix}recitct_cm_notes as t4 on t3.id = t4.ccid
-                    left join {$this->prefix}recitct_user_notes as t5 on t4.id = t5.cccmid and t5.userId = $userId
-                    where t1.id = $cmId and exists(select id from {$this->prefix}course_modules cm where id = t4.cmid and deletioninprogress = 0) -- avoid to fetch deleted activities
+                    inner join {$this->prefix}recitcahiertraces as t3 on t1.instance = t3.id 
+                    inner join {$this->prefix}recitct_groups as t2 on t3.id = t2.ctid
+                    inner join {$this->prefix}recitct_notes as t4 on t2.id = t4.gid
+                    left join {$this->prefix}recitct_user_notes as t5 on t4.id = t5.nid and t5.userId = $userId
+                    where t1.id = $cmId
                     order by length(orderByCustom) asc, orderByCustom asc";
                     
             $tmp = $this->mysqlConn->execSQLAndGetObjects($query, 'PersonalNote');
 
             if(count($tmp) > 0){
                 $context = context_course::instance(current($tmp)->courseId);
+                $modinfo = get_fast_modinfo(current($tmp)->courseId);
             
                 foreach($tmp as $item){
                     $obj = new stdClass();
                     $obj->text = file_rewrite_pluginfile_urls($item->note, 'pluginfile.php', $context->id, 'mod_recitcahiertraces', 'personalnote', $item->noteItemId);
                     $obj->itemid = $item->noteItemId;
                     $item->note = $obj;
-                    unset($item->noteItemId);	
-                }        
-            }
-                    
-            $this->setSectionActivitiesName($cmId, $tmp);
+                    unset($item->noteItemId);
 
-            // index by activity
+                    //activity name
+                    $item->activityName = '';
+                    if ($item->ncmid > 0){
+                        $item->activityName = $this->getCmNameFromCmId($item->ncmid, $item->courseId, $modinfo);
+                    }
+                }
+            }
+            
+            // index by group
             $result = array();
             foreach($tmp as $item){
-                if (!$garbage || isset($item->garbage)){
-                    $result[$item->cmId][] = $item;
-                }
+                $result[$item->gid][] = $item;
             }
 
             return array_values($result); // reset the array indexes
@@ -87,7 +90,6 @@ require_once "$CFG->dirroot/local/recitcommon/php/PersistCtrl.php";
 
         public function getUserFromItemId($itemId){
             
-            //(case length(recit_strip_tags(coalesce(t2.note, ''))) when 0 then t1.templatenote else t2.note end) as note,
             $query = "select userId FROM {$this->prefix}recitct_user_notes where note_itemid = $itemId";
             
             $result = $this->mysqlConn->execSQLAndGetObject($query);
@@ -95,44 +97,82 @@ require_once "$CFG->dirroot/local/recitcommon/php/PersistCtrl.php";
             return $result->userId;
         }
 
+        public function getGroupList($cmId){
+            
+            $query = "select t1.id as id, t1.name as name, t1.ctid as ctid FROM {$this->prefix}course_modules as t2
+            inner join {$this->prefix}recitct_groups as t1 on t2.instance = t1.ctid
+            where t2.id = $cmId";
+            
+            $result = $this->mysqlConn->execSQLAndGetObjects($query);
+            if (!$result) return [];
+            return $result;
+        }
+
+        public function getGroupIdFromName($ctId, $gName){
+            
+            $query = "select * FROM {$this->prefix}recitct_groups where ctid = $ctId and name='$gName'";
+            
+            $result = $this->mysqlConn->execSQLAndGetObject($query);
+            if (!$result) return false;
+            return $result->id;
+        }
+
+        public function addGroup($ctId, $gName){
+            $query = $this->mysqlConn->prepareStmt("insert", "{$this->prefix}recitct_groups", array('ctid', 'name'), array($ctId, $gName));
+            $this->mysqlConn->execSQL($query);
+            $gid = $this->mysqlConn->getLastInsertId("{$this->prefix}recitct_groups", "id");
+            return $gid;
+        }
+
+        public function getCtIdFromCmId($cmId){
+            $query = "select instance from {$this->prefix}course_modules as t2
+            inner join {$this->prefix}recitcahiertraces as t1_1 on t2.instance = t1_1.id
+            where t2.module = (select id from {$this->prefix}modules where name = 'recitcahiertraces') and t2.id = $cmId";
+            
+            $result = $this->mysqlConn->execSQLAndGetObject($query);
+            if (!$result) return 0;
+            return $result->instance;
+        }
+
         /**
          * Fetch the personal note (modified to work with exporting/importing the cahier de traces on the same database or elsewhere)
-         * Other method: ccCmId and userId
-         * From filter plugin method: userId and intCode and cmId
+         * Other method: gid and userId
+         * From filter plugin method: userId and intCode
          */
-        public function getPersonalNote($ccCmId, $userId, $intCode = null, $cmId = 0){
-            $ccCmId = intval($ccCmId);		
+        public function getPersonalNote($nid, $userId, $intCode = null){
+            $nid = intval($nid);		
             $whereStmt = "0";
             
             if($intCode != null){
-                $whereStmt = " (t1.intcode = '$intCode' and t1.cmid = $cmId) ";
+                $whereStmt = " (t1.intcode = '$intCode') ";
             }
-            else if($ccCmId > 0){
-                $whereStmt = " t1.id = $ccCmId";
+            else if($nid > 0){
+                $whereStmt = " t1.id = $nid";
             }
             
             //(case length(recit_strip_tags(coalesce(t2.note, ''))) when 0 then t1.templatenote else t2.note end) as note,
-            $query = "select t1.title as noteTitle, t1.cmid as cmId, t1.ccid as ccId, coalesce(t1.intcode, '') as intCode,
-            t1.id as ccCmId, t2.id, t2.userid as userId,  
+            $query = "select t1.title as noteTitle, t1.gId as gId, t3.ctid as ctid, coalesce(t1.intcode, '') as intCode,
+            t1.id as gid, t2.id, t2.userid as userId, t1.id as nid,
             if(t2.id > 0 and length(t2.note) > 0, t2.note, t1.templatenote) as note, coalesce(t2.note_itemid,0) as noteItemId, if(t2.id > 0 and length(t2.note) > 0, 0, 1) as isTemplate,
             t1.teachertip as teacherTip, t1.suggestednote as suggestedNote, coalesce(t2.feedback, '') as feedback, t2.grade, t2.lastupdate as lastUpdate,
             t1_1.course as courseId, t1.notifyteacher as notifyTeacher,
             (select id from {$this->prefix}course_modules where instance = t1_1.id and module = (select id from {$this->prefix}modules where name = 'recitcahiertraces')) as mcmId
-            from {$this->prefix}recitct_cm_notes as t1 
-            inner join {$this->prefix}recitcahiertraces as t1_1 on t1.ccid = t1_1.id
-            left join {$this->prefix}recitct_user_notes as t2 on t1.id = t2.cccmid and t2.userid = $userId
+            from {$this->prefix}recitct_notes as t1 
+            inner join {$this->prefix}recitct_groups as t3 on t1.gid = t3.id
+            inner join {$this->prefix}recitcahiertraces as t1_1 on t3.ctid = t1_1.id
+            left join {$this->prefix}recitct_user_notes as t2 on t1.id = t2.nid and t2.userid = $userId
             where $whereStmt";
             
             $result = $this->mysqlConn->execSQLAndGetObject($query, 'PersonalNote');
             
             if(empty($result)){
-                throw new Exception("La note n'a pas été trouvée. (ccCmId: $ccCmId, userId: $userId, intCode: $intCode, cmId: $cmId)");
+                throw new Exception("La note n'a pas été trouvée. (nid: $nid, userId: $userId, intCode: $intCode)");
             }
 
-            //list($course, $cm) = get_course_and_cm_from_cmid($result->cmId);
+            //list($course, $cm) = get_course_and_cm_from_gId($result->gId);
             $context = context_course::instance($result->courseId);
             
-            //$result->note = file_rewrite_pluginfile_urls($result->note, 'pluginfile.php', $context->id, 'mod_recitcahiertraces', 'personalnote', $result->ccCmId);
+            //$result->note = file_rewrite_pluginfile_urls($result->note, 'pluginfile.php', $context->id, 'mod_recitcahiertraces', 'personalnote', $result->gid);
             $obj = new stdClass();
             $obj->text = file_rewrite_pluginfile_urls($result->note, 'pluginfile.php', $context->id, 'mod_recitcahiertraces', 'personalnote', $result->noteItemId);
             $obj->itemid = $result->noteItemId;
@@ -150,19 +190,23 @@ require_once "$CFG->dirroot/local/recitcommon/php/PersistCtrl.php";
                     $data->note->text = file_save_draft_area_files($data->note->itemid, $context->id, 'mod_recitcahiertraces', 'personalnote', $data->note->itemid, array('subdirs'=>true), $data->note->text);	
 
                     $data->lastUpdate = time();
-                    $fields = array("cccmid", "userid", "note", "note_itemid", "lastupdate");
-                    $values = array($data->ccCmId, $data->userId, $data->note->text, $data->note->itemid,  $data->lastUpdate);
+                    $fields = array("nid", "userid", "note", "note_itemid", "lastupdate");
+                    $values = array($data->nid, $data->userId, $data->note->text, $data->note->itemid, $data->lastUpdate);
+                    if (isset($data->cmId)){
+                        $fields[] = "cmid";
+                        $values[] = $data->cmId;
+                    }
                 }
                 else{
-                    $fields = array("cccmid", "userid", "feedback");
-                    $values = array($data->ccCmId, $data->userId, $data->feedback);
+                    $fields = array("nid", "userid", "feedback");
+                    $values = array($data->nid, $data->userId, $data->feedback);
                 }
 
                 if($data->personalNoteId == 0){
                     $query = $this->mysqlConn->prepareStmt("insertorupdate", "{$this->prefix}recitct_user_notes", $fields, $values);
                     $this->mysqlConn->execSQL($query);
 
-                    //$obj = $this->mysqlConn->execSQLAndGetObject("select id from {$this->prefix}recitct_user_notes where cccmid = $data->ccCmId and userid = $data->userId");
+                    //$obj = $this->mysqlConn->execSQLAndGetObject("select id from {$this->prefix}recitct_user_notes where gid = $data->gid and userid = $data->userId");
                     //$data->personalNoteId = $obj->id;
                 }
                 else{
@@ -170,7 +214,7 @@ require_once "$CFG->dirroot/local/recitcommon/php/PersistCtrl.php";
                     $this->mysqlConn->execSQL($query);
                 }
                 
-                return $this->getPersonalNote($data->ccCmId, $data->userId);
+                return $this->getPersonalNote($data->nid, $data->userId);
             }
             catch(Exception $ex){
                 throw $ex;
@@ -178,22 +222,24 @@ require_once "$CFG->dirroot/local/recitcommon/php/PersistCtrl.php";
         }
 
         /**
-         * Fetch a cmNote (by unique ID = ccCmId) or a set of cmNotes (cmId+ccId = cmId and CahierCanada ID)
+         * Fetch a groupNote (by unique ID = gid) or a set of cmNotes (gId+ctid = gId and CahierCanada ID)
          */
-        public function getCmNotes($ccCmId = 0, $cmId = 0, $ccId = 0){
-            $ccCmIdStmt = ($ccCmId == 0 ? "1" : " t1.id = $ccCmId");
+        public function getGroupNotes($gid = 0, $ctid = 0){
+            $gidStmt = ($gid == 0 ? "1" : " t1.gid = $gid");
 
             $cmStmt = "1";
-            if($cmId > 0){
-                $cmStmt = " (t1.cmid = $cmId and t1.ccid = $ccId)";
+            if($ctid > 0){
+                $cmStmt = " (t1.ctid = $ctid)";
             }
             
-            $query = "select t1.id as ccCmId, coalesce(t1.intcode, '') as intCode, t1.ccid as ccId, t1.cmid as cmId, t1.title as noteTitle, t1.slot, t1.templatenote as templateNote, t1.suggestednote as suggestedNote, 
-                        t1.teachertip as teacherTip, t1.lastupdate as lastUpdate,  t1.notifyteacher as notifyTeacher,
+            $query = "select t1.id as gid, coalesce(t1.intcode, '') as intCode, t3.ctid as ctid, t1.gid as gid, t1.title as noteTitle, t1.slot, t1.templatenote as templateNote, t1.suggestednote as suggestedNote, 
+                        t1.teachertip as teacherTip, t1.lastupdate as lastUpdate, t1.notifyteacher as notifyTeacher, t1.id as nid,
                         GROUP_CONCAT(t2.id) as tagList
-                        from {$this->prefix}recitct_cm_notes as t1
+                        from {$this->prefix}recitct_notes as t1
                         left join {$this->prefix}tag_instance as t2 on t1.id = t2.itemid and itemtype = 'cccmnote' and component = 'mod_cahiercanada'
-                        where $ccCmIdStmt and $cmStmt
+                        inner join {$this->prefix}recitct_groups as t3 on t1.gid = t3.id
+                        inner join {$this->prefix}recitcahiertraces as t1_1 on t3.ctid = t1_1.id
+                        where $gidStmt and $cmStmt
                         group by t1.id                
                         order by slot asc";
 
@@ -211,20 +257,21 @@ require_once "$CFG->dirroot/local/recitcommon/php/PersistCtrl.php";
         }
 
         /**
-         * Fetch a cmNote (by unique ID = ccCmId) or a set of cmNotes (cmId+ccId = cmId and CahierCanada ID)
+         * Fetch a cmNote (by unique ID = gid) or a set of cmNotes (gId+ctid = gId and CahierCanada ID)
          */
-        public function getCmSuggestedNotes($cId = 0, $cmId = 0){
+        public function getCmSuggestedNotes($cId = 0, $gId = 0){
             $cIdStmt = ($cId == 0 ? "1" : " t1_1.course = $cId");
 
             $cmStmt = "1";
-            if($cmId > 0){
-                $cmStmt = " (t1.cmid = $cmId)";
+            if($gId > 0){
+                $cmStmt = " (t1.gid = $gId)";
             }
             
-            $query = "select t1.id as ccCmId, coalesce(t1.intcode, '') as intCode, t1.ccid as ccId, t1.cmid as cmId, t1.title as noteTitle, t1.slot, t1.templatenote as templateNote, t1.suggestednote as suggestedNote, 
+            $query = "select t1.id as nid, coalesce(t1.intcode, '') as intCode, t1_1.id as ctid, t1.gid as gid, t1.title as noteTitle, t1.slot, t1.templatenote as templateNote, t1.suggestednote as suggestedNote, 
                         t1.teachertip as teacherTip, t1.lastupdate as lastUpdate,  t1.notifyteacher as notifyTeacher
-                        from {$this->prefix}recitct_cm_notes as t1
-                        inner join {$this->prefix}recitcahiertraces as t1_1 on t1.ccid = t1_1.id
+                        from {$this->prefix}recitct_notes as t1
+                        inner join {$this->prefix}recitct_groups as t3 on t1.gid = t3.id
+                        inner join {$this->prefix}recitcahiertraces as t1_1 on t3.ctid = t1_1.id
                         where $cIdStmt and $cmStmt
                         group by t1.id
                         order by slot asc";
@@ -235,31 +282,23 @@ require_once "$CFG->dirroot/local/recitcommon/php/PersistCtrl.php";
                 return $tmp;
             }
 
-            $this->setSectionActivitiesName(current($tmp)->cmId, $tmp);
-
-            // index by activity
+            // index by group
             $result = array();
             foreach($tmp as $item){
-                $result[$item->cmId][] = $item;
+                $result[$item->gId][] = $item;
             }
 
             return array_values($result); // reset the array indexes
         }
 
-        public function getCcCmNote($ccCmId){
-            $result = $this->getCmNotes($ccCmId);
-            $result = array_shift($result);
-            return $result;
-        }
-
-        public function removeCcCmNote($ccCmId){  
+        public function removeNote($nid){  
             try{  
                 $this->mysqlConn->beginTransaction();
 
-                $query = "delete from {$this->prefix}recitct_user_notes where cccmid = $ccCmId";
+                $query = "delete from {$this->prefix}recitct_user_notes where id = $nid";
                 $this->mysqlConn->execSQL($query);
 
-                $query = "delete from {$this->prefix}recitct_cm_notes where id = $ccCmId";
+                $query = "delete from {$this->prefix}recitct_notes where id = $nid";
                 $this->mysqlConn->execSQL($query);
                 
                 $this->mysqlConn->commitTransaction();
@@ -273,7 +312,27 @@ require_once "$CFG->dirroot/local/recitcommon/php/PersistCtrl.php";
             return true;
         }
 
-        public function saveCcCmNote($data){
+        public function removeGroup($gId){  
+            $query = "DELETE t2, t3, t4
+            FROM {$this->prefix}recitct_groups as t4
+            left JOIN {$this->prefix}recitct_notes as t2 ON t4.id = t2.gid
+            left JOIN {$this->prefix}recitct_user_notes as t3 ON t2.id = t3.nid
+            WHERE t4.id = $gId";
+
+            $result = $this->mysqlConn->execSQL($query);
+
+            return (!$result ? false : true);
+        }
+
+        public function renameGroup($gId, $name){  
+            $query = "UPDATE {$this->prefix}recitct_groups set `name` = '$name' WHERE id = $gId";
+
+            $result = $this->mysqlConn->execSQL($query);
+
+            return (!$result ? false : true);
+        }
+
+        public function saveNote($data){
             try{
                 $data->lastUpdate = time();
                 
@@ -281,37 +340,37 @@ require_once "$CFG->dirroot/local/recitcommon/php/PersistCtrl.php";
                     $data->intCode = hash("md5", $data->noteTitle . $data->lastUpdate );
                 }
                 
-                $fields = array("ccid", "cmid", "title", "templatenote", "suggestednote", "teachertip", "lastupdate", "intcode", 'notifyteacher');
-                $values = array($data->ccId, $data->cmId, $data->noteTitle, $data->templateNote, $data->suggestedNote, $data->teacherTip, $data->lastUpdate, $data->intCode, $data->notifyTeacher);
+                $fields = array("gid", "title", "templatenote", "suggestednote", "teachertip", "lastupdate", "intcode", 'notifyteacher');
+                $values = array($data->gId, $data->noteTitle, $data->templateNote, $data->suggestedNote, $data->teacherTip, $data->lastUpdate, $data->intCode, $data->notifyTeacher);
 
-                if($data->ccCmId == 0){
-                    $curSlot = $this->mysqlConn->execSQLAndGetObject("select slot from {$this->prefix}recitct_cm_notes where cmid = $data->cmId order by slot desc limit 1");
+                if($data->nid == 0){
+                    $curSlot = $this->mysqlConn->execSQLAndGetObject("select slot from {$this->prefix}recitct_notes where gId = $data->gId order by slot desc limit 1");
                     $fields[] = "slot";
                     $values[] = (empty($curSlot) ? 1 : $curSlot->slot + 1);
 
-                    $query = $this->mysqlConn->prepareStmt("insert", "{$this->prefix}recitct_cm_notes", $fields, $values);
+                    $query = $this->mysqlConn->prepareStmt("insert", "{$this->prefix}recitct_notes", $fields, $values);
                     $this->mysqlConn->execSQL($query);
-                    $data->ccCmId = $this->mysqlConn->getLastInsertId("{$this->prefix}recitct_cm_notes", "id");
+                    $data->nid = $this->mysqlConn->getLastInsertId("{$this->prefix}recitct_notes", "id");
                 }
                 else{
                     $fields[] = "slot";
                     $values[] = $data->slot;
 
-                    $query = $this->mysqlConn->prepareStmt("update", "{$this->prefix}recitct_cm_notes", $fields, $values, array("id"), array($data->ccCmId));
+                    $query = $this->mysqlConn->prepareStmt("update", "{$this->prefix}recitct_notes", $fields, $values, array("id"), array($data->nid));
                     $this->mysqlConn->execSQL($query);
                 }
                 
-                return $this->getCcCmNote($data->ccCmId);
+                return $data->nid;
             }
             catch(Exception $ex){
                 throw $ex;
             }
         }
 
-    /* public function reorderCcCmNotesSlots($cmId){
+        public function switchNoteSlot($from, $to){
             try{
                 $this->mysqlConn->beginTransaction();
-                $tmp = $this->mysqlConn->execSQLAndGetObjects("select slot from {$this->prefix}recitct_cm_notes where id in ($from, $to) order by FIELD(id, $from, $to)");
+                $tmp = $this->mysqlConn->execSQLAndGetObjects("select slot from {$this->prefix}recitct_notes where id in ($from, $to) order by FIELD(id, $from, $to)");
 
                 // $tmp[0] = from
                 // $tmp[1] = to
@@ -319,10 +378,10 @@ require_once "$CFG->dirroot/local/recitcommon/php/PersistCtrl.php";
                     throw new Exception("Unknown slots");
                 }
 
-                $query = sprintf("update {$this->prefix}recitct_cm_notes set slot = %d where id = %d", $tmp[1]->slot, $from);
+                $query = sprintf("update {$this->prefix}recitct_notes set slot = %d where id = %d", $tmp[1]->slot, $from);
                 $this->mysqlConn->execSQL($query);
 
-                $query = sprintf("update {$this->prefix}recitct_cm_notes set slot = %d where id = %d", $tmp[0]->slot, $to);
+                $query = sprintf("update {$this->prefix}recitct_notes set slot = %d where id = %d", $tmp[0]->slot, $to);
                 $this->mysqlConn->execSQL($query);
 
                 $this->mysqlConn->commitTransaction();
@@ -333,107 +392,14 @@ require_once "$CFG->dirroot/local/recitcommon/php/PersistCtrl.php";
                 $this->mysqlConn->rollbackTransaction();
                 throw $ex;
             }
-        }*/
-
-        public function switchCcCmNoteSlot($from, $to){
-            try{
-                $this->mysqlConn->beginTransaction();
-                $tmp = $this->mysqlConn->execSQLAndGetObjects("select slot from {$this->prefix}recitct_cm_notes where id in ($from, $to) order by FIELD(id, $from, $to)");
-
-                // $tmp[0] = from
-                // $tmp[1] = to
-                if(!isset($tmp[0]) || !isset($tmp[1])){
-                    throw new Exception("Unknown slots");
-                }
-
-                $query = sprintf("update {$this->prefix}recitct_cm_notes set slot = %d where id = %d", $tmp[1]->slot, $from);
-                $this->mysqlConn->execSQL($query);
-
-                $query = sprintf("update {$this->prefix}recitct_cm_notes set slot = %d where id = %d", $tmp[0]->slot, $to);
-                $this->mysqlConn->execSQL($query);
-
-                $this->mysqlConn->commitTransaction();
-
-                return true;
-            }
-            catch(Exception $ex){
-                $this->mysqlConn->rollbackTransaction();
-                throw $ex;
-            }
-        }
-
-        public function setSectionActivitiesName($cmId, $ccCmList){
-            $secActList = $this->getSectionCmList($cmId);
-
-            foreach($ccCmList as $item){
-                foreach($secActList as $activity){
-                    if($item->cmId == $activity->cmId){
-                        $item->activityName = $activity->name;
-                        break;
-                    }
-                }
-            }
-
-            foreach($ccCmList as $item){
-                if(empty($item->activityName)){
-                    $item->activityName = "Erreur : L'activité #$item->cmId appartient à une autre section";
-                    $item->garbage = 1;
-                }
-            }
-        }
-
-        /*public function getCmSequenceFromSection($ccId){
-            $query = "select t1.id as ccId, t2.id as cmId, t4.sequence from {$this->prefix}recitcahiertraces as t1
-            inner join {$this->prefix}course_modules as t2 on t1.course = t2.course and t1.id = t2.instance
-            inner join {$this->prefix}modules as t3 on t2.module = t3.id and t3.name = 'recitcahiertraces'
-            inner join {$this->prefix}course_sections as t4 on t2.section = t4.id
-            where t1.id = $ccId";
-            $obj = $this->mysqlConn->execSQLAndGetObject($query);
-            $obj->sequence = explode(",", $obj->sequence);
-            return $obj;
-        }*/
-        
-        public function getCmIdFromIndexPos($ccId, $cmIndexPos){
-            $query = "select t1.id as ccId, t2.id as cmId, t4.sequence from {$this->prefix}recitcahiertraces as t1
-            inner join {$this->prefix}course_modules as t2 on t1.course = t2.course and t1.id = t2.instance
-            inner join {$this->prefix}modules as t3 on t2.module = t3.id and t3.name = 'recitcahiertraces'
-            inner join {$this->prefix}course_sections as t4 on t2.section = t4.id
-            where t1.id = $ccId";
-            $obj = $this->mysqlConn->execSQLAndGetObject($query);
-            $obj->sequence = explode(",", $obj->sequence);
-            return (isset($obj->sequence[$cmIndexPos]) ? $obj->sequence[$cmIndexPos] : 0);
-        }
-
-        public function checkCCSeqPos($cmId){
-            $query = "select t1.id as cmId, t2.sequence 
-                    from {$this->prefix}course_modules as t1 
-                    inner join {$this->prefix}course_sections as t2 on t1.section = t2.id
-                    where t1.id = $cmId";
-            $obj = $this->mysqlConn->execSQLAndGetObject($query);
-
-            if(!empty($obj)){
-                $obj->sequence = explode(",", $obj->sequence);
-                $lastItemId = array_pop($obj->sequence);
-                return ($lastItemId == $cmId);
-            }
-            else{
-                return true;
-            }
-        }
-
-        public function createBackupViews(){
-            $query = "create or replace view {$this->prefix}vw_recitct_cm_notes as 
-                        SELECT t1.*, (FIND_IN_SET(t1.cmid, t3.sequence) - 1) as cmindexpos FROM `{$this->prefix}recitct_cm_notes` as t1 
-                        inner join {$this->prefix}course_modules as t2 on t1.cmid = t2.id
-                        inner join {$this->prefix}course_sections as t3 on t2.section = t3.id";
-            $this->mysqlConn->execSQL($query);
         }
         
         public function removeCcInstance($id){
-            $query = "DELETE t1, t2, t3
+            $query = "DELETE t1, t2, t3, t4
             FROM {$this->prefix}recitcahiertraces as t1
-            left JOIN {$this->prefix}recitct_cm_notes as t2 ON t1.id = t2.ccid
-            left JOIN {$this->prefix}recitct_user_notes as t3 ON t2.id = t3.cccmid
+            left join {$this->prefix}recitct_groups as t4 on t1.id = t4.ctid
+            left JOIN {$this->prefix}recitct_notes as t2 ON t4.id = t2.gid
+            left JOIN {$this->prefix}recitct_user_notes as t3 ON t2.id = t3.nid
             WHERE t1.id = $id";
 
             $result = $this->mysqlConn->execSQL($query);
@@ -536,19 +502,18 @@ require_once "$CFG->dirroot/local/recitcommon/php/PersistCtrl.php";
         }
 
         public function getRequiredNotes($cmId){
-            $query = "select t1.instance, t4.id as ccCmId, t4.ccid as ccId, t4.cmid as cmId, t4.title as noteTitle, t4.slot, t5.id as personalNoteId, 
-            coalesce(t5.userid, 0) as userId, concat(find_in_set(t4.cmId, t2.sequence), t4.slot) as orderByCustom, 
-            t3.course as courseId, concat(t6.firstname, ' ', t6.lastname) as username
+            $query = "select t1.instance, t4.id as gid, t2.ctid as ctid, t4.gId as gId, t4.title as noteTitle, t4.slot, t5.id as personalNoteId, 
+            coalesce(t5.userid, 0) as userId, concat(find_in_set(t4.gId, t2.name), t4.slot) as orderByCustom, t4.id as nid,
+            t3.course as courseId, concat(t6.firstname, ' ', t6.lastname) as username, t2.name as groupName
             from {$this->prefix}course_modules as t1 
-            inner join {$this->prefix}course_sections as t2 on t1.section = t2.id 
-            inner join {$this->prefix}recitcahiertraces as t3 on t1.instance = t3.id                
-            inner join {$this->prefix}recitct_cm_notes as t4 on t3.id = t4.ccid
-            inner join {$this->prefix}recitct_user_notes as t5 on t4.id = t5.cccmid
+            inner join {$this->prefix}recitcahiertraces as t3 on t1.instance = t3.id    
+            inner join {$this->prefix}recitct_groups as t2 on t3.id = t2.ctid            
+            inner join {$this->prefix}recitct_notes as t4 on t2.id = t4.gid
+            inner join {$this->prefix}recitct_user_notes as t5 on t4.id = t5.gid
             inner join {$this->prefix}user as t6 on t6.id = t5.userid
             where t1.id = $cmId and t4.notifyTeacher = 1 and 
             if(t5.id > 0 and length(t5.note) > 0 and length(REGEXP_REPLACE(trim(coalesce(t5.feedback, '')), '<[^>]*>+', '')) = 0, 1, 0) = 1 and
             %s
-            and exists(select id from {$this->prefix}course_modules cm where id = t4.cmid and deletioninprogress = 0) -- avoid to fetch deleted activities
             order by length(orderByCustom) asc, orderByCustom asc
             limit 50";
             
@@ -556,27 +521,24 @@ require_once "$CFG->dirroot/local/recitcommon/php/PersistCtrl.php";
 
             $result = $this->mysqlConn->execSQLAndGetObjects($query);
 
-            $this->setSectionActivitiesName($cmId, $result);
-
             return $result;
         }
 
         public function getStudentsProgression($cmId){
-            $query = "select t4.id as ccCmId, t4.ccid as ccId, t4.cmid as cmId, t4.title as noteTitle, t4.slot, coalesce(t5.id,0) as personalNoteId, 
-            coalesce(t6.id, 0) as userId, concat(find_in_set(t4.cmId, t2.sequence), t4.slot) as orderByCustom, 
+            $query = "select t4.id as gid, t2.ctid as ctid, t4.gId as gId, t4.title as noteTitle, t4.slot, coalesce(t5.id,0) as personalNoteId, 
+            coalesce(t6.id, 0) as userId, concat(find_in_set(t4.gId, t2.name), t4.slot) as orderByCustom, t4.id as nid,
             t3.course as courseId, concat(t6.firstname, ' ', t6.lastname) as username, if(t5.id > 0 and length(t5.note) > 0, 1, 0) as done,
             group_concat(DISTINCT t9.groupid) as groupIds
             from {$this->prefix}course_modules as t1 
-            inner join {$this->prefix}course_sections as t2 on t1.section = t2.id 
             inner join {$this->prefix}recitcahiertraces as t3 on t1.instance = t3.id 
-            inner join {$this->prefix}recitct_cm_notes as t4 on t3.id = t4.ccid
+            inner join {$this->prefix}recitct_groups as t2 on t3.id = t2.ctid
+            inner join {$this->prefix}recitct_notes as t4 on t2.id = t4.gid
             inner join {$this->prefix}enrol as t7 on t7.courseid = t1.course
             inner join {$this->prefix}user_enrolments as t8 on t7.id = t8.enrolid
             inner join {$this->prefix}user as t6 on t6.id = t8.userid
-            left join {$this->prefix}recitct_user_notes as t5 on t4.id = t5.cccmid and t5.userid = t6.id
+            left join {$this->prefix}recitct_user_notes as t5 on t4.id = t5.gid and t5.userid = t6.id
             left join {$this->prefix}groups_members as t9 on t9.userid = t6.id
             where t1.id = $cmId and %s
-            and exists(select id from {$this->prefix}course_modules cm where id = t4.cmid and deletioninprogress = 0) 
             group by t4.id, t5.id, t6.id
             order by length(orderByCustom) asc, orderByCustom asc";
 
@@ -586,8 +548,6 @@ require_once "$CFG->dirroot/local/recitcommon/php/PersistCtrl.php";
             foreach($result as $item){
                 $item->groupIds = array_map('intval', explode(",", $item->groupIds));
             }
-
-            $this->setSectionActivitiesName($cmId, $result);
 
             return $result;
         }

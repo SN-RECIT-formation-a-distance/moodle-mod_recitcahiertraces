@@ -13,30 +13,7 @@ export class TeacherView extends Component {
         this.state = {modeEdition: false};
     }
 
-    componentDidMount(){
-        this.checkCCSeqPos();
-    }
-
-    componentWillUnmount(){
-        this.checkCCSeqPos();
-    }
-
     render() {       
-       /* const popover = (
-            <Popover id="popover-basic">
-              <Popover.Title as="h3">Code d'intégration</Popover.Title>
-              <Popover.Content>
-              Voici des variables extras pour le code d'intégration:<br/><br/>
-              <strong>color:</strong> code hexadécimal de la couleur du titre de la note<br/>
-              <strong>btnSaveVariant:</strong> style de bouton Bootstrap<br/>
-            <strong>btnResetVariant:</strong> style de bouton Bootstrap
-              </Popover.Content>
-            </Popover>
-          );
-          
-            <OverlayTrigger  placement="left" delay={{ show: 250, hide: 400 }} overlay={popover}>                                
-                <Button  variant="primary"  style={{marginRight: 3}}><FontAwesomeIcon icon={faInfo}/></Button>
-            </OverlayTrigger>*/
 
         let main =
             <div>
@@ -57,17 +34,6 @@ export class TeacherView extends Component {
             </div>
 
         return (main);
-    }
-
-    checkCCSeqPos(){
-        if(UtilsMoodle.checkRoles($glVars.signedUser.roles, UtilsMoodle.rolesL2)){
-            let callback = function(result){
-                if((result.success) && (!result.data)){
-                    $glVars.feedback.showError($glVars.i18n.tags.appName, $glVars.i18n.tags.msgCCSeqPos);
-                }
-            }
-            $glVars.webApi.checkCCSeqPos($glVars.urlParams.id, callback);    
-        }
     }
 
     onModeEditionClick(event){

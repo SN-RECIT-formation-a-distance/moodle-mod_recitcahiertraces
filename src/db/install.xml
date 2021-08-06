@@ -20,12 +20,23 @@
       </KEYS>
     </TABLE>
 
-     <TABLE NAME="recitct_cm_notes" COMMENT="It keeps the course modules which have notes to be taken by the users">
+     <TABLE NAME="recitct_groups" COMMENT="">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="ctid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Cahier Traces Id"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="fkctid" TYPE="foreign" FIELDS="ctid" REFTABLE="recitcahiertraces" REFFIELDS ="id"/>
+      </KEYS>
+    </TABLE>
+
+     <TABLE NAME="recitct_notes" COMMENT="">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="intcode" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false" COMMENT="integration code"/>
-        <FIELD NAME="ccid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Cahier Canada Id"/>
-        <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Course Module Id"/>
+        <FIELD NAME="gid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Course Module Id"/>
         <FIELD NAME="title" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="slot" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="templatenote" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
@@ -36,15 +47,15 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="fkccid" TYPE="foreign" FIELDS="ccid" REFTABLE="recitcahiertraces" REFFIELDS ="id"/>
-        <KEY NAME="fkcmid" TYPE="foreign" FIELDS="cmid" REFTABLE="course_modules" REFFIELDS ="id"/>
+        <KEY NAME="fkgid" TYPE="foreign" FIELDS="gid" REFTABLE="recitct_groups" REFFIELDS ="id"/>
       </KEYS>
     </TABLE>
 
     <TABLE NAME="recitct_user_notes" COMMENT="It keeps the personal notes taken by the users">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
-        <FIELD NAME="cccmid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Cahier Canada Course Module Id"/>
+        <FIELD NAME="nid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Note Id"/>
+        <FIELD NAME="cmid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Cm Id"/>
         <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
         <FIELD NAME="note" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="note_itemid" TYPE="char" LENGTH="25" NOTNULL="false" SEQUENCE="false"/>
@@ -54,11 +65,11 @@
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="fkcccm" TYPE="foreign" FIELDS="cccmid" REFTABLE="recitct_cm_notes" REFFIELDS ="id"/>
+        <KEY NAME="fknote" TYPE="foreign" FIELDS="nid" REFTABLE="recitct_notes" REFFIELDS ="id"/>
         <KEY NAME="fkuser" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS ="id"/>
       </KEYS>
       <INDEXES>
-        <INDEX NAME="uniquenote" UNIQUE="true" FIELDS="cccmid,userid"/>
+        <INDEX NAME="uniquenote" UNIQUE="true" FIELDS="nid,userid"/>
       </INDEXES>
     </TABLE>
 

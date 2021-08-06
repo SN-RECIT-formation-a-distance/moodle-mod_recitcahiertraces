@@ -28,7 +28,7 @@ class ViewPrintingNotes extends Component{
 
                 <hr/>
                 {this.state.userId > 0 &&
-                   <ActionBar cmId={$glVars.urlParams.id} userId={this.state.userId}/>              
+                   <ActionBar gId={$glVars.urlParams.id} userId={this.state.userId}/>              
                 }            
                           
             </div>;
@@ -62,9 +62,9 @@ class ViewNavGroupAndStudents extends Component{
             data: {
                 userId: 0,
                 username: "",
-                cmId: 0,
+                gId: 0,
                 noteTitle: "",
-                ccCmId: 0
+                nid: 0
             }
         };
     }    
@@ -78,7 +78,7 @@ class ViewNavGroupAndStudents extends Component{
                     <div>
                         <hr/>
                         <NavActivities userId={this.state.data.userId} onEdit={this.onEdit}/>                                
-                        {this.state.data.ccCmId > 0 && 
+                        {this.state.data.nid > 0 && 
                             <ModalPersonalNote modalTitle={`Élève: ${this.state.data.username}`} data={this.state.data} onClose={this.onClose} onNextStudent={this.onNextStudent} 
                                 onPreviousStudent={this.onPreviousStudent} navStatus={this.getNavStatus()}/>
                         }  
@@ -94,8 +94,8 @@ class ViewNavGroupAndStudents extends Component{
         if(item === null){ return; }
 
         let data = this.state.data;
-        data.cmId = item.cmId;
-        data.ccCmId = item.ccCmId;
+        data.gId = item.gId;
+        data.nid = item.nid;
         data.noteTitle = item.noteTitle;
 
         this.setState({data: data});
@@ -103,8 +103,8 @@ class ViewNavGroupAndStudents extends Component{
 
     onClose(){
         let data = this.state.data;
-        data.cmId = 0;
-        data.ccCmId = 0;
+        data.gId = 0;
+        data.nid = 0;
         data.noteTitle = "";
         this.setState({data: data});
     }
@@ -155,9 +155,9 @@ class ViewRequiredNotes extends Component{
             data: {
                 userId: 0,
                 username: "",
-                cmId: 0,
+                gId: 0,
                 noteTitle: "",
-                ccCmId: 0,
+                nid: 0,
                 personalNoteId: 0
             }
         };
@@ -215,7 +215,7 @@ class ViewRequiredNotes extends Component{
                                 let row = 
                                     <DataGrid.Body.Row key={index} onDbClick={() => that.onEdit(item)}>
                                         <DataGrid.Body.Cell>{index + 1}</DataGrid.Body.Cell>
-                                        <DataGrid.Body.Cell>{item.activityName}</DataGrid.Body.Cell>
+                                        <DataGrid.Body.Cell>{item.groupName}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell>{item.username}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell>{item.noteTitle}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell style={{textAlign: 'center'}}>
@@ -230,7 +230,7 @@ class ViewRequiredNotes extends Component{
                     </DataGrid.Body>
                 </DataGrid>
 
-                {this.state.data.ccCmId > 0 && 
+                {this.state.data.nid > 0 && 
                         <ModalPersonalNote modalTitle={`Élève: ${this.state.data.username}`} data={this.state.data} onClose={this.onClose} onNextStudent={this.onNextStudent} 
                                 onPreviousStudent={this.onPreviousStudent} navStatus={this.getNavStatus()}/>
                 }
@@ -246,8 +246,8 @@ class ViewRequiredNotes extends Component{
         }
 
         let data = this.state.data;
-        data.cmId = item.cmId;
-        data.ccCmId = item.ccCmId;
+        data.gId = item.gId;
+        data.nid = item.nid;
         data.noteTitle = item.noteTitle;
         data.userId = item.userId;
         data.username = item.username;
@@ -259,8 +259,8 @@ class ViewRequiredNotes extends Component{
     onClose(){
         let data = this.state.data;
         
-        data.cmId = 0;
-        data.ccCmId = 0;
+        data.gId = 0;
+        data.nid = 0;
         data.noteTitle = "";
         data.userId = 0;
         data.username = "";
@@ -408,7 +408,7 @@ class ViewProgression extends Component{
 
     /*getDetails(){
         let data = {};
-        let lastActivity = null;
+        let lastgroup = null;
         let username = "";
 
         for(let item of this.state.dataProvider){
@@ -418,13 +418,13 @@ class ViewProgression extends Component{
                 username = item.username;
             }
 
-            if(lastActivity !== item.cmId){
-                data[`cm${item.cmId}`] = {nbDone: 0, cmName: item.activityName, items: []};
-                lastActivity = item.cmId;
+            if(lastgroup !== item.gId){
+                data[`cm${item.gId}`] = {nbDone: 0, cmName: item.groupName, items: []};
+                lastgroup = item.gId;
             }
 
-            data[`cm${item.cmId}`].nbDone += item.done;
-            data[`cm${item.cmId}`].items.push(item);
+            data[`cm${item.gId}`].nbDone += item.done;
+            data[`cm${item.gId}`].items.push(item);
         }
 
         let grids = [];
@@ -522,17 +522,17 @@ class NavActivities extends Component{
         }
 
         // If the user is trying to load automatically some note by URL
-        if(!$glVars.urlParams.activityLoaded){
+        if(!$glVars.urlParams.groupLoaded){
             let item = null;
-            for(let activity of result.data){
-                for(let note of activity){
-                    if((note.ccCmId === $glVars.urlParams.ccCmId) && (note.cmId === $glVars.urlParams.cmId)){
+            for(let group of result.data){
+                for(let note of group){
+                    if((note.nid === $glVars.urlParams.nid) && (note.gId === $glVars.urlParams.gId)){
                         item = note;
                     }
                 }
             }
 
-            $glVars.urlParams.activityLoaded = true;
+            $glVars.urlParams.groupLoaded = true;
 
             this.setState({dataProvider: result.data}, () => this.props.onEdit(item));
         }
@@ -550,14 +550,14 @@ class NavActivities extends Component{
                     <Col sm={12}>
                         <Nav variant="pills" className="flex-row">
                             {this.state.dataProvider.map(function(items, index){
-                                let activityName = JsNx.at(items, 0).activityName;
+                                let groupName = JsNx.at(items, 0).groupName;
 
                                 let pctProgress = that.getPctProgress(items);
 
                                 return  <Nav.Item key={index} className="m-1 bg-light">
                                             <Nav.Link eventKey={index}>
-                                                <div  style={{display: "flex", width: '315px', justifyContent: "space-evenly"}} title={`${activityName} (${pctProgress.toFixed(0)}%)`}>
-                                                    <span className="text-truncate" >{`${activityName} `}</span>
+                                                <div  style={{display: "flex", width: '315px', justifyContent: "space-evenly"}} title={`${groupName} (${pctProgress.toFixed(0)}%)`}>
+                                                    <span className="text-truncate" >{`${groupName} `}</span>
                                                     <Badge pill  variant="light">{` ${pctProgress.toFixed(0)}%`}</Badge>
                                                 </div>
                                             </Nav.Link>
@@ -579,6 +579,7 @@ class NavActivities extends Component{
                                             <DataGrid.Header.Cell >{"Titre de la note"}</DataGrid.Header.Cell>
                                             <DataGrid.Header.Cell style={{width: 300}}>{"Note"}</DataGrid.Header.Cell>
                                             <DataGrid.Header.Cell style={{width: 300}}>{"Rétroaction"}</DataGrid.Header.Cell>
+                                            <DataGrid.Header.Cell style={{width: 300}}>{"Activité"}</DataGrid.Header.Cell>
                                             <DataGrid.Header.Cell style={{width: 80}}></DataGrid.Header.Cell>
                                             <DataGrid.Header.Cell  style={{width: 80}}></DataGrid.Header.Cell>
                                         </DataGrid.Header.Row>
@@ -591,6 +592,7 @@ class NavActivities extends Component{
                                                         <DataGrid.Body.Cell><FontAwesomeIcon icon={faEye}/>{` ${item.noteTitle}`}</DataGrid.Body.Cell>
                                                         <DataGrid.Body.Cell>{that.formatText(item.note.text)}</DataGrid.Body.Cell>
                                                         <DataGrid.Body.Cell>{that.formatText(item.feedback)}</DataGrid.Body.Cell>
+                                                        <DataGrid.Body.Cell>{that.formatText(item.activityName)}</DataGrid.Body.Cell>
                                                         <DataGrid.Body.Cell style={{textAlign: "center"}}>{(item.notifyTeacher === 1 ? 
                                                             <Button disabled={true} title="Rétroaction requise" size="sm" variant="warning"><FontAwesomeIcon icon={faCommentDots}/></Button> : null)}
                                                         </DataGrid.Body.Cell>
@@ -656,13 +658,11 @@ export class TeacherNotebook extends Component{
 
         this.getData = this.getData.bind(this);
         this.getDataResult = this.getDataResult.bind(this);
-        this.getNotesResult = this.getNotesResult.bind(this);
-        this.onRemoveGarbage = this.onRemoveGarbage.bind(this);
         this.onDataChange = this.onDataChange.bind(this);
         this.onSetTab = this.onSetTab.bind(this);
         this.onProgressionDetail = this.onProgressionDetail.bind(this);
 
-        this.state = {tab: $glVars.urlParams.tab.toString(), nbFeedback: "?", enrolledUserList: [], garbage: []};
+        this.state = {tab: $glVars.urlParams.tab.toString(), nbFeedback: "?", enrolledUserList: []};
     }
     
     componentDidMount(){
@@ -671,7 +671,6 @@ export class TeacherNotebook extends Component{
 
     getData(){
         $glVars.webApi.getEnrolledUserList($glVars.urlParams.id, this.getDataResult);
-        $glVars.webApi.getPersonalNotes($glVars.urlParams.id, 0, 1, this.getNotesResult);
     }
 
     getDataResult(result){
@@ -683,56 +682,9 @@ export class TeacherNotebook extends Component{
         this.setState({enrolledUserList: result.data});
     }
 
-
-    getNotesResult(result){
-        if(!result.success){
-            FeedbackCtrl.instance.showError($glVars.i18n.appName, result.msg);
-            return;
-        }
-
-        let garbage = [];
-        for (let notes of result.data){
-            for (let note of notes){
-                if (note.garbage){
-                    garbage.push(note);
-                }
-            }
-        }
-        this.setState({garbage:garbage});
-    }
-
-    getGarbageWarnings(){
-        let html = [];
-        let k = 0;
-        for (let n of this.state.garbage){
-            k++;
-            html.push(<div className="box py-3 activity-content errorbox alert alert-danger p-0 p-sm-3" key={k}>
-                <p className="errormessage">La note "{n.noteTitle}" (activité #{n.cmId}) n'a plus de relation avec aucune activité (l'activité ou le cahier de traces a été changé de section). <a href="#" onClick={() => this.onRemoveGarbage(n)}>Supprimer la note</a></p>
-            </div>);
-        }
-        return html;
-    }
-    
-    onRemoveGarbage(item){
-        let callback = function(result){
-            if(result.success){
-                $glVars.feedback.showInfo($glVars.i18n.tags.appName, $glVars.i18n.tags.msgSuccess, 3);
-                this.getData();
-            }
-            else{
-                $glVars.feedback.showError($glVars.i18n.tags.appName, result.msg);
-            }
-        }
-
-        if(window.confirm($glVars.i18n.tags.msgConfirmDeletion+"\nCela supprimera tous les données de l'élève. La suppression est irreversible.")){
-            $glVars.webApi.removeCcCmNote(item.ccCmId, item.cmId, callback.bind(this));
-        }
-    }    
-
     render(){
         let main = 
             <div>
-                {this.getGarbageWarnings()}
                 <Tabs activeKey={this.state.tab} id="tabTeacherNotebook" onSelect={this.onSetTab}>
                     <Tab eventKey={"0"} title={<span><FontAwesomeIcon icon={faCompass}/>{" Consulter les notes"}</span>}>
                         <ViewNavGroupAndStudents style={{padding: "1rem"}} enrolledUserList={this.state.enrolledUserList}></ViewNavGroupAndStudents>
@@ -782,9 +734,9 @@ export class StudentNotebook extends Component{
             data: {
                 userId: props.userId,
                 username: "",
-                cmId: 0,
+                gId: 0,
                 noteTitle: "",
-                ccCmId: 0
+                nid: 0
             }
         };
     }
@@ -794,13 +746,13 @@ export class StudentNotebook extends Component{
             <div>  
                 {this.state.data.userId > 0 &&
                     <div>
-                        <ActionBar cmId={$glVars.urlParams.id} userId={this.state.data.userId}/>
+                        <ActionBar gId={$glVars.urlParams.id} userId={this.state.data.userId}/>
 
                         <hr/>
 
                         <NavActivities userId={this.state.data.userId} onEdit={this.onEdit}/>
                     
-                        {this.state.data.ccCmId > 0 && 
+                        {this.state.data.nid > 0 && 
                                 <ModalPersonalNote modalTitle={`Cahier de traces - Note personnelle`} data={this.state.data} onClose={this.onClose} />}
                     </div>
                 }
@@ -813,8 +765,8 @@ export class StudentNotebook extends Component{
         if(item === null){ return; }
 
         let data = this.state.data;
-        data.cmId = item.cmId;
-        data.ccCmId = item.ccCmId;
+        data.gId = item.gId;
+        data.nid = item.nid;
         data.noteTitle = item.noteTitle;
 
         this.setState({data: data});
@@ -823,8 +775,8 @@ export class StudentNotebook extends Component{
     onClose(){
         let data = this.state.data;
         
-        data.cmId = 0;
-        data.ccCmId = 0;
+        data.gId = 0;
+        data.nid = 0;
         data.noteTitle = "";
         
         this.setState({data: data});
@@ -833,7 +785,6 @@ export class StudentNotebook extends Component{
 
 class ActionBar extends Component{
     static defaultProps = {
-        cmId: 0,
         userId: 0
     };
 
@@ -848,7 +799,7 @@ class ActionBar extends Component{
     }
 
     getPrintLink(showFeedback){
-        return UtilsMoodle.wwwRoot()+`/mod/recitcahiercanada/classes/ReportStudentNotes.php?cmId=${this.props.cmId}&userId=${this.props.userId}&sf=${showFeedback || 0}`;
+        return UtilsMoodle.wwwRoot()+`/mod/recitcahiertraces/classes/ReportStudentNotes.php?cmId=${$glVars.urlParams.id}&userId=${this.props.userId}&sf=${showFeedback || 0}`;
     }
 
 }

@@ -96,7 +96,7 @@ class restore_recitcahiertraces_activity_task extends restore_activity_task {
      *
      * Note this rules are applied when restoring course logs
      * by the restore final task, but are defined here at
-     * activity level. All them are rules not linked to any module instance (cmid = 0)
+     * activity level. All them are rules not linked to any module instance (gId = 0)
      */
     static public function define_restore_log_rules_for_course() {
         $rules = array();

@@ -38,8 +38,8 @@ export class AppWebApi extends WebApi
         this.post(this.gateway, data, onSuccess);
     }
 
-    getPersonalNote(ccCmId, cmId, userId, onSuccess){
-        let data = {cmId: cmId, ccCmId: ccCmId, userId: userId, service: "getPersonalNote"};
+    getPersonalNote(cmId, nid, gId, userId, onSuccess){
+        let data = {cmId: cmId, gId: gId, nid: nid, userId: userId, service: "getPersonalNote"};
         this.post(this.gateway, data, onSuccess);
     }
 
@@ -56,56 +56,76 @@ export class AppWebApi extends WebApi
         this.post(this.gateway, options, onSuccessTmp);
     }
 
-    getSectionCmList(cmId, onSuccess){
-        let data = {cmId: cmId, service: "getSectionCmList"};
+    getGroupList(cmId, onSuccess){
+        let data = {cmId: cmId, service: "getGroupList"};
         this.post(this.gateway, data, onSuccess);
     }
 
-    getCmNotes(cmId, ccId, onSuccess){
-        let data = {cmId: cmId, ccId: (ccId || 0), service: "getCmNotes"};
+    getCCList(cmId, onSuccess){
+        let data = {cmId: cmId, service: "getCCList"};
         this.post(this.gateway, data, onSuccess);
     }
 
-    switchCcCmNoteSlot(from, to, onSuccess){
+    importCC(cmId, importcmid, onSuccess){
+        let data = {cmId: cmId, importcmid: importcmid, service: "importCC"};
+        this.post(this.gateway, data, onSuccess);
+    }
+
+    getGroupNotes(gId, ctid, onSuccess){
+        let data = {gId: gId, ctid: (ctid || 0), service: "getGroupNotes"};
+        this.post(this.gateway, data, onSuccess);
+    }
+
+    switchNoteSlot(from, to, onSuccess){
         if(from === to){ return;}
 
-        let data = {from: from, to: to, service: "switchCcCmNoteSlot"};
+        let data = {from: from, to: to, service: "switchNoteSlot"};
         this.post(this.gateway, data, onSuccess);
     }
     
-    getCcCmNoteFormKit(ccCmId, cmId, onSuccess){
-        let data = {ccCmId: ccCmId, cmId: cmId, service: "getCcCmNoteFormKit"};
+    getGroupNoteFormKit(cmId, nId, onSuccess){
+        let data = {cmId: cmId, nId: nId, service: "getGroupNoteFormKit"};
         this.post(this.gateway, data, onSuccess);
     }
     
-    saveCcCmNote(data, onSuccess){
+    saveNote(data, onSuccess){
         let that = this;
         let onSuccessTmp = function(result){     
             onSuccess(result);
             if(result.success){
-                that.notifyObservers('saveCcCmNote');
+                that.notifyObservers('saveNote');
             }
         };
 
-        let options = {data: data, service: "saveCcCmNote"};
+        let options = {data: data, service: "saveNote"};
         this.post(this.gateway, options, onSuccessTmp);
     }
 
-    removeCcCmNote(ccCmId, cmId, onSuccess){
+    removeNote(nid, cmId, onSuccess){
         let that = this;
         let onSuccessTmp = function(result){     
             onSuccess(result);
             if(result.success){
-                that.notifyObservers('removeCcCmNote');
+                that.notifyObservers('removeNote');
             }
         };
 
-        let options = {ccCmId: ccCmId, cmId: cmId, service: "removeCcCmNote"};
+        let options = {nid: nid, cmId: cmId, service: "removeNote"};
         this.post(this.gateway, options, onSuccessTmp);
     }
 
-    checkCCSeqPos(cmId, onSuccess){
-        let options = {cmId: cmId, service: "checkCCSeqPos"};
+    removeGroup(cmId, gId, onSuccess){
+        let options = {cmId: cmId, gId: gId, service: "removeGroup"};
+        this.post(this.gateway, options, onSuccess);
+    }
+
+    addGroup(cmId, name, onSuccess){
+        let options = {cmId: cmId, name: name, service: "addGroup"};
+        this.post(this.gateway, options, onSuccess);
+    }
+
+    renameGroup(cmId, gId, name, onSuccess){
+        let options = {cmId: cmId, gId: gId, name: name, service: "renameGroup"};
         this.post(this.gateway, options, onSuccess);
     }
 

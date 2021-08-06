@@ -33,36 +33,31 @@ class backup_recitcahiertraces_activity_structure_step extends backup_activity_s
     protected function define_structure() {
         global $DB, $USER;
 
-        // To know if we are including userinfo.
-        //$userinfo = $this->get_setting_value('userinfo');
-
-        CahierTracesPersistCtrl::getInstance($DB, $USER)->createBackupViews();
-
         // Define each element separated
         $recitcahiertraces = new backup_nested_element('recitcahiertraces', array('id'), array(
             'course', 'name', 'intro', 'introformat', 'display', 'timemodified'));
 
+        $recitct_groups = new backup_nested_element('recitct_groups', array('id'), array('ctid', 'name'));
 
-        $recitct_cm_notes = new backup_nested_element('recitct_cm_notes', array('id'), array(
-            'intcode', 'ccid', 'cmid', 'title', 'slot', 'templatenote', 'suggestednote', 'teachertip', 'notifyteacher', 'lastupdate', 'cmindexpos'));
+        $recitct_notes = new backup_nested_element('recitct_notes', array('id'), array(
+            'intcode', 'gid', 'title', 'slot', 'templatenote', 'suggestednote', 'teachertip', 'notifyteacher', 'lastupdate'));
 
-       // $mdl_recitct_user_notes = new backup_nested_element('recitct_user_notes', array('id'), array('cccmid', 'userid', 'note', 'feedback', 'grade', 'lastupdate'));
 
         // Build the tree
-        $recitcahiertraces->add_child($recitct_cm_notes);
-       // $recitct_cm_notes->add_child($mdl_recitct_user_notes);
+       $recitct_groups->add_child($recitct_notes);
+       $recitcahiertraces->add_child($recitct_groups);
 
         // Define sources
         $recitcahiertraces->set_source_table('recitcahiertraces', array('id' => backup::VAR_ACTIVITYID));
-        $recitct_cm_notes->set_source_table('vw_recitct_cm_notes', array('ccid' => backup::VAR_PARENTID));
-       // $mdl_recitct_user_notes->set_source_table('recitct_user_notes', array('cccmid' => backup::VAR_PARENTID));
+        $recitct_groups->set_source_table('recitct_groups', array('ctid' => backup::VAR_PARENTID));
+        $recitct_notes->set_source_table('recitct_notes', array('gid' => backup::VAR_PARENTID));
 
         // Define id annotations
         //$recitcahiertraces->annotate_ids('question', 'questionid');
         
         // Define file annotations
         $recitcahiertraces->annotate_files('mod_recitcahiertraces', 'intro', null); 
-        $recitct_cm_notes->annotate_files('vw_recitct_cm_notes', 'templatenote', null); 
+        $recitct_notes->annotate_files('recitct_notes', 'templatenote', null);
        // $mdl_recitct_user_notes->annotate_files('mdl_recitct_user_notes', 'note', null); // This file area hasn't itemid
        // $mdl_recitct_user_notes->annotate_files('mdl_recitct_user_notes', 'feedback', null); // This file area hasn't itemid       
 
