@@ -77,12 +77,12 @@ require_once 'PersistCtrlCahierTraces.php';
                 $this->prepareJson($result);
 
                 if(($flags->mode == "s") && ($result->notifyTeacher == 1)){
-                    $url = sprintf("%s/mod/recitcahiertraces/view.php?id=%ld&nid=%ld&gId=%ld&userId=%ld", $CFG->wwwroot, $result->mgId, $result->nid, $result->gId, $result->userId);
+                    $url = sprintf("%s/mod/recitcahiertraces/view.php?id=%ld&nid=%ld&gId=%ld&userId=%ld", $CFG->wwwroot, $result->mcmId, $result->nid, $result->gId, $result->userId);
                     $msg = sprintf("Nouvelle mise à jour dans la note: « <a href='%s' target='_blank'>%s</a> »", $url, $result->noteTitle);
                     CahierTracesPersistCtrl::getInstance()->sendInstantMessagesToTeachers($result->courseId, $msg);
                 }
                 else if(($flags->mode == "t") && ($flags->teacherFeedbackUpdated == 1)){
-                    $url = sprintf("%s/mod/recitcahiertraces/view.php?id=%ld&nid=%ld&gId=%ld&userId=%ld", $CFG->wwwroot, $result->mgId, $result->nid, $result->gId, $result->userId);
+                    $url = sprintf("%s/mod/recitcahiertraces/view.php?id=%ld&nid=%ld&gId=%ld&userId=%ld", $CFG->wwwroot, $result->mcmId, $result->nid, $result->gId, $result->userId);
                     $msg = sprintf("Nouvelle mise à jour dans la note: « <a href='%s' target='_blank'>%s</a> »", $url, $result->noteTitle);
                     CahierTracesPersistCtrl::getInstance()->sendInstantMessagesToStudents(array($result->userId), $result->courseId, $msg);
                 }
