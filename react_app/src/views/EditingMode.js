@@ -295,7 +295,7 @@ export class EditionMode extends Component{
         this.onDropRow = this.onDropRow.bind(this);
         this.onCopy = this.onCopy.bind(this);
 
-        this.state = {ccgroup: null, nid: -1, groupList: [], groupNoteList: [], draggingItem: null, copyIC: "", addGroup: false, groupName: '', importForm: false};
+        this.state = {ccgroup: null, nid: -1, groupList: [], groupNoteList: [], draggingItem: null, copyIC: "", addGroup: -1, groupName: '', importForm: false};
 
         this.intCodeRef = React.createRef();
     }
@@ -405,7 +405,7 @@ export class EditionMode extends Component{
                                 
                 {this.state.nid >= 0 && <NoteForm nid={this.state.nid} ccgroup={this.state.ccgroup} onClose={this.onClose}/>}
                 
-                {this.state.addGroup && <AddGroupForm onClose={this.onAddGroupModalClose} gId={this.state.addGroup} name={this.state.groupNamed}/>}
+                {this.state.addGroup >= 0 && <AddGroupForm onClose={this.onAddGroupModalClose} gId={this.state.addGroup} name={this.state.groupNamed}/>}
 
                 {this.state.importForm && <ImportForm onClose={this.onCloseImport}/>}
 
@@ -467,7 +467,7 @@ export class EditionMode extends Component{
                 $glVars.webApi.addGroup($glVars.urlParams.id, name, callback);
             }
         }
-        this.setState({addGroup: false});
+        this.setState({addGroup: -1});
     }
 
     getSuggestedNotesPrintLink(){
@@ -645,8 +645,8 @@ class AddGroupForm extends Component{
         let footer = 
             <div className="btn-tollbar" style={{width: "100%", display: "flex", justifyContent: "flex-end"}}>
                 <div className="btn-group">
-                    <Button  variant="secondary" onClick={() => this.props.onClose()}>{"Annuler"}</Button>
-                    <Button  variant="success"  onClick={this.onSave}>{"Enregistrer"}</Button>
+                    <Button variant="secondary" onClick={() => this.props.onClose()}>{"Annuler"}</Button>
+                    <Button variant="success" onClick={this.onSave}>{"Enregistrer"}</Button>
                 </div>
             </div>;
 

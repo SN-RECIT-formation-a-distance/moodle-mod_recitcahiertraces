@@ -251,6 +251,11 @@ export class UtilsDateTime
             return 0;
         }
     }
+
+    static formatTime(timestamp){
+        var time = new Date(timestamp * 1000);
+        return time.toLocaleDateString();
+    }
     
     /**
     * Transform the shift minutes to the time string

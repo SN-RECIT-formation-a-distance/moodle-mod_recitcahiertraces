@@ -3,7 +3,7 @@ import { ButtonGroup, Form, Button, Col, Tab, DropdownButton, Dropdown, Row, Nav
 import {faArrowLeft, faArrowRight, faPencilAlt, faBars, faEye, faPrint, faCompass, faCommentDots, faTasks, faCheckSquare, faSquare, faFileExport} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {FeedbackCtrl, DataGrid, ComboBox} from '../libs/components/Components';
-import {UtilsMoodle, JsNx} from '../libs/utils/Utils';
+import {UtilsMoodle, JsNx, UtilsDateTime} from '../libs/utils/Utils';
 import {ModalPersonalNote} from './PersonalNote';
 import {$glVars} from '../common/common';
 
@@ -77,7 +77,7 @@ class ViewNavGroupAndStudents extends Component{
                 {this.state.data.userId > 0 &&
                     <div>
                         <hr/>
-                        <NavActivities userId={this.state.data.userId} onEdit={this.onEdit}/>                                
+                        <NavActivities userId={this.state.data.userId} onEdit={this.onEdit} isTeacher={true}/>                                
                         {this.state.data.nid > 0 && 
                             <ModalPersonalNote modalTitle={`Élève: ${this.state.data.username}`} data={this.state.data} onClose={this.onClose} onNextStudent={this.onNextStudent} 
                                 onPreviousStudent={this.onPreviousStudent} navStatus={this.getNavStatus()}/>
@@ -475,6 +475,7 @@ class ViewProgression extends Component{
 class NavActivities extends Component{
     static defaultProps = {
         userId: 0,
+        isTeacher: false,
         onEdit: null
     };
 
@@ -547,8 +548,8 @@ class NavActivities extends Component{
         let main = 
             <Tab.Container id="tabActivities" activeKey={this.state.activeTab} onSelect={this.onSelectTab}>
                 <Row>
-                    <Col sm={12}>
-                        <Nav variant="pills" className="flex-row">
+                    <Col sm={3}>
+                        <Nav variant="pills" className="flex-column">
                             {this.state.dataProvider.map(function(items, index){
                                 let groupName = JsNx.at(items, 0).groupName;
 
@@ -565,48 +566,15 @@ class NavActivities extends Component{
                             })}
                         </Nav>
                     </Col>
-                </Row>
-                <br/>
-                <Row>
-                    <Col sm={12}>
+                    <Col sm={9}>
                         <Tab.Content>
                             {this.state.dataProvider.map(function(items, index){
-                                let datagrid = 
-                                <DataGrid orderBy={true}>
-                                    <DataGrid.Header>
-                                        <DataGrid.Header.Row>
-                                            <DataGrid.Header.Cell style={{width: 80}}>{"#"}</DataGrid.Header.Cell>
-                                            <DataGrid.Header.Cell >{"Titre de la note"}</DataGrid.Header.Cell>
-                                            <DataGrid.Header.Cell style={{width: 300}}>{"Note"}</DataGrid.Header.Cell>
-                                            <DataGrid.Header.Cell style={{width: 300}}>{"Rétroaction"}</DataGrid.Header.Cell>
-                                            <DataGrid.Header.Cell style={{width: 300}}>{"Activité"}</DataGrid.Header.Cell>
-                                            <DataGrid.Header.Cell style={{width: 80}}></DataGrid.Header.Cell>
-                                            <DataGrid.Header.Cell  style={{width: 80}}></DataGrid.Header.Cell>
-                                        </DataGrid.Header.Row>
-                                    </DataGrid.Header>
-                                    <DataGrid.Body>
-                                        {items.map((item, index2) => {
-                                                let row = 
-                                                    <DataGrid.Body.Row key={index2} onDbClick={() => that.props.onEdit(item)}>
-                                                        <DataGrid.Body.Cell>{index2 + 1}</DataGrid.Body.Cell>
-                                                        <DataGrid.Body.Cell><FontAwesomeIcon icon={faEye}/>{` ${item.noteTitle}`}</DataGrid.Body.Cell>
-                                                        <DataGrid.Body.Cell>{that.formatText(item.note.text)}</DataGrid.Body.Cell>
-                                                        <DataGrid.Body.Cell>{that.formatText(item.feedback)}</DataGrid.Body.Cell>
-                                                        <DataGrid.Body.Cell>{that.formatText(item.activityName)}</DataGrid.Body.Cell>
-                                                        <DataGrid.Body.Cell style={{textAlign: "center"}}>{(item.notifyTeacher === 1 ? 
-                                                            <Button disabled={true} title="Rétroaction requise" size="sm" variant="warning"><FontAwesomeIcon icon={faCommentDots}/></Button> : null)}
-                                                        </DataGrid.Body.Cell>
-                                                        <DataGrid.Body.Cell style={{textAlign: 'center'}}>
-                                                            <ButtonGroup size="sm">
-                                                                <Button onClick={() => that.props.onEdit(item)} title="Modifier" variant="primary"><FontAwesomeIcon icon={faPencilAlt}/></Button>
-                                                            </ButtonGroup>
-                                                        </DataGrid.Body.Cell>
-                                                    </DataGrid.Body.Row>
-                                                return (row);                                    
-                                            }
-                                        )}
-                                    </DataGrid.Body>
-                                </DataGrid>;
+                                let datagrid = null;
+                                if (that.props.isTeacher){
+                                    datagrid = that.getDataGridForTeacher(items);
+                                }else{
+                                    datagrid = that.getDataGrid(items);
+                                }
 
                                 let result=
                                     <Tab.Pane key={index} eventKey={index}>
@@ -621,6 +589,84 @@ class NavActivities extends Component{
             </Tab.Container>;
 
         return main;
+    }
+
+    getDataGrid(items){
+        let that = this;
+        let datagrid =
+        <div className="groupContent card border-0 m-0 p-0 position-relative bg-transparent">
+            
+            {items.map((item, index2) => {
+                        let retro = null;
+                        let feedback = item.feedback;
+                        let time = "";
+                        if (item.lastUpdate > 0){
+                            time = UtilsDateTime.formatTime(item.lastUpdate) + " - ";
+                        }
+                        if (item.activityName.length == 0){
+                            item.activityName = "Cette note n'a pas été intégrer";
+                        }
+                        if (feedback.length > 0){
+                            retro = 
+                            <div className="balon1 p-2 m-0 position-relative" data-is="Rétroaction" key={"key"+index2}>
+                                <div className="float-right" dangerouslySetInnerHTML={{ __html: feedback }}></div>
+                            </div>
+                        }
+                        let row = 
+                                <div className="balon2 p-2 m-0 position-relative" data-is={time+"Activité: "+that.formatText(item.activityName)} key={index2}>
+                                    <div className="float-left">
+                                        <Button onClick={() => that.props.onEdit(item)} title="Modifier" variant="link"><FontAwesomeIcon icon={faPencilAlt}/></Button>
+                                        <p style={{fontWeight:'bold'}}>{item.noteTitle}</p>
+                                        <p dangerouslySetInnerHTML={{ __html: item.note.text }}></p>
+                                        {(item.notifyTeacher === 1 ? <Button disabled={true} title="Rétroaction requise" size="sm" variant="warning"><FontAwesomeIcon icon={faCommentDots}/></Button> : null)}
+                                    </div>
+                                </div>
+                        return [row, retro];                                    
+                    }
+                )}
+        </div>;
+        return datagrid;
+        
+    }
+
+    getDataGridForTeacher(items){
+        let that = this;
+        let datagrid = <DataGrid orderBy={true}>
+        <DataGrid.Header>
+            <DataGrid.Header.Row>
+                <DataGrid.Header.Cell style={{width: 80}}>{"#"}</DataGrid.Header.Cell>
+                <DataGrid.Header.Cell >{"Titre de la note"}</DataGrid.Header.Cell>
+                <DataGrid.Header.Cell style={{width: 300}}>{"Note"}</DataGrid.Header.Cell>
+                <DataGrid.Header.Cell style={{width: 300}}>{"Rétroaction"}</DataGrid.Header.Cell>
+                <DataGrid.Header.Cell style={{width: 300}}>{"Activité"}</DataGrid.Header.Cell>
+                <DataGrid.Header.Cell style={{width: 80}}></DataGrid.Header.Cell>
+                <DataGrid.Header.Cell  style={{width: 80}}></DataGrid.Header.Cell>
+            </DataGrid.Header.Row>
+        </DataGrid.Header>
+        <DataGrid.Body>
+            {items.map((item, index2) => {
+                    let row = 
+                        <DataGrid.Body.Row key={index2} onDbClick={() => that.props.onEdit(item)}>
+                            <DataGrid.Body.Cell>{index2 + 1}</DataGrid.Body.Cell>
+                            <DataGrid.Body.Cell><FontAwesomeIcon icon={faEye}/>{` ${item.noteTitle}`}</DataGrid.Body.Cell>
+                            <DataGrid.Body.Cell>{that.formatText(item.note.text)}</DataGrid.Body.Cell>
+                            <DataGrid.Body.Cell>{that.formatText(item.feedback)}</DataGrid.Body.Cell>
+                            <DataGrid.Body.Cell>{that.formatText(item.activityName)}</DataGrid.Body.Cell>
+                            <DataGrid.Body.Cell style={{textAlign: "center"}}>{(item.notifyTeacher === 1 ? 
+                                <Button disabled={true} title="Rétroaction requise" size="sm" variant="warning"><FontAwesomeIcon icon={faCommentDots}/></Button> : null)}
+                            </DataGrid.Body.Cell>
+                            <DataGrid.Body.Cell style={{textAlign: 'center'}}>
+                                <ButtonGroup size="sm">
+                                    <Button onClick={() => that.props.onEdit(item)} title="Modifier" variant="primary"><FontAwesomeIcon icon={faPencilAlt}/></Button>
+                                </ButtonGroup>
+                            </DataGrid.Body.Cell>
+                        </DataGrid.Body.Row>
+                    return (row);                                    
+                }
+            )}
+        </DataGrid.Body>
+    </DataGrid>;
+        return datagrid;
     }
     
     getPctProgress(items){

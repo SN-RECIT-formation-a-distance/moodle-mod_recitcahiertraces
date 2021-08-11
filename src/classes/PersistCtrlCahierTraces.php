@@ -45,7 +45,7 @@ require_once "$CFG->dirroot/local/recitcommon/php/PersistCtrl.php";
         }
 
         public function getPersonalNotes($cmId, $userId){
-            $query = "select t1.instance as cmId, t4.id as gid, t2.ctid as ctid, t4.title as noteTitle, t4.slot, t5.id as personalNoteId, 
+            $query = "select t1.instance as cmId, t2.id as gid, t2.ctid as ctid, t4.title as noteTitle, t4.slot, t5.id as personalNoteId, 
                     coalesce(t5.note, '') as note, t2.name as groupName, t4.id as nid, t5.cmid as ncmid,
                     coalesce(t5.userid, 0) as userId, coalesce(t5.feedback, '') as feedback, t4.templatenote as templateNote, 
                     t5.grade, t5.lastupdate as lastUpdate, concat(find_in_set(t4.gId, t2.name), t4.slot) as orderByCustom, t3.name as ccName,

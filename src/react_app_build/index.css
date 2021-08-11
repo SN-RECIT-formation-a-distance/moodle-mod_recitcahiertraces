@@ -59,5 +59,37 @@
     margin-right: -50%;
     transform: translate(-50%, -50%); }
 
+.groupContent {
+  overflow-y: auto;
+  height: 40vh; }
+  .groupContent .balon1, .groupContent .balon2 {
+    margin-top: 10px !important;
+    margin-bottom: 10px !important; }
+  .groupContent .balon1 div {
+    background: #42a5f5;
+    color: #fff !important;
+    border-radius: 20px 20px 3px 20px;
+    display: block;
+    max-width: 75%;
+    padding: 7px 13px 7px 13px; }
+  .groupContent .balon2 div {
+    background: #f1f1f1;
+    color: #000 !important;
+    border-radius: 20px 20px 20px 3px;
+    display: block;
+    max-width: 75%;
+    padding: 7px 13px 7px 13px; }
+  .groupContent .balon1:after, .groupContent .balon2:after {
+    content: attr(data-is);
+    position: absolute;
+    left: 15px;
+    bottom: -15px;
+    display: block;
+    font-size: .750rem;
+    color: #546e7a; }
+  .groupContent .balon1:after {
+    left: unset;
+    right: 15px; }
+
 
 /*# sourceMappingURL=/index.css.map */

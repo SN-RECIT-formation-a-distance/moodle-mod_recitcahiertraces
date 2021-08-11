@@ -62210,6 +62210,12 @@ var UtilsDateTime = /*#__PURE__*/function () {
         return 0;
       }
     }
+  }, {
+    key: "formatTime",
+    value: function formatTime(timestamp) {
+      var time = new Date(timestamp * 1000);
+      return time.toLocaleDateString();
+    }
     /**
     * Transform the shift minutes to the time string
     * @param {type} time 
@@ -63410,7 +63416,7 @@ var EditionMode = /*#__PURE__*/function (_Component3) {
       groupNoteList: [],
       draggingItem: null,
       copyIC: "",
-      addGroup: false,
+      addGroup: -1,
       groupName: '',
       importForm: false
     };
@@ -63613,7 +63619,7 @@ var EditionMode = /*#__PURE__*/function (_Component3) {
         nid: this.state.nid,
         ccgroup: this.state.ccgroup,
         onClose: this.onClose
-      }), this.state.addGroup && _react.default.createElement(AddGroupForm, {
+      }), this.state.addGroup >= 0 && _react.default.createElement(AddGroupForm, {
         onClose: this.onAddGroupModalClose,
         gId: this.state.addGroup,
         name: this.state.groupNamed
@@ -63708,7 +63714,7 @@ var EditionMode = /*#__PURE__*/function (_Component3) {
       }
 
       this.setState({
-        addGroup: false
+        addGroup: -1
       });
     }
   }, {
@@ -64768,7 +64774,8 @@ var ViewNavGroupAndStudents = /*#__PURE__*/function (_Component2) {
         onSelectUser: this.onSelectUser
       }), this.state.data.userId > 0 && _react.default.createElement("div", null, _react.default.createElement("hr", null), _react.default.createElement(NavActivities, {
         userId: this.state.data.userId,
-        onEdit: this.onEdit
+        onEdit: this.onEdit,
+        isTeacher: true
       }), this.state.data.nid > 0 && _react.default.createElement(_PersonalNote.ModalPersonalNote, {
         modalTitle: "\xC9l\xE8ve: ".concat(this.state.data.username),
         data: this.state.data,
@@ -65387,10 +65394,10 @@ var NavActivities = /*#__PURE__*/function (_Component5) {
         activeKey: this.state.activeTab,
         onSelect: this.onSelectTab
       }, _react.default.createElement(_reactBootstrap.Row, null, _react.default.createElement(_reactBootstrap.Col, {
-        sm: 12
+        sm: 3
       }, _react.default.createElement(_reactBootstrap.Nav, {
         variant: "pills",
-        className: "flex-row"
+        className: "flex-column"
       }, this.state.dataProvider.map(function (items, index) {
         var groupName = _Utils.JsNx.at(items, 0).groupName;
 
@@ -65413,72 +65420,16 @@ var NavActivities = /*#__PURE__*/function (_Component5) {
           pill: true,
           variant: "light"
         }, " ".concat(pctProgress.toFixed(0), "%")))));
-      })))), _react.default.createElement("br", null), _react.default.createElement(_reactBootstrap.Row, null, _react.default.createElement(_reactBootstrap.Col, {
-        sm: 12
+      }))), _react.default.createElement(_reactBootstrap.Col, {
+        sm: 9
       }, _react.default.createElement(_reactBootstrap.Tab.Content, null, this.state.dataProvider.map(function (items, index) {
-        var datagrid = _react.default.createElement(_Components.DataGrid, {
-          orderBy: true
-        }, _react.default.createElement(_Components.DataGrid.Header, null, _react.default.createElement(_Components.DataGrid.Header.Row, null, _react.default.createElement(_Components.DataGrid.Header.Cell, {
-          style: {
-            width: 80
-          }
-        }, "#"), _react.default.createElement(_Components.DataGrid.Header.Cell, null, "Titre de la note"), _react.default.createElement(_Components.DataGrid.Header.Cell, {
-          style: {
-            width: 300
-          }
-        }, "Note"), _react.default.createElement(_Components.DataGrid.Header.Cell, {
-          style: {
-            width: 300
-          }
-        }, "Rétroaction"), _react.default.createElement(_Components.DataGrid.Header.Cell, {
-          style: {
-            width: 300
-          }
-        }, "Activité"), _react.default.createElement(_Components.DataGrid.Header.Cell, {
-          style: {
-            width: 80
-          }
-        }), _react.default.createElement(_Components.DataGrid.Header.Cell, {
-          style: {
-            width: 80
-          }
-        }))), _react.default.createElement(_Components.DataGrid.Body, null, items.map(function (item, index2) {
-          var row = _react.default.createElement(_Components.DataGrid.Body.Row, {
-            key: index2,
-            onDbClick: function onDbClick() {
-              return that.props.onEdit(item);
-            }
-          }, _react.default.createElement(_Components.DataGrid.Body.Cell, null, index2 + 1), _react.default.createElement(_Components.DataGrid.Body.Cell, null, _react.default.createElement(_reactFontawesome.FontAwesomeIcon, {
-            icon: _freeSolidSvgIcons.faEye
-          }), " ".concat(item.noteTitle)), _react.default.createElement(_Components.DataGrid.Body.Cell, null, that.formatText(item.note.text)), _react.default.createElement(_Components.DataGrid.Body.Cell, null, that.formatText(item.feedback)), _react.default.createElement(_Components.DataGrid.Body.Cell, null, that.formatText(item.activityName)), _react.default.createElement(_Components.DataGrid.Body.Cell, {
-            style: {
-              textAlign: "center"
-            }
-          }, item.notifyTeacher === 1 ? _react.default.createElement(_reactBootstrap.Button, {
-            disabled: true,
-            title: "R\xE9troaction requise",
-            size: "sm",
-            variant: "warning"
-          }, _react.default.createElement(_reactFontawesome.FontAwesomeIcon, {
-            icon: _freeSolidSvgIcons.faCommentDots
-          })) : null), _react.default.createElement(_Components.DataGrid.Body.Cell, {
-            style: {
-              textAlign: 'center'
-            }
-          }, _react.default.createElement(_reactBootstrap.ButtonGroup, {
-            size: "sm"
-          }, _react.default.createElement(_reactBootstrap.Button, {
-            onClick: function onClick() {
-              return that.props.onEdit(item);
-            },
-            title: "Modifier",
-            variant: "primary"
-          }, _react.default.createElement(_reactFontawesome.FontAwesomeIcon, {
-            icon: _freeSolidSvgIcons.faPencilAlt
-          })))));
+        var datagrid = null;
 
-          return row;
-        })));
+        if (that.props.isTeacher) {
+          datagrid = that.getDataGridForTeacher(items);
+        } else {
+          datagrid = that.getDataGrid(items);
+        }
 
         var result = _react.default.createElement(_reactBootstrap.Tab.Pane, {
           key: index,
@@ -65489,6 +65440,146 @@ var NavActivities = /*#__PURE__*/function (_Component5) {
       })))));
 
       return main;
+    }
+  }, {
+    key: "getDataGrid",
+    value: function getDataGrid(items) {
+      var that = this;
+
+      var datagrid = _react.default.createElement("div", {
+        className: "groupContent card border-0 m-0 p-0 position-relative bg-transparent"
+      }, items.map(function (item, index2) {
+        var retro = null;
+        var feedback = item.feedback;
+        var time = "";
+
+        if (item.lastUpdate > 0) {
+          time = _Utils.UtilsDateTime.formatTime(item.lastUpdate) + " - ";
+        }
+
+        if (item.activityName.length == 0) {
+          item.activityName = "Cette note n'a pas été intégrer";
+        }
+
+        if (feedback.length > 0) {
+          retro = _react.default.createElement("div", {
+            className: "balon1 p-2 m-0 position-relative",
+            "data-is": "R\xE9troaction",
+            key: "key" + index2
+          }, _react.default.createElement("div", {
+            className: "float-right",
+            dangerouslySetInnerHTML: {
+              __html: feedback
+            }
+          }));
+        }
+
+        var row = _react.default.createElement("div", {
+          className: "balon2 p-2 m-0 position-relative",
+          "data-is": time + "Activité: " + that.formatText(item.activityName),
+          key: index2
+        }, _react.default.createElement("div", {
+          className: "float-left"
+        }, _react.default.createElement(_reactBootstrap.Button, {
+          onClick: function onClick() {
+            return that.props.onEdit(item);
+          },
+          title: "Modifier",
+          variant: "link"
+        }, _react.default.createElement(_reactFontawesome.FontAwesomeIcon, {
+          icon: _freeSolidSvgIcons.faPencilAlt
+        })), _react.default.createElement("p", {
+          style: {
+            fontWeight: 'bold'
+          }
+        }, item.noteTitle), _react.default.createElement("p", {
+          dangerouslySetInnerHTML: {
+            __html: item.note.text
+          }
+        }), item.notifyTeacher === 1 ? _react.default.createElement(_reactBootstrap.Button, {
+          disabled: true,
+          title: "R\xE9troaction requise",
+          size: "sm",
+          variant: "warning"
+        }, _react.default.createElement(_reactFontawesome.FontAwesomeIcon, {
+          icon: _freeSolidSvgIcons.faCommentDots
+        })) : null));
+
+        return [row, retro];
+      }));
+
+      return datagrid;
+    }
+  }, {
+    key: "getDataGridForTeacher",
+    value: function getDataGridForTeacher(items) {
+      var that = this;
+
+      var datagrid = _react.default.createElement(_Components.DataGrid, {
+        orderBy: true
+      }, _react.default.createElement(_Components.DataGrid.Header, null, _react.default.createElement(_Components.DataGrid.Header.Row, null, _react.default.createElement(_Components.DataGrid.Header.Cell, {
+        style: {
+          width: 80
+        }
+      }, "#"), _react.default.createElement(_Components.DataGrid.Header.Cell, null, "Titre de la note"), _react.default.createElement(_Components.DataGrid.Header.Cell, {
+        style: {
+          width: 300
+        }
+      }, "Note"), _react.default.createElement(_Components.DataGrid.Header.Cell, {
+        style: {
+          width: 300
+        }
+      }, "Rétroaction"), _react.default.createElement(_Components.DataGrid.Header.Cell, {
+        style: {
+          width: 300
+        }
+      }, "Activité"), _react.default.createElement(_Components.DataGrid.Header.Cell, {
+        style: {
+          width: 80
+        }
+      }), _react.default.createElement(_Components.DataGrid.Header.Cell, {
+        style: {
+          width: 80
+        }
+      }))), _react.default.createElement(_Components.DataGrid.Body, null, items.map(function (item, index2) {
+        var row = _react.default.createElement(_Components.DataGrid.Body.Row, {
+          key: index2,
+          onDbClick: function onDbClick() {
+            return that.props.onEdit(item);
+          }
+        }, _react.default.createElement(_Components.DataGrid.Body.Cell, null, index2 + 1), _react.default.createElement(_Components.DataGrid.Body.Cell, null, _react.default.createElement(_reactFontawesome.FontAwesomeIcon, {
+          icon: _freeSolidSvgIcons.faEye
+        }), " ".concat(item.noteTitle)), _react.default.createElement(_Components.DataGrid.Body.Cell, null, that.formatText(item.note.text)), _react.default.createElement(_Components.DataGrid.Body.Cell, null, that.formatText(item.feedback)), _react.default.createElement(_Components.DataGrid.Body.Cell, null, that.formatText(item.activityName)), _react.default.createElement(_Components.DataGrid.Body.Cell, {
+          style: {
+            textAlign: "center"
+          }
+        }, item.notifyTeacher === 1 ? _react.default.createElement(_reactBootstrap.Button, {
+          disabled: true,
+          title: "R\xE9troaction requise",
+          size: "sm",
+          variant: "warning"
+        }, _react.default.createElement(_reactFontawesome.FontAwesomeIcon, {
+          icon: _freeSolidSvgIcons.faCommentDots
+        })) : null), _react.default.createElement(_Components.DataGrid.Body.Cell, {
+          style: {
+            textAlign: 'center'
+          }
+        }, _react.default.createElement(_reactBootstrap.ButtonGroup, {
+          size: "sm"
+        }, _react.default.createElement(_reactBootstrap.Button, {
+          onClick: function onClick() {
+            return that.props.onEdit(item);
+          },
+          title: "Modifier",
+          variant: "primary"
+        }, _react.default.createElement(_reactFontawesome.FontAwesomeIcon, {
+          icon: _freeSolidSvgIcons.faPencilAlt
+        })))));
+
+        return row;
+      })));
+
+      return datagrid;
     }
   }, {
     key: "getPctProgress",
@@ -65539,6 +65630,7 @@ var NavActivities = /*#__PURE__*/function (_Component5) {
 
 NavActivities.defaultProps = {
   userId: 0,
+  isTeacher: false,
   onEdit: null
 };
 
@@ -66402,7 +66494,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53089" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57821" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
