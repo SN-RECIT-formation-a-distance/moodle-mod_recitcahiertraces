@@ -25,6 +25,7 @@ use recitcahiertraces\PersistCtrl;
  * @copyright  2019 RÉCIT
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+use recitcahiercanada\PersistCtrl;
 
 class recitcahiertraces_portfolio_caller extends portfolio_module_caller_base {
 
