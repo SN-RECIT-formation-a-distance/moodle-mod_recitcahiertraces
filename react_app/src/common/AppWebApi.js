@@ -33,26 +33,26 @@ export class AppWebApi extends WebApi
         this.post(this.gateway, data, onSuccess);
     }
     
-    getPersonalNotes(cmId, userId, garbage, onSuccess){
-        let data = {cmId: cmId, userId: userId, garbage: garbage, service: "getPersonalNotes"};
+    getUserNotes(cmId, userId, garbage, onSuccess){
+        let data = {cmId: cmId, userId: userId, service: "getUserNotes"};
         this.post(this.gateway, data, onSuccess);
     }
 
-    getPersonalNote(cmId, nid, gId, userId, onSuccess){
-        let data = {cmId: cmId, gId: gId, nid: nid, userId: userId, service: "getPersonalNote"};
+    getUserNote(cmId, nId, gId, userId, onSuccess){
+        let data = {cmId: cmId, gId: gId, nId: nId, userId: userId, service: "getUserNote"};
         this.post(this.gateway, data, onSuccess);
     }
 
-    savePersonalNote(data, flags, onSuccess){
+    saveUserNote(data, flags, onSuccess){
         let that = this;
         let onSuccessTmp = function(result){     
             onSuccess(result);
             if(result.success){
-                that.notifyObservers('savePersonalNote');
+                that.notifyObservers('saveUserNote');
             }
         };
 
-        let options = {data: data, flags: flags, service: "savePersonalNote"};
+        let options = {data: data, flags: flags, service: "saveUserNote"};
         this.post(this.gateway, options, onSuccessTmp);
     }
 
@@ -71,8 +71,8 @@ export class AppWebApi extends WebApi
         this.post(this.gateway, data, onSuccess);
     }
 
-    getGroupNotes(gId, ctid, onSuccess){
-        let data = {gId: gId, ctid: (ctid || 0), service: "getGroupNotes"};
+    getGroupNotes(gId, ctId, onSuccess){
+        let data = {gId: gId, ctId: (ctId || 0), service: "getGroupNotes"};
         this.post(this.gateway, data, onSuccess);
     }
 
@@ -83,8 +83,8 @@ export class AppWebApi extends WebApi
         this.post(this.gateway, data, onSuccess);
     }
     
-    getGroupNoteFormKit(cmId, nId, onSuccess){
-        let data = {cmId: cmId, nId: nId, service: "getGroupNoteFormKit"};
+    getNoteFormKit(cmId, nId, onSuccess){
+        let data = {cmId: cmId, nId: nId, service: "getNoteFormKit"};
         this.post(this.gateway, data, onSuccess);
     }
     
@@ -101,7 +101,7 @@ export class AppWebApi extends WebApi
         this.post(this.gateway, options, onSuccessTmp);
     }
 
-    removeNote(nid, cmId, onSuccess){
+    removeNote(nId, cmId, onSuccess){
         let that = this;
         let onSuccessTmp = function(result){     
             onSuccess(result);
@@ -110,23 +110,34 @@ export class AppWebApi extends WebApi
             }
         };
 
-        let options = {nid: nid, cmId: cmId, service: "removeNote"};
+        let options = {nId: nId, cmId: cmId, service: "removeNote"};
         this.post(this.gateway, options, onSuccessTmp);
     }
 
-    removeGroup(cmId, gId, onSuccess){
-        let options = {cmId: cmId, gId: gId, service: "removeGroup"};
-        this.post(this.gateway, options, onSuccess);
+    removeNoteGroup(cmId, gId, onSuccess){
+        let that = this;
+        let onSuccessTmp = function(result){     
+            onSuccess(result);
+            if(result.success){
+                that.notifyObservers('removeNoteGroup');
+            }
+        };
+
+        let options = {cmId: cmId, gId: gId, service: "removeNoteGroup"};
+        this.post(this.gateway, options, onSuccessTmp);
     }
 
-    addGroup(cmId, name, onSuccess){
-        let options = {cmId: cmId, name: name, service: "addGroup"};
-        this.post(this.gateway, options, onSuccess);
-    }
+    saveNoteGroup(data, onSuccess){
+        let that = this;
+        let onSuccessTmp = function(result){     
+            onSuccess(result);
+            if(result.success){
+                that.notifyObservers('saveNoteGroup');
+            }
+        };
 
-    renameGroup(cmId, gId, name, onSuccess){
-        let options = {cmId: cmId, gId: gId, name: name, service: "renameGroup"};
-        this.post(this.gateway, options, onSuccess);
+        let options = {data: data, service: "saveNoteGroup"};
+        this.post(this.gateway, options, onSuccessTmp);
     }
 
     getRequiredNotes(cmId, onSuccess){

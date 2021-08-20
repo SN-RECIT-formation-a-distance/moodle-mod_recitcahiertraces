@@ -24,7 +24,10 @@
 defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->dirroot . "/local/recitcommon/php/Utils.php");
-require_once(__DIR__ . "/classes/PersistCtrlCahierTraces.php");
+require_once(__DIR__ . "/classes/PersistCtrl.php");
+
+use recitcommon\Utils;
+use recitcahiertraces\PersistCtrl;
 
 /**
  * List of features supported in recitcahiertraces module
@@ -94,7 +97,7 @@ function recitcahiertraces_delete_instance($id) {
 
     $DB->delete_records('recitcahiertraces', array('id'=>$recitcahiertraces->id));*/
 
-    return CahierTracesPersistCtrl::getInstance($DB, $USER)->removeCcInstance($id);
+    return PersistCtrl::getInstance($DB, $USER)->removeCcInstance($id);
 }
 
 
@@ -122,9 +125,9 @@ function mod_recitcahiertraces_pluginfile($course, $cm, $context, $filearea, $ar
     
     //require_once($CFG->dirroot . "/mod/wiki/locallib.php");
 
-    if ($filearea == 'personalnote') {
+    if ($filearea == 'usernote') {
         $itemId = (int) array_shift($args);
-        $ownerId = CahierTracesPersistCtrl::getInstance($DB, $USER)->getUserFromItemId($itemId);
+        $ownerId = PersistCtrl::getInstance($DB, $USER)->getUserFromItemId($itemId);
         
         $roles = Utils::getUserRoles($course->id, $USER->id);
         if((Utils::isAdminRole($roles) == false) && ($USER->id != $ownerId)){
@@ -139,7 +142,7 @@ function mod_recitcahiertraces_pluginfile($course, $cm, $context, $filearea, $ar
 
         $relativepath = implode('/', $args);
 
-        $fullpath = "/$context->id/mod_recitcahiertraces/personalnote/$itemId/$relativepath";
+        $fullpath = "/$context->id/mod_recitcahiertraces/usernote/$itemId/$relativepath";
 
         $fs = get_file_storage();
 		$file = $fs->get_file_by_hash(sha1($fullpath));		

@@ -16,7 +16,10 @@
  
 require_once($CFG->libdir . '/portfolio/caller.php');
 require_once($CFG->libdir . '/filelib.php');
-require_once('classes/PersistCtrlCahierTraces.php');
+require_once('classes/PersistCtrl.php');
+
+use recitcahiertraces\PersistCtrl;
+
 /**
  *
  * @copyright  2019 RÉCIT
@@ -50,7 +53,7 @@ class recitcahiertraces_portfolio_caller extends portfolio_module_caller_base {
             throw new portfolio_caller_exception('invalidid', 'recitcahiertraces');
         }
         
-        $this->notes = CahierTracesPersistCtrl::getInstance($DB, $USER)->getPersonalNotes($this->id, $USER->id);
+        $this->notes = PersistCtrl::getInstance($DB, $USER)->getUserNotes($this->id, $USER->id);
     }
     /**
      * @return array

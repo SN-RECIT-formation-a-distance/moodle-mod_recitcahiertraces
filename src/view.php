@@ -20,10 +20,13 @@
  * @copyright 2019 RÉCIT FAD
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
+namespace recitcahiertraces;
 require('../../config.php');
 require_once($CFG->dirroot . "/local/recitcommon/php/Utils.php");
 require_once($CFG->libdir . '/portfoliolib.php');
+
+use recitcommon;
+use moodle_url;
 
 $id = required_param('id', PARAM_INT);
 list ($course, $cm) = get_course_and_cm_from_cmId($id, 'recitcahiertraces');
@@ -33,12 +36,12 @@ require_login();
 
 //$context = context_module::instance($cm->id);
 //require_capability('mod/recitcahiertraces:view', $context);
-$view = new recitcahiertracesView($PAGE, $course, $cm, $OUTPUT, $USER, $DB, $CFG);
+$view = new MainView($PAGE, $course, $cm, $OUTPUT, $USER, $DB, $CFG);
 
 //$modeAdmin = intval(has_capability('mod/recitcahiertraces:viewadmin', context_system::instance()));
 $view->display();
 
-class recitcahiertracesView
+class MainView
 {
     protected $viewMode = null;
     protected $data = null;
@@ -69,8 +72,8 @@ class recitcahiertracesView
         $this->page->set_pagelayout('incourse');
         $this->page->set_title($this->course->shortname.': '.$this->cm->name);
         $this->page->set_heading($this->course->fullname);
-        $this->page->requires->css(new moodle_url('./react_app_build/index.css'), true);
-        $this->page->requires->js(new moodle_url('./react_app_build/index.js'), true);
+        //$this->page->requires->css(new moodle_url('./react_app_build/index.css'), true);
+        $this->page->requires->js(new moodle_url('./react_app_build/index.js?v='.rand()), true);
         $this->page->requires->js(new moodle_url("{$this->cfg->wwwroot}/local/recitcommon/js/Components.js"), true);
 
        /* if($this->editorOption == "2"){
@@ -83,7 +86,7 @@ class recitcahiertracesView
         echo $this->output->header();
         echo $this->output->heading(format_string($this->cm->name), 2);
                         
-        $roles = Utils::getUserRoles($this->course->id, $this->user->id);
+        $roles = recitcommon\Utils::getUserRoles($this->course->id, $this->user->id);
         $studentId = (in_array('ad', $roles) ? 0 : $this->user->id);
         $portfolioUrl = $this->getPortfolioUrl();
         
@@ -97,13 +100,13 @@ class recitcahiertracesView
     }
 
     protected function getEditorOption($name, $index){
-        $context = context_course::instance($this->course->id);
+        $context = \context_course::instance($this->course->id);
 
         /*if($this->editorOption == "2"){
             return "<div id='{$name}_container_{$index}' data-format='recit_rich_editor' style='display: none;'></div>";
         }
         else{*/
-            return Utils::createEditorHtml(false, "{$name}_container_{$index}", "{$name}_{$index}", "", 15, $context, 0, 0);
+            return recitcommon\Utils::createEditorHtml(false, "{$name}_container_{$index}", "{$name}_{$index}", "", 15, $context, 0, 0);
         //}
     }
 

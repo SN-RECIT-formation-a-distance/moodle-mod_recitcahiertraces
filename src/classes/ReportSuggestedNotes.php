@@ -1,7 +1,10 @@
 <?php
 require('../../../config.php');
-require_once($CFG->dirroot . "/mod/recitcahiertraces/classes/PersistCtrlCahierTraces.php");
+require_once($CFG->dirroot . "/mod/recitcahiertraces/classes/PersistCtrl.php");
 require_once($CFG->dirroot . "/local/recitcommon/php/Utils.php");
+
+use recitcommon\Utils;
+use recitcahiertraces\PersistCtrl;
 
 $gId = required_param('gId', PARAM_INT);
 $cId = required_param('cmId', PARAM_INT);
@@ -30,8 +33,7 @@ if(!Utils::isAdminRole($roles)){
     }
 }
 
-
-$pNotes = CahierTracesPersistCtrl::getInstance($DB, $USER)->getCmSuggestedNotes($course->id, $gId);
+$pNotes = PersistCtrl::getInstance($DB, $USER)->getCmSuggestedNotes($course->id, $gId);
 
 $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahiertraces'), get_string('suggestednote', 'mod_recitcahiertraces'), get_string('printedOn', 'mod_recitcahiertraces'), date('Y-m-d H:i:s'));
 ?>
@@ -55,17 +57,18 @@ $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahie
             <div class='Logo'><img src='<?php echo $brandImage; ?>' alt='brand logo'/></div>
         </header>
     <?php 
-        foreach($pNotes as $notes){
+        foreach($pNotes as $group){
             
-            $note = current($notes);
+            $note = current($group);
+            
             echo '<div class="activity-container">';
 
-            echo sprintf("<h4 class='activity-name'>%s: %s</h4>", get_string('activity', 'mod_recitcahiertraces'), $note->activityName);
+            echo sprintf("<h4 class='activity-name'>%s: %s</h4>", get_string('group', 'mod_recitcahiertraces'), $note->group->name);
         
-            foreach($notes as $note){
+            foreach($group as $note){
                 // overflow = hidden for the notes that overflow the page dimensions
                 echo "<div class='note-container'>";
-                echo sprintf("<h5 class='text-muted note-title'>%s: %s</h5>", get_string('note', 'mod_recitcahiertraces'), $note->noteTitle);
+                echo sprintf("<h5 class='text-muted note-title'>%s: %s</h5>", get_string('note', 'mod_recitcahiertraces'), $note->title);
                 
                 echo sprintf("<div class='alert alert-secondary student-note'>%s</div>", $note->suggestedNote);
                 

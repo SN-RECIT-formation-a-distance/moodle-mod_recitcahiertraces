@@ -1,7 +1,10 @@
 <?php
 require('../../../config.php');
-require_once($CFG->dirroot . "/mod/recitcahiertraces/classes/PersistCtrlCahierTraces.php");
+require_once($CFG->dirroot . "/mod/recitcahiertraces/classes/PersistCtrl.php");
 require_once($CFG->dirroot . "/local/recitcommon/php/Utils.php");
+
+use recitcommon\Utils;
+use recitcahiertraces\PersistCtrl;
 
 $cmId = required_param('cmId', PARAM_INT);
 $userId = required_param('userId', PARAM_INT);
@@ -32,11 +35,17 @@ if(!Utils::isAdminRole($roles)){
 }
 
 
-$personalNotes = CahierTracesPersistCtrl::getInstance($DB, $USER)->getPersonalNotes($cmId, $userId);
-$student = current(current(CahierTracesPersistCtrl::getInstance()->getEnrolledUserList($cmId, $userId)));
+$userNotes = PersistCtrl::getInstance($DB, $USER)->getUserNotes($cmId, $userId);
+$student = current(current(PersistCtrl::getInstance()->getEnrolledUserList($cmId, $userId)));
 
-$cahierCanada = current(current($personalNotes));
-$pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahiertraces'), $cahierCanada->ccName, get_string('printedOn', 'mod_recitcahiertraces'), date('Y-m-d H:i:s'));
+if(empty($userNotes)){
+    echo "<h5>Aucune information disponible.</h5>";
+    die();
+}
+
+$userNote = current(current($userNotes));
+
+$pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahiertraces'), $userNote->noteDef->group->ct->name, get_string('printedOn', 'mod_recitcahiertraces'), date('Y-m-d H:i:s'));
 ?>
 
 <!DOCTYPE html>
@@ -53,24 +62,24 @@ $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahie
         <header class='Header'>
             <div style='flex-grow: 1'>
                 <div class='Title'><?php echo get_string('pluginname', 'mod_recitcahiertraces'); ?></div>
-                <div class='Subtitle'><?php echo sprintf("%s | %s | %s", $cahierCanada->ccName, $student->userName, $student->groupName) ; ?></div>
+                <div class='Subtitle'><?php echo sprintf("%s | %s | %s", $userNote->noteDef->group->ct->name, $student->userName, $student->groupName) ; ?></div>
             </div>
             <div class='Logo'><img src='<?php echo $brandImage; ?>' alt='brand logo'/></div>
         </header>
     <?php 
-        foreach($personalNotes as $notes){
+        foreach($userNotes as $group){
             
-            $note = current($notes);
+            $note = current($group);
             echo '<div class="activity-container">';
 
-            echo sprintf("<h4 class='activity-name'>%s: %s</h4>", get_string('activity', 'mod_recitcahiertraces'), $note->activityName);
+            echo sprintf("<h4 class='activity-name'>%s: %s</h4>", get_string('group', 'mod_recitcahiertraces'), $userNote->noteDef->group->name);
 
-            foreach($notes as $note){
+            foreach($group as $note){
                 // overflow = hidden for the notes that overflow the page dimensions
                 echo "<div class='note-container'>";
-                echo sprintf("<h5 class='text-muted note-title'>%s: %s</h5>",  get_string('note', 'mod_recitcahiertraces'), $note->noteTitle);
+                echo sprintf("<h5 class='text-muted note-title'>%s: %s</h5>",  get_string('note', 'mod_recitcahiertraces'), $note->noteDef->title);
                 
-                echo sprintf("<div class='alert alert-secondary student-note'>%s</div>", $note->note->text);
+                echo sprintf("<div class='alert alert-secondary student-note'>%s</div>", $note->noteContent->text);
 
                 echo '<blockquote class="blockquote mb-0">';
                 echo sprintf('<span class="blockquote-footer">%s: %s</span>',  get_string('timestamp', 'mod_recitcahiertraces'), $note->lastUpdateFormat());

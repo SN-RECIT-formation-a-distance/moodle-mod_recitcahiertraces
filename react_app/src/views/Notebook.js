@@ -64,7 +64,7 @@ class ViewNavGroupAndStudents extends Component{
                 username: "",
                 gId: 0,
                 noteTitle: "",
-                nid: 0
+                nId: 0
             }
         };
     }    
@@ -78,7 +78,7 @@ class ViewNavGroupAndStudents extends Component{
                     <div>
                         <hr/>
                         <NavActivities userId={this.state.data.userId} onEdit={this.onEdit} isTeacher={true}/>                                
-                        {this.state.data.nid > 0 && 
+                        {this.state.data.nId > 0 && 
                             <ModalPersonalNote modalTitle={`Élève: ${this.state.data.username}`} data={this.state.data} onClose={this.onClose} onNextStudent={this.onNextStudent} 
                                 onPreviousStudent={this.onPreviousStudent} navStatus={this.getNavStatus()}/>
                         }  
@@ -94,9 +94,9 @@ class ViewNavGroupAndStudents extends Component{
         if(item === null){ return; }
 
         let data = this.state.data;
-        data.gId = item.gId;
-        data.nid = item.nid;
-        data.noteTitle = item.noteTitle;
+        data.gId = item.noteDef.group.id;
+        data.nId = item.noteDef.id;
+        data.noteTitle = item.noteDef.title;
 
         this.setState({data: data});
     }
@@ -104,7 +104,7 @@ class ViewNavGroupAndStudents extends Component{
     onClose(){
         let data = this.state.data;
         data.gId = 0;
-        data.nid = 0;
+        data.nId = 0;
         data.noteTitle = "";
         this.setState({data: data});
     }
@@ -157,14 +157,14 @@ class ViewRequiredNotes extends Component{
                 username: "",
                 gId: 0,
                 noteTitle: "",
-                nid: 0,
+                nId: 0,
                 personalNoteId: 0
             }
         };
     }
 
     componentDidMount(){
-        $glVars.webApi.addObserver("ViewRequiredNotes", this.getData, ['savePersonalNote']);        
+        $glVars.webApi.addObserver("ViewRequiredNotes", this.getData, ['saveUserNote']);        
         this.getData();
     }
 
@@ -230,7 +230,7 @@ class ViewRequiredNotes extends Component{
                     </DataGrid.Body>
                 </DataGrid>
 
-                {this.state.data.nid > 0 && 
+                {this.state.data.nId > 0 && 
                         <ModalPersonalNote modalTitle={`Élève: ${this.state.data.username}`} data={this.state.data} onClose={this.onClose} onNextStudent={this.onNextStudent} 
                                 onPreviousStudent={this.onPreviousStudent} navStatus={this.getNavStatus()}/>
                 }
@@ -247,7 +247,7 @@ class ViewRequiredNotes extends Component{
 
         let data = this.state.data;
         data.gId = item.gId;
-        data.nid = item.nid;
+        data.nId = item.nId;
         data.noteTitle = item.noteTitle;
         data.userId = item.userId;
         data.username = item.username;
@@ -260,7 +260,7 @@ class ViewRequiredNotes extends Component{
         let data = this.state.data;
         
         data.gId = 0;
-        data.nid = 0;
+        data.nId = 0;
         data.noteTitle = "";
         data.userId = 0;
         data.username = "";
@@ -493,7 +493,7 @@ class NavActivities extends Component{
     }
 
     componentDidMount(){
-        $glVars.webApi.addObserver("NavActivities", this.getData, ['savePersonalNote']);        
+        $glVars.webApi.addObserver("NavActivities", this.getData, ['saveUserNote']);        
         this.getData();
     }
 
@@ -513,7 +513,7 @@ class NavActivities extends Component{
             return;
         }
         
-        $glVars.webApi.getPersonalNotes($glVars.urlParams.id, this.props.userId, 0, this.getDataResult);
+        $glVars.webApi.getUserNotes($glVars.urlParams.id, this.props.userId, 0, this.getDataResult);
     }
 
     getDataResult(result){
@@ -526,8 +526,8 @@ class NavActivities extends Component{
         if(!$glVars.urlParams.groupLoaded){
             let item = null;
             for(let group of result.data){
-                for(let note of group){
-                    if((note.nid === $glVars.urlParams.nid) && (note.gId === $glVars.urlParams.gId)){
+                for(let userNote of group){
+                    if((userNote.noteDef.id === $glVars.urlParams.nId) && (userNote.noteDef.group.id === $glVars.urlParams.gId)){
                         item = note;
                     }
                 }
@@ -551,7 +551,7 @@ class NavActivities extends Component{
                     <Col sm={3}>
                         <Nav variant="pills" className="flex-column">
                             {this.state.dataProvider.map(function(items, index){
-                                let groupName = JsNx.at(items, 0).groupName;
+                                let groupName = JsNx.at(items, 0).noteDef.group.name;
 
                                 let pctProgress = that.getPctProgress(items);
 
@@ -598,27 +598,26 @@ class NavActivities extends Component{
             
             {items.map((item, index2) => {
                         let retro = null;
-                        let feedback = item.feedback;
                         let time = "";
                         if (item.lastUpdate > 0){
                             time = UtilsDateTime.formatTime(item.lastUpdate) + " - ";
                         }
-                        if (item.activityName.length == 0){
-                            item.activityName = "Cette note n'a pas été intégrer";
+                        if (item.cmName.length == 0){
+                            item.cmName = "Cette note n'a pas été intégrer";
                         }
-                        if (feedback.length > 0){
+                        if (item.feedback.length > 0){
                             retro = 
                             <div className="balon1 p-2 m-0 position-relative" data-is="Rétroaction" key={"key"+index2}>
-                                <div className="float-right" dangerouslySetInnerHTML={{ __html: feedback }}></div>
+                                <div className="float-right" dangerouslySetInnerHTML={{ __html: item.feedback }}></div>
                             </div>
                         }
                         let row = 
-                                <div className="balon2 p-2 m-0 position-relative" data-is={time+"Activité: "+that.formatText(item.activityName)} key={index2}>
+                                <div className="balon2 p-2 m-0 position-relative" data-is={time+"Activité: "+that.formatText(item.cmName)} key={index2}>
                                     <div className="float-left">
                                         <Button onClick={() => that.props.onEdit(item)} title="Modifier" variant="link"><FontAwesomeIcon icon={faPencilAlt}/></Button>
-                                        <p style={{fontWeight:'bold'}}>{item.noteTitle}</p>
-                                        <p dangerouslySetInnerHTML={{ __html: item.note.text }}></p>
-                                        {(item.notifyTeacher === 1 ? <Button disabled={true} title="Rétroaction requise" size="sm" variant="warning"><FontAwesomeIcon icon={faCommentDots}/></Button> : null)}
+                                        <p style={{fontWeight:'bold'}}>{item.noteDef.title}</p>
+                                        <p dangerouslySetInnerHTML={{ __html: item.noteContent.text }}></p>
+                                        {(item.noteDef.notifyTeacher === 1 ? <Button disabled={true} title="Rétroaction requise" size="sm" variant="warning"><FontAwesomeIcon icon={faCommentDots}/></Button> : null)}
                                     </div>
                                 </div>
                         return [row, retro];                                    
@@ -648,11 +647,11 @@ class NavActivities extends Component{
                     let row = 
                         <DataGrid.Body.Row key={index2} onDbClick={() => that.props.onEdit(item)}>
                             <DataGrid.Body.Cell>{index2 + 1}</DataGrid.Body.Cell>
-                            <DataGrid.Body.Cell><FontAwesomeIcon icon={faEye}/>{` ${item.noteTitle}`}</DataGrid.Body.Cell>
-                            <DataGrid.Body.Cell>{that.formatText(item.note.text)}</DataGrid.Body.Cell>
+                            <DataGrid.Body.Cell>{` ${item.noteDef.title}`}</DataGrid.Body.Cell>
+                            <DataGrid.Body.Cell>{that.formatText(item.noteContent.text)}</DataGrid.Body.Cell>
                             <DataGrid.Body.Cell>{that.formatText(item.feedback)}</DataGrid.Body.Cell>
-                            <DataGrid.Body.Cell>{that.formatText(item.activityName)}</DataGrid.Body.Cell>
-                            <DataGrid.Body.Cell style={{textAlign: "center"}}>{(item.notifyTeacher === 1 ? 
+                            <DataGrid.Body.Cell>{that.formatText(item.cmName)}</DataGrid.Body.Cell>
+                            <DataGrid.Body.Cell style={{textAlign: "center"}}>{(item.noteDef.notifyTeacher === 1 ? 
                                 <Button disabled={true} title="Rétroaction requise" size="sm" variant="warning"><FontAwesomeIcon icon={faCommentDots}/></Button> : null)}
                             </DataGrid.Body.Cell>
                             <DataGrid.Body.Cell style={{textAlign: 'center'}}>
@@ -782,7 +781,7 @@ export class StudentNotebook extends Component{
                 username: "",
                 gId: 0,
                 noteTitle: "",
-                nid: 0
+                nId: 0
             }
         };
     }
@@ -792,13 +791,10 @@ export class StudentNotebook extends Component{
             <div>  
                 {this.state.data.userId > 0 &&
                     <div>
-                        <ActionBar gId={$glVars.urlParams.id} userId={this.state.data.userId}/>
-
+                        <ActionBar userId={this.state.data.userId}/>
                         <hr/>
-
                         <NavActivities userId={this.state.data.userId} onEdit={this.onEdit}/>
-                    
-                        {this.state.data.nid > 0 && 
+                        {this.state.data.nId > 0 && 
                                 <ModalPersonalNote modalTitle={`Cahier de traces - Note personnelle`} data={this.state.data} onClose={this.onClose} />}
                     </div>
                 }
@@ -808,12 +804,13 @@ export class StudentNotebook extends Component{
     }
 
     onEdit(item){
+        console.log(item);
         if(item === null){ return; }
 
         let data = this.state.data;
-        data.gId = item.gId;
-        data.nid = item.nid;
-        data.noteTitle = item.noteTitle;
+        data.gId = item.noteDef.group.id;
+        data.nId = item.noteDef.id;
+        data.noteTitle = item.noteDef.title;
 
         this.setState({data: data});
     }
@@ -822,7 +819,7 @@ export class StudentNotebook extends Component{
         let data = this.state.data;
         
         data.gId = 0;
-        data.nid = 0;
+        data.nId = 0;
         data.noteTitle = "";
         
         this.setState({data: data});

@@ -10,7 +10,7 @@ class PersonalNoteForm extends Component{
     static defaultProps = {        
         userId: 0,
         gId: 0,
-        nid: 0,
+        nId: 0,
         setOnSave: null,
     };
 
@@ -33,7 +33,7 @@ class PersonalNoteForm extends Component{
         else if(UtilsMoodle.checkRoles($glVars.signedUser.roles, UtilsMoodle.rolesL2)){
             mode = "t";
         }
-        this.state = {data: null, dropdownLists: null, mode: mode, collapse: {note: true, suggestedNote: false, feedback: true}};
+        this.state = {data: null, remoteData: null, dropdownLists: null, mode: mode, collapse: {note: true, suggestedNote: false, feedback: true}};
 
         this.editorRef = React.createRef();
         this.editorDec = new recit.components.EditorDecorator(`recit_cahiertraces_editor_container_1`);
@@ -60,13 +60,13 @@ class PersonalNoteForm extends Component{
             }
         }
 
-        if((prevProps.userId !== this.props.userId) || (prevProps.nid !== this.props.nid)){
+        if((prevProps.userId !== this.props.userId) || (prevProps.nId !== this.props.nId)){
             this.getData();
         }
     }
 
     getData(){
-        $glVars.webApi.getPersonalNote($glVars.urlParams.id, this.props.nid, this.props.gId, this.props.userId, this.getDataResult);        
+        $glVars.webApi.getUserNote($glVars.urlParams.id, this.props.nId, this.props.gId, this.props.userId, this.getDataResult);        
     }
 
     getDataResult(result){         
@@ -81,17 +81,25 @@ class PersonalNoteForm extends Component{
     prepareNewState(data, dropdownLists){
         data = data || null;
         dropdownLists = dropdownLists || null;
-        let result = {data: null, dropdownLists: {}};
+        let result = {data: null, remoteData: data, dropdownLists: {}};
         
         if(data !== null){
-            result.data = data;
+            result.data = {};
+            result.data.userId = data.userId;
+            result.data.courseId = data.noteDef.group.ct.courseId;
+            result.data.lastUpdate = data.lastUpdate;
+            result.data.nId = data.noteDef.id;
+            result.data.cmId = 0;
+            result.data.feedback = data.feedback;
+            result.data.unId = data.id;
+            result.data.note = data.noteContent;
         }
 
         return result;
     }
 
     render(){
-        if(this.state.data === null){return null;}
+        if(this.state.remoteData === null){return null;}
 
         let data = this.state.data;
         let student = null;
@@ -110,7 +118,7 @@ class PersonalNoteForm extends Component{
             this.editorDec.setValue(data.feedback);       
             teacher = <div ref={this.editorRef}></div>;
             student =  <div style={styleText} dangerouslySetInnerHTML={{__html: data.note.text}}></div>;
-            suggestedNote = <div style={styleText} dangerouslySetInnerHTML={{__html: data.suggestedNote}}></div>;
+            suggestedNote = <div style={styleText} dangerouslySetInnerHTML={{__html: this.state.remoteData.noteDef.suggestedNote}}></div>;
         }
         else{
             console.log(this.state);
@@ -120,7 +128,7 @@ class PersonalNoteForm extends Component{
         
         let main =
             <div>
-                <h5 className="text-truncate">{`Note: ${this.state.data.noteTitle}`}</h5>
+                <h5 className="text-truncate">{`Note: ${this.state.remoteData.noteDef.title}`}</h5>
                 <Card>
                     <Card.Header style={styleHeader} onClick={() => this.onCollapse("note")}>
                         {"Note de l'élève"}
@@ -191,7 +199,7 @@ class PersonalNoteForm extends Component{
     onSave(callback){
         let tmp = this.onEditorDataChange();
         
-        $glVars.webApi.savePersonalNote(tmp.data, tmp.flags, (result) => this.onSaveResult(result, callback));
+        $glVars.webApi.saveUserNote(tmp.data, tmp.flags, (result) => this.onSaveResult(result, callback));
     }
 
     onSaveResult(result, callback){
@@ -229,7 +237,7 @@ export class ModalPersonalNote extends Component{
     }
 
     render(){
-        let personalNote = <PersonalNoteForm userId={this.props.data.userId} gId={this.props.data.gId} setOnSave={this.setOnSave} nid={this.props.data.nid}/>;
+        let personalNote = <PersonalNoteForm userId={this.props.data.userId} gId={this.props.data.gId} setOnSave={this.setOnSave} nId={this.props.data.nId}/>;
         let footer = 
             <div className="btn-tollbar" style={{width: "100%", display: "flex", justifyContent: "space-between", flexWrap: "wrap"}}>
                 <div className="btn-group" style={{flexWrap: "wrap"}}>

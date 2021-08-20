@@ -1,7 +1,7 @@
 
 import React, { Component } from 'react';
-import {ButtonGroup, Button, Form, Col, Tabs, Tab, DropdownButton, Dropdown} from 'react-bootstrap';
-import {faPencilAlt, faPlusCircle, faWrench, faTrashAlt, faCopy, faBars, faPrint, faGripVertical, faFileImport} from '@fortawesome/free-solid-svg-icons';
+import {ButtonGroup, Button, Form, Col, Tabs, Tab, ButtonToolbar, DropdownButton, Dropdown} from 'react-bootstrap';
+import {faPencilAlt, faPlusCircle, faWrench, faTrashAlt, faCopy, faPrint, faGripVertical, faFileImport} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {ComboBox, FeedbackCtrl, DataGrid, InputNumber, ToggleButtons, Modal} from '../libs/components/Components';
 import {JsNx, UtilsMoodle} from '../libs/utils/Utils';
@@ -27,8 +27,8 @@ export class BtnModeEdition extends Component{
 class NoteForm extends Component
 {
     static defaultProps = {        
-        nid: 0,
-        ccgroup: null,
+        nId: 0,
+        selectedGroup: null,
         onClose: null,
     };
 
@@ -49,7 +49,6 @@ class NoteForm extends Component
             data: null,  
             formValidated: false,
             dropdownLists: {
-                tagList: [],
                 groupList: []
             }
         };
@@ -100,7 +99,7 @@ class NoteForm extends Component
                         <Form.Row>
                             <Form.Group as={Col}>
                                 <Form.Label>{"Titre"}</Form.Label>
-                                <Form.Control type="text" required value={data.noteTitle} name="noteTitle" onChange={this.onDataChange}/>
+                                <Form.Control type="text" required value={data.title} name="title" onChange={this.onDataChange}/>
                             </Form.Group>
                         </Form.Row>
                         <Form.Row>
@@ -172,6 +171,7 @@ class NoteForm extends Component
     }
 
     componentDidUpdate(){
+        if(this.state.data === null){ return;}
         this.updateEditor(this.editorTemplateNote, this.editorTemplateNoteRef, this.state.data.templateNote);
         this.updateEditor(this.editorSuggestedNote, this.editorSuggestedNoteRef, this.state.data.suggestedNote);
         this.updateEditor(this.editorTeacherTip, this.editorTeacherTipRef, this.state.data.teacherTip);
@@ -197,13 +197,13 @@ class NoteForm extends Component
     }
 
     getData(){
-        if(this.props.ccgroup === null){return;}
-        $glVars.webApi.getGroupNoteFormKit($glVars.urlParams.id, this.props.nid, this.getDataResult);        
+        if(this.props.selectedGroup === null){return;}
+        $glVars.webApi.getNoteFormKit($glVars.urlParams.id, this.props.nId, this.getDataResult);        
     }
 
     getDataResult(result){         
         if(result.success){
-            this.setState(this.prepareNewState(result.data.data, {tagList: result.data.tagList, groupList: result.data.groupList}));
+            this.setState(this.prepareNewState(result.data.data, {groupList: result.data.groupList}));
         }
         else{
             $glVars.feedback.showError($glVars.i18n.tags.appname, result.msg);
@@ -213,34 +213,50 @@ class NoteForm extends Component
     prepareNewState(data, dropdownLists){
         data = data || null;
         dropdownLists = dropdownLists || null;
-        let result = {data: null, dropdownLists: {}};
+        let result = {
+            data: {
+                nId: 0, 
+                gId: 0, 
+                cmId: $glVars.urlParams.id, 
+                title: "", 
+                templateNote: "", 
+                suggestedNote: "", 
+                teacherTip: "", 
+                lastUpdate: 0, 
+                intCode: "", 
+                notifyTeacher: 0,
+                slot: 0
+            }, dropdownLists: {}};
         
         if(data !== null){
-            result.data = data;
+            result.data.nId = data.id;
+            result.data.gId = data.group.id;
+            result.data.title = data.title;
+            result.data.templateNote = data.templateNote;
+            result.data.suggestedNote = data.suggestedNote;
+            result.data.teacherTip = data.teacherTip;
+            result.data.lastUpdate = data.lastUpdate;
+            result.data.intCode = data.intCode;
+            result.data.notifyTeacher = data.notifyTeacher;
+            result.data.slot = data.slot;
         }
 
         if(dropdownLists !== null){
-            result.dropdownLists.tagList = [];
             result.dropdownLists.groupList = [];
 
-            for(let item of dropdownLists.tagList){
-                result.dropdownLists.tagList.push({value: item.tagId, label: item.tagName, data: item});
-            }
-
             for(let item of dropdownLists.groupList){
-                result.dropdownLists.groupList.push({value: item.id, text: item.name});
+                result.dropdownLists.groupList.push({value: item.id, text: item.name, data: item});
             }
         }
         
-        if(result.data.nid === 0){
-            result.data.gId = this.props.ccgroup.id;
+        if(result.data.nId === 0){
+            result.data.gId = this.props.selectedGroup.id;
         }
 
         return result;
     }
 
     onSubmit(){
-
         if (this.formRef.current.checkValidity() === false) {
             this.setState({formValidated: false});            
         }
@@ -254,9 +270,6 @@ class NoteForm extends Component
         data.templateNote = this.editorTemplateNote.getValue().text;
         data.suggestedNote = this.editorSuggestedNote.getValue().text;
         data.teacherTip = this.editorTeacherTip.getValue().text;
-        if(data.nid === 0){
-            data.ctid = this.props.ccgroup.ctid;
-        }
         $glVars.webApi.saveNote(data, this.onSaveResult);
     }
 
@@ -282,12 +295,11 @@ export class EditionMode extends Component{
         this.getData = this.getData.bind(this);
         this.getData2 = this.getData2.bind(this);
         this.onAdd = this.onAdd.bind(this);
-        this.onAddGroup = this.onAddGroup.bind(this);
-        this.onAddGroupModalClose = this.onAddGroupModalClose.bind(this);
-        this.onRemoveGroup = this.onRemoveGroup.bind(this);
+        this.showGroupForm = this.showGroupForm.bind(this);
+        this.removeNoteGroup = this.removeNoteGroup.bind(this);
         this.onEdit = this.onEdit.bind(this);
         this.onRemove = this.onRemove.bind(this);
-        this.onSelectgroup = this.onSelectgroup.bind(this);
+        this.onSelectGroup = this.onSelectGroup.bind(this);
         this.onClose = this.onClose.bind(this);
         this.onCloseImport = this.onCloseImport.bind(this);
         this.onImport = this.onImport.bind(this);
@@ -295,18 +307,20 @@ export class EditionMode extends Component{
         this.onDropRow = this.onDropRow.bind(this);
         this.onCopy = this.onCopy.bind(this);
 
-        this.state = {ccgroup: null, nid: -1, groupList: [], groupNoteList: [], draggingItem: null, copyIC: "", addGroup: -1, groupName: '', importForm: false};
+        this.state = {selectedGroup: null, nId: -1, groupList: [], groupNoteList: [], draggingItem: null, copyIC: "", showGroupForm: false, importForm: false};
 
         this.intCodeRef = React.createRef();
     }
 
     componentDidMount(){
-        $glVars.webApi.addObserver("EditionMode", this.getData2, ['saveNote', 'removeNote']);
+        $glVars.webApi.addObserver("EditionMode1", this.getData, ['saveNoteGroup', 'removeNoteGroup']);
+        $glVars.webApi.addObserver("EditionMode2", this.getData2, ['saveNote', 'removeNote']);
         this.getData();
     }
 
     componentWillUnmount(){
-        $glVars.webApi.removeObserver("EditionMode");
+        $glVars.webApi.removeObserver("EditionMode1");
+        $glVars.webApi.removeObserver("EditionMode2");
     }
 
     getData(){
@@ -320,7 +334,7 @@ export class EditionMode extends Component{
             
             let groupList = [];
             for(let item of result.data){
-                groupList.push({value: item.nid, text: item.name, data: item});
+                groupList.push({value: item.id, text: item.name, data: item});
             }
 
             that.setState({groupList: groupList});
@@ -341,8 +355,9 @@ export class EditionMode extends Component{
             that.setState({groupNoteList: result.data});
         }
         
-        if(this.state.ccgroup !== null){ 
-            $glVars.webApi.getGroupNotes(this.state.ccgroup.id, this.state.ccgroup.ctid, callback);
+        if(this.state.selectedGroup !== null){ 
+            console.log(this.state.selectedGroup)
+            $glVars.webApi.getGroupNotes(this.state.selectedGroup.id, this.state.selectedGroup.ct.id, callback);
         }
         else{
             this.setState({groupNoteList: []});
@@ -350,26 +365,30 @@ export class EditionMode extends Component{
     }
 
     render(){
-        let selectedgId = (this.state.ccgroup !== null ? this.state.ccgroup.name : 0);
-
         let main =
             <div>
                 <Form>
                     <Form.Row>
                         <Form.Group as={Col}>
                             <Form.Label>{"Sélectionnez le groupe de notes:"}</Form.Label>
-                            <ComboBox placeholder={"Sélectionnez votre option"} value={selectedgId.toString()} options={this.state.groupList} onChange={this.onSelectgroup} />
+                            <ComboBox placeholder={"Sélectionnez votre option"} value={(this.state.selectedGroup !== null ? this.state.selectedGroup.id : 0)} options={this.state.groupList} onChange={this.onSelectGroup} />
                         </Form.Group>
                     </Form.Row>
                 </Form>
-                <ButtonGroup>
-                    <Button variant="primary" disabled={this.state.ccgroup === null} onClick={this.onAdd}><FontAwesomeIcon icon={faPlusCircle}/>{" Ajouter une nouvelle note"}</Button>
-                    <Button variant="primary" onClick={() => this.onAddGroup(0)}><FontAwesomeIcon icon={faPlusCircle}/>{" Ajouter un nouveau groupe de notes"}</Button>
-                    <Button variant="danger" disabled={this.state.ccgroup === null} onClick={this.onRemoveGroup}><FontAwesomeIcon icon={faTrashAlt}/>{" Supprimer ce groupe de notes"}</Button>
-                    <Button variant="primary" disabled={this.state.ccgroup === null} onClick={() => this.onAddGroup(this.state.ccgroup.id)}><FontAwesomeIcon icon={faTrashAlt}/>{" Modifier ce groupe de notes"}</Button>
-                    <Button variant="primary" onClick={this.onImport}><FontAwesomeIcon icon={faFileImport}/>{" Importer cahier canada"}</Button>
-                </ButtonGroup>
-                <a className="btn btn-link" href={this.getSuggestedNotesPrintLink()} target="_blank"><FontAwesomeIcon icon={faPrint}/>{" Imprimer les réponses suggérées"}</a>
+                <ButtonToolbar>
+                    <ButtonGroup className="mr-4" >
+                        <Button variant="primary" disabled={this.state.selectedGroup === null} onClick={this.onAdd} title="Ajouter une nouvelle note"><FontAwesomeIcon icon={faPlusCircle}/>{" Note"}</Button>
+                    </ButtonGroup>
+                    <ButtonGroup className="mr-4" >
+                        <Button variant="primary" onClick={() => this.showGroupForm(true)} title="Ajouter un nouveau groupe de notes"><FontAwesomeIcon icon={faPlusCircle}/>{" Groupe"}</Button>
+                        <Button variant="danger" disabled={this.state.selectedGroup === null} onClick={this.removeNoteGroup} title="Supprimer ce groupe de notes"><FontAwesomeIcon icon={faTrashAlt}/>{" Groupe"}</Button>
+                        <Button variant="primary" disabled={this.state.selectedGroup === null} onClick={() => this.showGroupForm(true)} title="Modifier ce groupe de notes"><FontAwesomeIcon icon={faPencilAlt}/>{" Groupe"}</Button>
+                    </ButtonGroup>
+                    <ButtonGroup>
+                        <a className="btn btn-primary" href={this.getSuggestedNotesPrintLink()} target="_blank" title="Imprimer les réponses suggérées"><FontAwesomeIcon icon={faPrint}/>{" Imprimer"}</a>
+                        <Button variant="primary" onClick={this.onImport} title="Importer cahier canada"><FontAwesomeIcon icon={faFileImport} />{" Importer"}</Button>
+                    </ButtonGroup>
+                </ButtonToolbar>
                 <hr/><br/>
                 <DataGrid orderBy={true}>
                     <DataGrid.Header>
@@ -384,14 +403,14 @@ export class EditionMode extends Component{
                     <DataGrid.Body>
                         {this.state.groupNoteList.map((item, index) => {                            
                                 let row = 
-                                    <DataGrid.Body.RowDraggable key={index} data={item} onDbClick={() => this.onEdit(item.nid)} onDrag={this.onDragRow} onDrop={this.onDropRow}>
+                                    <DataGrid.Body.RowDraggable key={index} data={item} onDbClick={() => this.onEdit(item.id)} onDrag={this.onDragRow} onDrop={this.onDropRow}>
                                         <DataGrid.Body.Cell><FontAwesomeIcon icon={faGripVertical} title="Déplacer l'item"/></DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell>{item.slot}</DataGrid.Body.Cell>
-                                        <DataGrid.Body.Cell>{item.noteTitle}</DataGrid.Body.Cell>
+                                        <DataGrid.Body.Cell>{item.title}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell>{item.intCode}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell style={{textAlign: 'center'}}>
                                             <ButtonGroup size="sm">
-                                                <Button onClick={() => this.onEdit(item.nid)} title="Modifier" variant="primary"><FontAwesomeIcon icon={faPencilAlt}/></Button>
+                                                <Button onClick={() => this.onEdit(item.id)} title="Modifier" variant="primary"><FontAwesomeIcon icon={faPencilAlt}/></Button>
                                                 <Button onClick={() => this.onRemove(item)} title="Supprimer" variant="primary"><FontAwesomeIcon icon={faTrashAlt}/></Button>
                                                 <Button onClick={() => this.onCopy(item.intCode)} title="Code d'intégration" variant="primary"><FontAwesomeIcon icon={faCopy}/></Button>
                                             </ButtonGroup>
@@ -403,9 +422,9 @@ export class EditionMode extends Component{
                     </DataGrid.Body>
                 </DataGrid>
                                 
-                {this.state.nid >= 0 && <NoteForm nid={this.state.nid} ccgroup={this.state.ccgroup} onClose={this.onClose}/>}
+                {this.state.nId >= 0 && <NoteForm nId={this.state.nId} selectedGroup={this.state.selectedGroup} onClose={this.onClose}/>}
                 
-                {this.state.addGroup >= 0 && <AddGroupForm onClose={this.onAddGroupModalClose} gId={this.state.addGroup} name={this.state.groupNamed}/>}
+                {this.state.showGroupForm && <GroupForm onClose={() => this.showGroupForm(false)} data={this.state.selectedGroup}/>}
 
                 {this.state.importForm && <ImportForm onClose={this.onCloseImport}/>}
 
@@ -420,58 +439,31 @@ export class EditionMode extends Component{
     }
 
     onCloseImport(){
-        this.setState({importForm: false, ccgroup: null, groupNoteList: []});
+        this.setState({importForm: false, selectedGroup: null, groupNoteList: []});
         this.getData();
     }
 
-    onRemoveGroup(){
+    removeNoteGroup(){
         let that = this;
         let callback = function(result){
             if(result.success){
-                that.setState({ccgroup: null, groupNoteList: []});
-                that.getData();
+                that.setState({selectedGroup: null, groupNoteList: []});
             }
             else{
                 $glVars.feedback.showError($glVars.i18n.tags.appName, result.msg);
             }
         }
-        if(window.confirm($glVars.i18n.tags.msgConfirmDeletion+"\nCela supprimera tous les notes lié à ce groupe")){
-            $glVars.webApi.removeGroup($glVars.urlParams.id, this.state.ccgroup.id, callback);
+        if(window.confirm(`${$glVars.i18n.tags.msgConfirmDeletion}\n\n${$glVars.i18n.tags.msgIrreversible}`)){
+            $glVars.webApi.removeNoteGroup($glVars.urlParams.id, this.state.selectedGroup.id, callback);
         }
     }
 
-    onAddGroup(gId){
-        if (gId > 0){
-            this.setState({groupName: this.state.ccgroup.name});
-        }else{
-            this.setState({groupName: ''});
-        }
-        this.setState({addGroup: gId});
-    }
-
-    onAddGroupModalClose(name, gId){
-        if (name){
-            let that = this;
-            let callback = function(result){
-                if(result.success){
-                    that.setState({ccgroup: null, groupNoteList: []});
-                    that.getData();
-                }
-                else{
-                    $glVars.feedback.showError($glVars.i18n.tags.appName, result.msg);
-                }
-            }
-            if (gId && gId > 0){
-                $glVars.webApi.renameGroup($glVars.urlParams.id, gId, name, callback);
-            }else{
-                $glVars.webApi.addGroup($glVars.urlParams.id, name, callback);
-            }
-        }
-        this.setState({addGroup: -1});
+    showGroupForm(show){
+        this.setState({showGroupForm: show});
     }
 
     getSuggestedNotesPrintLink(){
-        let selectedgId = (this.state.ccgroup !== null ? this.state.ccgroup.id : 0);
+        let selectedgId = (this.state.selectedGroup !== null ? this.state.selectedGroup.id : 0);
         return UtilsMoodle.wwwRoot()+`/mod/recitcahiertraces/classes/ReportSuggestedNotes.php?gId=${selectedgId}&cmId=${$glVars.urlParams.id}`;
     }
 
@@ -489,15 +481,15 @@ export class EditionMode extends Component{
                 $glVars.feedback.showError($glVars.i18n.tags.appName, result.msg);
             }
         }
-        $glVars.webApi.switchNoteSlot(this.state.draggingItem.nid, item.nid, callback);
+        $glVars.webApi.switchNoteSlot(this.state.draggingItem.nId, item.nId, callback);
     }
 
     onAdd(){
-        this.setState({nid: 0});
+        this.setState({nId: 0});
     }
 
-    onEdit(nid){
-        this.setState({nid: nid});
+    onEdit(nId){
+        this.setState({nId: nId});
     }
     
     onRemove(item){
@@ -510,13 +502,13 @@ export class EditionMode extends Component{
             }
         }
 
-        if(window.confirm($glVars.i18n.tags.msgConfirmDeletion)){
-            $glVars.webApi.removeNote(item.nid, $glVars.urlParams.id, callback);
+        if(window.confirm(`${$glVars.i18n.tags.msgConfirmDeletion}\n\n${$glVars.i18n.tags.msgIrreversible}`)){
+            $glVars.webApi.removeNote(item.id, $glVars.urlParams.id, callback);
         }
     }    
 
-    onSelectgroup(event){
-        this.setState({ccgroup: event.target.data}, this.getData2);
+    onSelectGroup(event){
+        this.setState({selectedGroup: event.target.data}, this.getData2);
     }
 
     onCopy(intCode){
@@ -524,7 +516,7 @@ export class EditionMode extends Component{
     }
 
     onClose(){
-        this.setState({nid: -1, copyIC: ""});
+        this.setState({nId: -1, copyIC: ""});
     }
 }
 
@@ -612,11 +604,10 @@ class ModalGenerateIntCode extends Component{
     }
 }
 
-class AddGroupForm extends Component{
+class GroupForm extends Component{
     static defaultProps = {        
         onClose: null,
-        gId: 0,
-        name: false,
+        data: null
     };
 
     constructor(props){
@@ -625,15 +616,12 @@ class AddGroupForm extends Component{
         this.onSave = this.onSave.bind(this);
         this.onDataChange = this.onDataChange.bind(this);
 
-        this.state = {data: {name: ''}};
-        if (this.props.name){
-            this.state.data.name = this.props.name;
-        }
+        this.state = {data: props.data || {id: 0, name: "", ct: {id:0, mCmId: $glVars.urlParams.id}}};
     }
 
     render(){        
         let body = 
-            <Form >
+            <Form onSubmit={(event) => (event.preventDefault())}>
                 <Form.Row>
                     <Form.Group as={Col}>
                         <Form.Label>{"Nom du groupe"}</Form.Label>
@@ -646,7 +634,7 @@ class AddGroupForm extends Component{
             <div className="btn-tollbar" style={{width: "100%", display: "flex", justifyContent: "flex-end"}}>
                 <div className="btn-group">
                     <Button variant="secondary" onClick={() => this.props.onClose()}>{"Annuler"}</Button>
-                    <Button variant="success" onClick={this.onSave}>{"Enregistrer"}</Button>
+                    <Button variant="success" onClick={this.onSave} disabled={(this.state.data.name.length === 0)}>{"Enregistrer"}</Button>
                 </div>
             </div>;
 
@@ -662,10 +650,19 @@ class AddGroupForm extends Component{
     }
 
     onSave(){
-        this.props.onClose(this.state.data.name, this.props.gId);
+        let that = this;
+        let callback = function(result){
+            if(result.success){
+                that.setState({selectedGroup: null, groupNoteList: []}, that.props.onClose);
+            }
+            else{
+                $glVars.feedback.showError($glVars.i18n.tags.appName, result.msg);
+            }
+        }
+
+        $glVars.webApi.saveNoteGroup(this.state.data, callback);
     }
 }
-
 
 class ImportForm extends Component{
     static defaultProps = {        
