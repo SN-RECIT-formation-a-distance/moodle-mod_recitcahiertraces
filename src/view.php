@@ -21,9 +21,15 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+namespace recitcahiercanada;
+
 require('../../config.php');
 require_once($CFG->dirroot . "/local/recitcommon/php/Utils.php");
 require_once($CFG->libdir . '/portfoliolib.php');
+
+use recitcommon;
+use moodle_url;
+use context_course;
 
 $id = required_param('id', PARAM_INT);
 list ($course, $cm) = get_course_and_cm_from_cmid($id, 'recitcahiercanada');
@@ -33,12 +39,12 @@ require_login();
 
 //$context = context_module::instance($cm->id);
 //require_capability('mod/recitcahiercanada:view', $context);
-$view = new RecitCahierCanadaView($PAGE, $course, $cm, $OUTPUT, $USER, $DB, $CFG);
+$view = new MainView($PAGE, $course, $cm, $OUTPUT, $USER, $DB, $CFG);
 
 //$modeAdmin = intval(has_capability('mod/recitcahiercanada:viewadmin', context_system::instance()));
 $view->display();
 
-class RecitCahierCanadaView
+class MainView
 {
     protected $viewMode = null;
     protected $data = null;
@@ -83,7 +89,7 @@ class RecitCahierCanadaView
         echo $this->output->header();
         echo $this->output->heading(format_string($this->cm->name), 2);
                         
-        $roles = Utils::getUserRoles($this->course->id, $this->user->id);
+        $roles = recitcommon\Utils::getUserRoles($this->course->id, $this->user->id);
         $studentId = (in_array('ad', $roles) ? 0 : $this->user->id);
         $portfolioUrl = $this->getPortfolioUrl();
         
@@ -103,7 +109,7 @@ class RecitCahierCanadaView
             return "<div id='{$name}_container_{$index}' data-format='recit_rich_editor' style='display: none;'></div>";
         }
         else{*/
-            return Utils::createEditorHtml(false, "{$name}_container_{$index}", "{$name}_{$index}", "", 15, $context, 0, 0);
+            return recitcommon\Utils::createEditorHtml(false, "{$name}_container_{$index}", "{$name}_{$index}", "", 15, $context, 0, 0);
         //}
     }
 

@@ -24,7 +24,10 @@
 defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->dirroot . "/local/recitcommon/php/Utils.php");
-require_once(__DIR__ . "/classes/PersistCtrlCahierTraces.php");
+require_once(__DIR__ . "/classes/PersistCtrl.php");
+
+use recitcahiercanada\PersistCtrl;
+use recitcommon\Utils;
 
 /**
  * List of features supported in recitcahiercanada module
@@ -94,7 +97,7 @@ function recitcahiercanada_delete_instance($id) {
 
     $DB->delete_records('recitcahiercanada', array('id'=>$recitcahiercanada->id));*/
 
-    return CahierCanadaPersistCtrl::getInstance($DB, $USER)->removeCcInstance($id);
+    return PersistCtrl::getInstance($DB, $USER)->removeCcInstance($id);
 }
 
 
@@ -124,7 +127,7 @@ function mod_recitcahiercanada_pluginfile($course, $cm, $context, $filearea, $ar
 
     if ($filearea == 'personalnote') {
         $itemId = (int) array_shift($args);
-        $ownerId = CahierCanadaPersistCtrl::getInstance($DB, $USER)->getUserFromItemId($itemId);
+        $ownerId = PersistCtrl::getInstance($DB, $USER)->getUserFromItemId($itemId);
         
         $roles = Utils::getUserRoles($course->id, $USER->id);
         if((Utils::isAdminRole($roles) == false) && ($USER->id != $ownerId)){

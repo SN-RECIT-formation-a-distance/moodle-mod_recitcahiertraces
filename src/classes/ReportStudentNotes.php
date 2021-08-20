@@ -1,7 +1,10 @@
 <?php
 require('../../../config.php');
-require_once($CFG->dirroot . "/mod/recitcahiercanada/classes/PersistCtrlCahierTraces.php");
+require_once($CFG->dirroot . "/mod/recitcahiercanada/classes/PersistCtrl.php");
 require_once($CFG->dirroot . "/local/recitcommon/php/Utils.php");
+
+use recitcommon\Utils;
+use recitcahiercanada\PersistCtrl;
 
 $cmId = required_param('cmId', PARAM_INT);
 $userId = required_param('userId', PARAM_INT);
@@ -32,8 +35,8 @@ if(!Utils::isAdminRole($roles)){
 }
 
 
-$personalNotes = CahierTracesPersistCtrl::getInstance($DB, $USER)->getPersonalNotes($cmId, $userId);
-$student = current(current(CahierTracesPersistCtrl::getInstance()->getEnrolledUserList($cmId, $userId)));
+$personalNotes = PersistCtrl::getInstance($DB, $USER)->getPersonalNotes($cmId, $userId);
+$student = current(current(PersistCtrl::getInstance()->getEnrolledUserList($cmId, $userId)));
 
 $cahierCanada = current(current($personalNotes));
 $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahiercanada'), $cahierCanada->ccName, get_string('printedOn', 'mod_recitcahiercanada'), date('Y-m-d H:i:s'));
