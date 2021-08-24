@@ -23,7 +23,7 @@
  */
 
 defined('MOODLE_INTERNAL') || die;
-require_once($CFG->dirroot . "/mod/recitcahiercanada/classes/PersistCtrlCahierTraces.php");
+require_once($CFG->dirroot . "/mod/recitcahiercanada/classes/PersistCtrl.php");
 
  /**
  * Define the complete recitcahiercanada structure for backup, with file and id annotations
@@ -36,7 +36,7 @@ class backup_recitcahiercanada_activity_structure_step extends backup_activity_s
         // To know if we are including userinfo.
         //$userinfo = $this->get_setting_value('userinfo');
 
-        CahierTracesPersistCtrl::getInstance($DB, $USER)->createBackupViews();
+        recitcahiercanada\CahierTracesPersistCtrl::getInstance($DB, $USER)->createBackupViews();
 
         // Define each element separated
         $recitcahiercanada = new backup_nested_element('recitcahiercanada', array('id'), array(
