@@ -25,8 +25,6 @@
  * Define all the restore steps that will be used by the restore_recitcahiertraces_activity_task
  */
 
-require_once($CFG->dirroot . "/mod/recitcahiertraces/classes/PersistCtrlCahierTraces.php");
-
 /**
  * Structure step to restore one recitcahiertraces activity
  */
