@@ -69,7 +69,7 @@ class restore_recitcahiercanada_activity_structure_step extends restore_activity
         $oldid = $data->id;
         
         $data->ccid = $this->get_mappingid('recitcahiercanada', $data->ccid);
-        $data->cmid = recitcahiercanada\CahierTracesPersistCtrl::getInstance($DB, $USER)->getCmIdFromIndexPos($data->ccid, $data->cmindexpos);
+        $data->cmid = recitcahiercanada\PersistCtrl::getInstance($DB, $USER)->getCmIdFromIndexPos($data->ccid, $data->cmindexpos);
 
         if($data->cmid > 0){
             $newitemid = $DB->insert_record('recitcc_cm_notes', $data); // insert the recitcc_cm_notes record
