@@ -44,6 +44,7 @@ class NoteForm extends Component
         this.onSaveResult = this.onSaveResult.bind(this);
         this.prepareNewState = this.prepareNewState.bind(this);
         this.onClose = this.onClose.bind(this);
+        this.facadeUpdateEditor = this.facadeUpdateEditor.bind(this);
         
         this.state = {
             data: null,  
@@ -63,6 +64,7 @@ class NoteForm extends Component
     }
 
     componentDidMount(){
+        this.facadeUpdateEditor();
         this.getData();             
     }  
 
@@ -151,7 +153,7 @@ class NoteForm extends Component
                 </div>
             </div>;
 
-        let main = <Modal title={`Note: ${data.noteTitle}`} body={body} footer={footer} onClose={this.props.onClose} />;
+        let main = <Modal title={`Note: ${data.title}`} body={body} footer={footer} onClose={this.props.onClose} />;
 
         return (main);
     }
@@ -170,7 +172,7 @@ class NoteForm extends Component
         }
     }
 
-    componentDidUpdate(){
+    facadeUpdateEditor(){
         if(this.state.data === null){ return;}
         this.updateEditor(this.editorTemplateNote, this.editorTemplateNoteRef, this.state.data.templateNote);
         this.updateEditor(this.editorSuggestedNote, this.editorSuggestedNoteRef, this.state.data.suggestedNote);
@@ -203,7 +205,7 @@ class NoteForm extends Component
 
     getDataResult(result){         
         if(result.success){
-            this.setState(this.prepareNewState(result.data.data, {groupList: result.data.groupList}));
+            this.setState(this.prepareNewState(result.data.data, {groupList: result.data.groupList}), this.facadeUpdateEditor);
         }
         else{
             $glVars.feedback.showError($glVars.i18n.tags.appname, result.msg);
@@ -267,6 +269,7 @@ class NoteForm extends Component
 
     onSave(){
         let data = JsNx.clone(this.state.data);
+        
         data.templateNote = this.editorTemplateNote.getValue().text;
         data.suggestedNote = this.editorSuggestedNote.getValue().text;
         data.teacherTip = this.editorTeacherTip.getValue().text;
@@ -356,7 +359,6 @@ export class EditionMode extends Component{
         }
         
         if(this.state.selectedGroup !== null){ 
-            console.log(this.state.selectedGroup)
             $glVars.webApi.getGroupNotes(this.state.selectedGroup.id, this.state.selectedGroup.ct.id, callback);
         }
         else{
@@ -481,7 +483,7 @@ export class EditionMode extends Component{
                 $glVars.feedback.showError($glVars.i18n.tags.appName, result.msg);
             }
         }
-        $glVars.webApi.switchNoteSlot(this.state.draggingItem.nId, item.nId, callback);
+        $glVars.webApi.switchNoteSlot(this.state.draggingItem.id, item.id, callback);
     }
 
     onAdd(){

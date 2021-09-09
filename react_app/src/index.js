@@ -10,7 +10,6 @@ import {VisualFeedback, Loading} from "./libs/components/Components";
 import Utils, {UtilsMoodle} from "./libs/utils/Utils";
 import {TeacherView, StudentView} from "./views/Views";
 import {$glVars} from "./common/common";
-//import "./libs/utils/JsExtension";
 export * from "./common/i18n";
  
 class App extends Component {

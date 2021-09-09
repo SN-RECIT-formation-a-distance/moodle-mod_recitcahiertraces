@@ -28,7 +28,7 @@ use recitcahiertraces\PersistCtrl;
 
 class recitcahiertraces_portfolio_caller extends portfolio_module_caller_base {
 
-    protected $notes;
+    protected $noteGroups;
     /** @var int Timestamp */
     protected $start;
     /** @var int Timestamp */
@@ -53,7 +53,7 @@ class recitcahiertraces_portfolio_caller extends portfolio_module_caller_base {
             throw new portfolio_caller_exception('invalidid', 'recitcahiertraces');
         }
         
-        $this->notes = PersistCtrl::getInstance($DB, $USER)->getUserNotes($this->id, $USER->id);
+        $this->noteGroups = PersistCtrl::getInstance($DB, $USER)->getUserNotes($this->id, $USER->id);
     }
     /**
      * @return array
@@ -71,17 +71,24 @@ class recitcahiertraces_portfolio_caller extends portfolio_module_caller_base {
     }
     
     public function expected_time() {
-        return portfolio_expected_time_db(count($this->notes));
+        $time = 0;
+
+        foreach($this->noteGroups as $noteGroup){
+            foreach($noteGroup as $note){
+                $time++;
+            }
+        }
+
+        return portfolio_expected_time_db($time);
     }
     /**
      * @return string
      */
     public function get_sha1() {
         $str = '';
-        foreach($this->notes as $notes){
-            $notea = current($notes);
-            foreach($notes as $note){
-                $str .= $notea->groupName . ',' . $note->noteTitle . ',' . $note->note->text . ',' . $note->lastUpdateFormat();
+        foreach($this->noteGroups as $noteGroup){
+            foreach($noteGroup as $note){
+                $str .= $note->noteDef->group->name . ',' . $note->noteDef->title . ',' . $note->noteContent->text . ',' . $note->lastUpdateFormat();
             }
         }
         return sha1($str);
@@ -89,19 +96,19 @@ class recitcahiertraces_portfolio_caller extends portfolio_module_caller_base {
 
     public function prepare_package() {
         $content = '';
-        foreach($this->notes as $notes){
+        foreach($this->noteGroups as $noteGroup){
             
-            $notea = current($notes);
+            $note = current($noteGroup);
             $content .= '<div class="activity-container">';
 
-            $content .= sprintf("<h4 class='activity-name'>%s: %s</h4>", get_string('activity', 'mod_recitcahiertraces'), $notea->activityName);
+            $content .= sprintf("<h4 class='activity-name'>%s: %s</h4>", get_string('activity', 'mod_recitcahiertraces'), $note->cmName);
 
-            foreach($notes as $note){
+            foreach($noteGroup as $note){
                 // overflow = hidden for the notes that overflow the page dimensions
                 $content .= "<div class='note-container'>";
-                $content .= sprintf("<h5 class='text-muted note-title'>%s: %s</h5>",  get_string('note', 'mod_recitcahiertraces'), $note->noteTitle);
+                $content .= sprintf("<h5 class='text-muted note-title'>%s: %s</h5>",  get_string('note', 'mod_recitcahiertraces'), $note->noteDef->title);
                 
-                $content .= sprintf("<div class='alert alert-secondary student-note'>%s</div>", $note->note->text);
+                $content .= sprintf("<div class='alert alert-secondary student-note'>%s</div>", $note->noteContent->text);
 
                 $content .= '<blockquote class="blockquote mb-0">';
                 $content .= sprintf('<span class="blockquote-footer">%s: %s</span>',  get_string('timestamp', 'mod_recitcahiertraces'), $note->lastUpdateFormat());
@@ -136,6 +143,6 @@ class recitcahiertraces_portfolio_caller extends portfolio_module_caller_base {
     public function get_return_url() {
         global $CFG, $USER;
 
-        return $CFG->wwwroot . "/mod/recitcahiertraces/classes/ReportStudentNotes.php?gId={$this->cm->id}&userId={$USER->id}&sf=1";
+        return $CFG->wwwroot . "/mod/recitcahiertraces/view.php?id={$this->cm->id}";
     }
 }

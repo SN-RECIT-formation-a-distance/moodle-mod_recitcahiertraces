@@ -89,7 +89,7 @@ class PersonalNoteForm extends Component{
             result.data.courseId = data.noteDef.group.ct.courseId;
             result.data.lastUpdate = data.lastUpdate;
             result.data.nId = data.noteDef.id;
-            result.data.cmId = 0;
+            result.data.nCmId = 0;
             result.data.feedback = data.feedback;
             result.data.unId = data.id;
             result.data.note = data.noteContent;

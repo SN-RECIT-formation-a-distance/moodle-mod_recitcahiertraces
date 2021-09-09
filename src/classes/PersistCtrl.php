@@ -105,7 +105,7 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
         $query = "select t1.title as title, t1.gid as gId, t3.ctid as ctId, coalesce(t1.intcode, '') as intCode,
         t2.id unId, t2.userid as userId, t1.id as nId,
         if(t2.id > 0 and length(t2.note) > 0, t2.note, t1.templatenote) as note, coalesce(t2.note_itemid,0) as noteItemId, if(t2.id > 0 and length(t2.note) > 0, 0, 1) as isTemplate,
-        t1.teachertip as teacherTip, t1.suggestednote as suggestedNote, coalesce(t2.feedback, '') as feedback,  t2.lastupdate as lastUpdate,
+        t1.teachertip as teacherTip, t1.suggestednote as suggestedNote, coalesce(t2.feedback, '') as feedback,  t2.lastupdate as lastUpdate, t2.cmid as nCmId,
         t1_1.course as courseId, t1.notifyteacher as notifyTeacher,
         (select id from {$this->prefix}course_modules where instance = t1_1.id and module = (select id from {$this->prefix}modules where name = 'recitcahiertraces')) as mCmId
         from {$this->prefix}recitct_notes as t1 
@@ -137,9 +137,9 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
                 $data->lastUpdate = time();
                 $fields = array("nid", "userid", "note", "note_itemid", "lastupdate");
                 $values = array($data->nId, $data->userId, $data->note->text, $data->note->itemid, $data->lastUpdate);
-                if (isset($data->cmId)){
+                if (isset($data->nCmId)){
                     $fields[] = "cmid";
-                    $values[] = $data->cmId;
+                    $values[] = $data->nCmId;
                 }
             }
             else{
@@ -211,15 +211,6 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
         
         return $result;
     }
-
-   /* public function getGroupIdFromName($ctId, $gName){
-        
-        $query = "select * FROM {$this->prefix}recitct_groups where ctid = $ctId and name='$gName'";
-        
-        $result = $this->mysqlConn->execSQLAndGetObject($query);
-        if (!$result) return false;
-        return $result->id;
-    }*/
 
     public function saveNoteGroup($data){
         try{		   
@@ -504,9 +495,10 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
     }
 
     public function getRequiredNotes($cmId){
-        $query = "select t1.instance, t4.id as gid, t2.ctid as ctid, t4.gId as gId, t4.title as noteTitle, t4.slot, t5.id as personalNoteId, 
-        coalesce(t5.userid, 0) as userId, concat(find_in_set(t4.gId, t2.name), t4.slot) as orderByCustom, t4.id as nid,
-        t3.course as courseId, concat(t6.firstname, ' ', t6.lastname) as username, t2.name as groupName
+        $query = "select t4.id as nId, t2.ctid as ctId, t4.gId as gId, t4.title, t4.slot, t5.id as unId, 
+        coalesce(t5.userid, 0) as userId, concat(find_in_set(t4.gId, t2.name), t4.slot) as orderByCustom, 
+        t3.course as courseId, concat(t6.firstname, ' ', t6.lastname) as username, t2.name as groupName,
+        coalesce(t5.note_itemid,0) as noteItemId, coalesce(t5.note, '') as note, t4.notifyteacher as notifyTeacher, t5.cmid as nCmId
         from {$this->prefix}course_modules as t1 
         inner join {$this->prefix}recitcahiertraces as t3 on t1.instance = t3.id    
         inner join {$this->prefix}recitct_groups as t2 on t3.id = t2.ctid            
@@ -521,15 +513,30 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
         
         $query = sprintf($query, $this->getStmtStudentRole('t6.id', 't1.course'));
 
-        $result = $this->mysqlConn->execSQLAndGetObjects($query);
+        $tmp = $this->mysqlConn->execSQLAndGetObjects($query);
 
+        $result = array();
+        if(count($tmp) > 0){
+            $context = \context_course::instance(current($tmp)->courseId);
+            $modinfo = get_fast_modinfo(current($tmp)->courseId);
+        
+            foreach($tmp as $dbData){
+                //activity name
+                $dbData->cmName = '';
+                if ($dbData->nCmId > 0){
+                    $dbData->cmName = $this->getCmNameFromCmId($dbData->nCmId, $dbData->courseId, $modinfo);
+                }
+
+                // index by group
+                $result[] = UserNote::create($dbData, $context);
+            }
+        }
+        
         return $result;
     }
 
     public function getStudentsProgression($cmId){
-        $query = "select t4.id as gid, t2.ctid as ctid, t4.gid as gId, t4.title as noteTitle, t4.slot, coalesce(t5.id,0) as personalNoteId, 
-        coalesce(t6.id, 0) as userId, concat(find_in_set(t4.gId, t2.name), t4.slot) as orderByCustom, t4.id as nid,
-        t3.course as courseId, concat(t6.firstname, ' ', t6.lastname) as username, if(t5.id > 0 and length(t5.note) > 0, 1, 0) as done,
+        $query = "select coalesce(t6.id, 0) as userId, concat(t6.firstname, ' ', t6.lastname) as username, if(t5.id > 0 and length(t5.note) > 0, 1, 0) as done,
         group_concat(DISTINCT t9.groupid) as groupIds
         from {$this->prefix}course_modules as t1 
         inner join {$this->prefix}recitcahiertraces as t3 on t1.instance = t3.id 
@@ -542,7 +549,7 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
         left join {$this->prefix}groups_members as t9 on t9.userid = t6.id
         where t1.id = $cmId and %s
         group by t4.id, t5.id, t6.id
-        order by length(orderByCustom) asc, orderByCustom asc";
+        order by username";
 
         $query = sprintf($query, $this->getStmtStudentRole('t6.id', 't1.course'));
         
@@ -645,7 +652,8 @@ class UserNote
     public $nCmId = 0;      // course module id
     public $cmName = "";    // course module name
     public $userId = 0;
-    public $noteContent = null;    // student note ({text: '', itemId: 0})
+    public $username = "";
+    public $noteContent = null;    // student note ({text: '', itemid: 0})
     public $feedback = "";  // teacher feedback 
     public $lastUpdate = 0;
     public $isTemplate = false;
@@ -672,9 +680,10 @@ class UserNote
             $result->noteContent->itemid = $dbData->noteItemId;
         }
 
-        $result->feedback = $dbData->feedback;
-        $result->lastUpdate = $dbData->lastUpdate;
-        $result->isTemplate = $dbData->isTemplate;
+        if(isset($dbData->username)){ $result->username = $dbData->username; }
+        if(isset($dbData->feedback)){ $result->feedback = $dbData->feedback; }
+        if(isset($dbData->lastUpdate)){ $result->lastUpdate = $dbData->lastUpdate; }
+        if(isset($dbData->isTemplate)){ $result->isTemplate = $dbData->isTemplate; }
         
         return $result;
     }

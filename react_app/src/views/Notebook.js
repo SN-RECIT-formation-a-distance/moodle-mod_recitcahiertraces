@@ -158,7 +158,7 @@ class ViewRequiredNotes extends Component{
                 gId: 0,
                 noteTitle: "",
                 nId: 0,
-                personalNoteId: 0
+                unId: 0
             }
         };
     }
@@ -215,9 +215,9 @@ class ViewRequiredNotes extends Component{
                                 let row = 
                                     <DataGrid.Body.Row key={index} onDbClick={() => that.onEdit(item)}>
                                         <DataGrid.Body.Cell>{index + 1}</DataGrid.Body.Cell>
-                                        <DataGrid.Body.Cell>{item.groupName}</DataGrid.Body.Cell>
+                                        <DataGrid.Body.Cell>{item.cmName}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell>{item.username}</DataGrid.Body.Cell>
-                                        <DataGrid.Body.Cell>{item.noteTitle}</DataGrid.Body.Cell>
+                                        <DataGrid.Body.Cell>{item.noteDef.title}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell style={{textAlign: 'center'}}>
                                             <ButtonGroup size="sm">
                                                 <Button onClick={() => that.onEdit(item)} title="Modifier" variant="primary"><FontAwesomeIcon icon={faPencilAlt}/></Button>
@@ -246,12 +246,12 @@ class ViewRequiredNotes extends Component{
         }
 
         let data = this.state.data;
-        data.gId = item.gId;
-        data.nId = item.nId;
-        data.noteTitle = item.noteTitle;
+        data.gId = item.noteDef.group.id;
+        data.nId = item.noteDef.id;
+        data.noteTitle = item.noteDef.title;
         data.userId = item.userId;
         data.username = item.username;
-        data.personalNoteId = item.personalNoteId;
+        data.unId = item.id;
 
         this.setState({data: data});
     }
@@ -264,13 +264,13 @@ class ViewRequiredNotes extends Component{
         data.noteTitle = "";
         data.userId = 0;
         data.username = "";
-        data.personalNoteId = 0;
+        data.unId = 0;
         
         this.setState({data: data});
     }
 
     onNextStudent(){
-        let index = JsNx.getItemIndex(this.state.dataProvider, 'personalNoteId', this.state.data.personalNoteId) + 1;
+        let index = JsNx.getItemIndex(this.state.dataProvider, 'id', this.state.data.unId) + 1;
 
         let item = JsNx.at(this.state.dataProvider, index, null);
 
@@ -278,7 +278,7 @@ class ViewRequiredNotes extends Component{
     }
 
     onPreviousStudent(){
-        let index = JsNx.getItemIndex(this.state.dataProvider, 'personalNoteId', this.state.data.personalNoteId) - 1;
+        let index = JsNx.getItemIndex(this.state.dataProvider, 'id', this.state.data.unId) - 1;
 
         let item = JsNx.at(this.state.dataProvider, index, null);
 
@@ -286,7 +286,7 @@ class ViewRequiredNotes extends Component{
     }
 
     getNavStatus(){
-        let index = JsNx.getItemIndex(this.state.dataProvider, 'personalNoteId', this.state.data.personalNoteId);
+        let index = JsNx.getItemIndex(this.state.dataProvider, 'id', this.state.data.unId);
         let result = {previous: !(index <= 0), next: !(this.state.dataProvider.length <= (index + 1))};
         return result;
     }
@@ -405,71 +405,6 @@ class ViewProgression extends Component{
     onSelectGroup(groupId){
         this.setState({groupId: groupId});
     }
-
-    /*getDetails(){
-        let data = {};
-        let lastgroup = null;
-        let username = "";
-
-        for(let item of this.state.dataProvider){
-            if(item.userId !== this.state.userId){ continue; }
-
-            if(username.length === 0){
-                username = item.username;
-            }
-
-            if(lastgroup !== item.gId){
-                data[`cm${item.gId}`] = {nbDone: 0, cmName: item.groupName, items: []};
-                lastgroup = item.gId;
-            }
-
-            data[`cm${item.gId}`].nbDone += item.done;
-            data[`cm${item.gId}`].items.push(item);
-        }
-
-        let grids = [];
-        
-        for(let attr in data){
-            let grid = 
-                <DataGrid key={grids.length} orderBy={true} caption={`${data[attr].cmName} (${(data[attr].nbDone/data[attr].items.length*100).toFixed(0)}%)`}>
-                    <DataGrid.Header>
-                        <DataGrid.Header.Row>
-                            <DataGrid.Header.Cell style={{width: 80}}>{"#"}</DataGrid.Header.Cell>
-                            <DataGrid.Header.Cell >{"Titre de la note"}</DataGrid.Header.Cell>
-                            <DataGrid.Header.Cell  style={{width: 80}}></DataGrid.Header.Cell>
-                        </DataGrid.Header.Row>
-                    </DataGrid.Header>
-                    <DataGrid.Body>
-                        {data[attr].items.map((item, index) => {
-                                let row = 
-                                    <DataGrid.Body.Row key={index}>
-                                        <DataGrid.Body.Cell>{index + 1}</DataGrid.Body.Cell>
-                                        <DataGrid.Body.Cell>{item.noteTitle}</DataGrid.Body.Cell>
-                                        <DataGrid.Body.Cell style={{textAlign: "center"}}>{(item.done === 1 ?<FontAwesomeIcon icon={faCheckSquare}/> : <FontAwesomeIcon icon={faSquare}/>)}</DataGrid.Body.Cell>
-                                    </DataGrid.Body.Row>
-                                return (row);                                    
-                            }
-                        )}
-                    </DataGrid.Body>
-                </DataGrid>;
-
-            grids.push(grid);
-        }
-                
-        let main =
-            <div>
-                <Button onClick={this.onBack}><FontAwesomeIcon icon={faArrowLeft}/>{" Retour"}</Button>
-                <br/><br/>
-                <h2>{username}</h2>
-                {grids}
-            </div>;
-
-        return main;
-    }
-
-    onBack(){
-        this.setState({userId: 0})
-    }*/
 }
 
 class NavActivities extends Component{
@@ -545,129 +480,128 @@ class NavActivities extends Component{
     render(){
         let that = this;
 
+        let navItems = 
+            <Nav variant="pills" className="flex-column">
+                {this.state.dataProvider.map(function(items, index){
+                    let groupName = JsNx.at(items, 0).noteDef.group.name;
+
+                    let pctProgress = that.getPctProgress(items);
+
+                    return  <Nav.Item key={index} className="m-1 bg-light">
+                                <Nav.Link eventKey={index}>
+                                    <div  style={{display: "flex", width: '315px', justifyContent: "space-evenly"}} title={`${groupName} (${pctProgress.toFixed(0)}%)`}>
+                                        <span className="text-truncate" >{`${groupName} `}</span>
+                                        <Badge pill  variant="light">{` ${pctProgress.toFixed(0)}%`}</Badge>
+                                    </div>
+                                </Nav.Link>
+                            </Nav.Item>;
+                })}
+            </Nav>;
+
+        let studentView = 
+            <Row>
+                <Col sm={12} md={12} lg={12} xl={3}>{navItems}</Col>
+                <Col sm={12} md={12} lg={12} xl={9}>
+                    <Tab.Content>
+                        {this.state.dataProvider.map(function(items, index){
+                            let result=
+                                <Tab.Pane key={index} eventKey={index}>
+                                    <div className="groupContent card border-0 m-0 p-0 position-relative bg-transparent">
+                                        {items.map((item, index2) => {
+                                                    let retro = null;
+                                                    let time = "";
+                                                    if (item.lastUpdate > 0){
+                                                        time = UtilsDateTime.formatTime(item.lastUpdate) + " - ";
+                                                    }
+                                                    if (item.cmName.length == 0){
+                                                        item.cmName = "Cette note n'a pas été intégrée.";
+                                                    }
+                                                    if (item.feedback.length > 0){
+                                                        retro = 
+                                                        <div className="balon1 p-2 m-0 position-relative" data-is="Rétroaction" key={"key"+index2}>
+                                                            <div className="float-right" dangerouslySetInnerHTML={{ __html: item.feedback }}></div>
+                                                        </div>
+                                                    }
+                                                    let row = 
+                                                            <div className="balon2 p-2 m-0 position-relative" data-is={time+"Activité: "+that.formatText(item.cmName)} key={index2}>
+                                                                <div className="float-left">                                                                    
+                                                                    <p style={{fontWeight:'bold'}}>
+                                                                        {item.noteDef.title}
+                                                                        <Button onClick={() => that.props.onEdit(item)} title="Modifier" variant="link"><FontAwesomeIcon icon={faPencilAlt}/></Button>
+                                                                    </p>
+                                                                    <p dangerouslySetInnerHTML={{ __html: item.noteContent.text }}></p>
+                                                                </div>
+                                                            </div>
+                                                    return [row, retro];                                    
+                                                }
+                                            )}
+                                    </div>
+                                </Tab.Pane>;
+                                // {(item.noteDef.notifyTeacher === 1 ? <Button disabled={true} title="Rétroaction requise" size="sm" variant="warning"><FontAwesomeIcon icon={faCommentDots}/></Button> : null)}
+                            return result;
+                        })}
+                    </Tab.Content>
+                </Col>
+            </Row>;
+
+        let teacherView = 
+            <div>
+                <Row>{navItems}</Row>
+                <Row>
+                    <Tab.Content style={{width: "100%"}}>
+                        {this.state.dataProvider.map(function(items, index){
+                            let result=
+                                <Tab.Pane key={index} eventKey={index}>
+                                   <DataGrid orderBy={true}>
+                                        <DataGrid.Header>
+                                            <DataGrid.Header.Row>
+                                                <DataGrid.Header.Cell style={{width: 80}}>{"#"}</DataGrid.Header.Cell>
+                                                <DataGrid.Header.Cell >{"Titre de la note"}</DataGrid.Header.Cell>
+                                                <DataGrid.Header.Cell style={{width: 300}}>{"Note"}</DataGrid.Header.Cell>
+                                                <DataGrid.Header.Cell style={{width: 300}}>{"Rétroaction"}</DataGrid.Header.Cell>
+                                                <DataGrid.Header.Cell style={{width: 300}}>{"Activité"}</DataGrid.Header.Cell>
+                                                <DataGrid.Header.Cell style={{width: 80}}></DataGrid.Header.Cell>
+                                                <DataGrid.Header.Cell  style={{width: 80}}></DataGrid.Header.Cell>
+                                            </DataGrid.Header.Row>
+                                        </DataGrid.Header>
+                                        <DataGrid.Body>
+                                            {items.map((item, index2) => {
+                                                    let row = 
+                                                        <DataGrid.Body.Row key={index2} onDbClick={() => that.props.onEdit(item)}>
+                                                            <DataGrid.Body.Cell>{index2 + 1}</DataGrid.Body.Cell>
+                                                            <DataGrid.Body.Cell>{` ${item.noteDef.title}`}</DataGrid.Body.Cell>
+                                                            <DataGrid.Body.Cell>{that.formatText(item.noteContent.text)}</DataGrid.Body.Cell>
+                                                            <DataGrid.Body.Cell>{that.formatText(item.feedback)}</DataGrid.Body.Cell>
+                                                            <DataGrid.Body.Cell>{that.formatText(item.cmName)}</DataGrid.Body.Cell>
+                                                            <DataGrid.Body.Cell style={{textAlign: "center"}}>{(item.noteDef.notifyTeacher === 1 ? 
+                                                                <Button disabled={true} title="Rétroaction requise" size="sm" variant="warning"><FontAwesomeIcon icon={faCommentDots}/></Button> : null)}
+                                                            </DataGrid.Body.Cell>
+                                                            <DataGrid.Body.Cell style={{textAlign: 'center'}}>
+                                                                <ButtonGroup size="sm">
+                                                                    <Button onClick={() => that.props.onEdit(item)} title="Modifier" variant="primary"><FontAwesomeIcon icon={faPencilAlt}/></Button>
+                                                                </ButtonGroup>
+                                                            </DataGrid.Body.Cell>
+                                                        </DataGrid.Body.Row>
+                                                    return (row);                                    
+                                                }
+                                            )}
+                                        </DataGrid.Body>
+                                    </DataGrid>
+                                </Tab.Pane>;
+                            return result;
+                        })}
+                    </Tab.Content>
+                </Row>
+            </div>;
+
         let main = 
             <Tab.Container id="tabActivities" activeKey={this.state.activeTab} onSelect={this.onSelectTab}>
-                <Row>
-                    <Col sm={3}>
-                        <Nav variant="pills" className="flex-column">
-                            {this.state.dataProvider.map(function(items, index){
-                                let groupName = JsNx.at(items, 0).noteDef.group.name;
-
-                                let pctProgress = that.getPctProgress(items);
-
-                                return  <Nav.Item key={index} className="m-1 bg-light">
-                                            <Nav.Link eventKey={index}>
-                                                <div  style={{display: "flex", width: '315px', justifyContent: "space-evenly"}} title={`${groupName} (${pctProgress.toFixed(0)}%)`}>
-                                                    <span className="text-truncate" >{`${groupName} `}</span>
-                                                    <Badge pill  variant="light">{` ${pctProgress.toFixed(0)}%`}</Badge>
-                                                </div>
-                                            </Nav.Link>
-                                        </Nav.Item>;
-                            })}
-                        </Nav>
-                    </Col>
-                    <Col sm={9}>
-                        <Tab.Content>
-                            {this.state.dataProvider.map(function(items, index){
-                                let datagrid = null;
-                                if (that.props.isTeacher){
-                                    datagrid = that.getDataGridForTeacher(items);
-                                }else{
-                                    datagrid = that.getDataGrid(items);
-                                }
-
-                                let result=
-                                    <Tab.Pane key={index} eventKey={index}>
-                                        {datagrid}
-                                    </Tab.Pane>;
-
-                                return result;
-                            })}
-                        </Tab.Content>
-                    </Col>
-                </Row>
+                {this.props.isTeacher ? teacherView : studentView}
             </Tab.Container>;
 
         return main;
     }
 
-    getDataGrid(items){
-        let that = this;
-        let datagrid =
-        <div className="groupContent card border-0 m-0 p-0 position-relative bg-transparent">
-            
-            {items.map((item, index2) => {
-                        let retro = null;
-                        let time = "";
-                        if (item.lastUpdate > 0){
-                            time = UtilsDateTime.formatTime(item.lastUpdate) + " - ";
-                        }
-                        if (item.cmName.length == 0){
-                            item.cmName = "Cette note n'a pas été intégrer";
-                        }
-                        if (item.feedback.length > 0){
-                            retro = 
-                            <div className="balon1 p-2 m-0 position-relative" data-is="Rétroaction" key={"key"+index2}>
-                                <div className="float-right" dangerouslySetInnerHTML={{ __html: item.feedback }}></div>
-                            </div>
-                        }
-                        let row = 
-                                <div className="balon2 p-2 m-0 position-relative" data-is={time+"Activité: "+that.formatText(item.cmName)} key={index2}>
-                                    <div className="float-left">
-                                        <Button onClick={() => that.props.onEdit(item)} title="Modifier" variant="link"><FontAwesomeIcon icon={faPencilAlt}/></Button>
-                                        <p style={{fontWeight:'bold'}}>{item.noteDef.title}</p>
-                                        <p dangerouslySetInnerHTML={{ __html: item.noteContent.text }}></p>
-                                        {(item.noteDef.notifyTeacher === 1 ? <Button disabled={true} title="Rétroaction requise" size="sm" variant="warning"><FontAwesomeIcon icon={faCommentDots}/></Button> : null)}
-                                    </div>
-                                </div>
-                        return [row, retro];                                    
-                    }
-                )}
-        </div>;
-        return datagrid;
-        
-    }
-
-    getDataGridForTeacher(items){
-        let that = this;
-        let datagrid = <DataGrid orderBy={true}>
-        <DataGrid.Header>
-            <DataGrid.Header.Row>
-                <DataGrid.Header.Cell style={{width: 80}}>{"#"}</DataGrid.Header.Cell>
-                <DataGrid.Header.Cell >{"Titre de la note"}</DataGrid.Header.Cell>
-                <DataGrid.Header.Cell style={{width: 300}}>{"Note"}</DataGrid.Header.Cell>
-                <DataGrid.Header.Cell style={{width: 300}}>{"Rétroaction"}</DataGrid.Header.Cell>
-                <DataGrid.Header.Cell style={{width: 300}}>{"Activité"}</DataGrid.Header.Cell>
-                <DataGrid.Header.Cell style={{width: 80}}></DataGrid.Header.Cell>
-                <DataGrid.Header.Cell  style={{width: 80}}></DataGrid.Header.Cell>
-            </DataGrid.Header.Row>
-        </DataGrid.Header>
-        <DataGrid.Body>
-            {items.map((item, index2) => {
-                    let row = 
-                        <DataGrid.Body.Row key={index2} onDbClick={() => that.props.onEdit(item)}>
-                            <DataGrid.Body.Cell>{index2 + 1}</DataGrid.Body.Cell>
-                            <DataGrid.Body.Cell>{` ${item.noteDef.title}`}</DataGrid.Body.Cell>
-                            <DataGrid.Body.Cell>{that.formatText(item.noteContent.text)}</DataGrid.Body.Cell>
-                            <DataGrid.Body.Cell>{that.formatText(item.feedback)}</DataGrid.Body.Cell>
-                            <DataGrid.Body.Cell>{that.formatText(item.cmName)}</DataGrid.Body.Cell>
-                            <DataGrid.Body.Cell style={{textAlign: "center"}}>{(item.noteDef.notifyTeacher === 1 ? 
-                                <Button disabled={true} title="Rétroaction requise" size="sm" variant="warning"><FontAwesomeIcon icon={faCommentDots}/></Button> : null)}
-                            </DataGrid.Body.Cell>
-                            <DataGrid.Body.Cell style={{textAlign: 'center'}}>
-                                <ButtonGroup size="sm">
-                                    <Button onClick={() => that.props.onEdit(item)} title="Modifier" variant="primary"><FontAwesomeIcon icon={faPencilAlt}/></Button>
-                                </ButtonGroup>
-                            </DataGrid.Body.Cell>
-                        </DataGrid.Body.Row>
-                    return (row);                                    
-                }
-            )}
-        </DataGrid.Body>
-    </DataGrid>;
-        return datagrid;
-    }
-    
     getPctProgress(items){
         let result = 0;
 
