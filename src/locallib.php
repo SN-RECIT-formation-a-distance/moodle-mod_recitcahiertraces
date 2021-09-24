@@ -27,7 +27,7 @@ use recitcahiertraces\PersistCtrl;
  */
 use recitcahiercanada\PersistCtrl;
 
-class recitcahiertraces_portfolio_caller extends portfolio_module_caller_base {
+class recitcahiercanada_portfolio_caller extends portfolio_module_caller_base {
 
     protected $noteGroups;
     /** @var int Timestamp */
