@@ -24,7 +24,7 @@ require_once('classes/PersistCtrl.php');
  */
 use recitcahiercanada\PersistCtrl;
 
-class recitcahiertraces_portfolio_caller extends portfolio_module_caller_base {
+class recitcahiercanada_portfolio_caller extends portfolio_module_caller_base {
 
     protected $notes;
     /** @var int Timestamp */
@@ -134,6 +134,6 @@ class recitcahiertraces_portfolio_caller extends portfolio_module_caller_base {
     public function get_return_url() {
         global $CFG, $USER;
 
-        return $CFG->wwwroot . "/mod/recitcahiercanada/classes/ReportStudentNotes.php?cmId={$this->cm->id}&userId={$USER->id}&sf=1";
+        return $CFG->wwwroot .  "/mod/recitcahiercanada/view.php?id={$this->cm->id}";
     }
 }

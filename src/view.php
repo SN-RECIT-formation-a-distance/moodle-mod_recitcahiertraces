@@ -121,7 +121,7 @@ class MainView
         }
             
         $button = new \portfolio_add_button();
-        $button->set_callback_options('recitcahiertraces_portfolio_caller', array('id' => $this->cm->id), 'mod_recitcahiercanada');
+        $button->set_callback_options('recitcahiercanada_portfolio_caller', array('id' => $this->cm->id), 'mod_recitcahiercanada');
         return sprintf('data-portfolio-url="%s"', $button->to_html(PORTFOLIO_ADD_MOODLE_URL));
     }
 }
