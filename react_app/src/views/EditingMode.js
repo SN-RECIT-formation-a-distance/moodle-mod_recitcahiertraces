@@ -94,7 +94,7 @@ class NoteForm extends Component
                     <Tab eventKey={0} title="Note" style={styleTab}>
                         <Form.Row>
                             <Form.Group as={Col}>
-                                <Form.Label>{"Groupe de notes:"}</Form.Label>
+                                <Form.Label>{"Collection de notes:"}</Form.Label>
                                 <ComboBox placeholder={"Sélectionnez votre option"} required={true}  name="gId" value={data.gId} options={this.state.dropdownLists.groupList} onChange={this.onDataChange} />
                             </Form.Group>
                         </Form.Row>
@@ -372,7 +372,7 @@ export class EditionMode extends Component{
                 <Form>
                     <Form.Row>
                         <Form.Group as={Col}>
-                            <Form.Label>{"Sélectionnez le groupe de notes:"}</Form.Label>
+                            <Form.Label>{"Sélectionnez la collection de notes:"}</Form.Label>
                             <ComboBox placeholder={"Sélectionnez votre option"} value={(this.state.selectedGroup !== null ? this.state.selectedGroup.id : 0)} options={this.state.groupList} onChange={this.onSelectGroup} />
                         </Form.Group>
                     </Form.Row>
@@ -382,9 +382,9 @@ export class EditionMode extends Component{
                         <Button variant="primary" disabled={this.state.selectedGroup === null} onClick={this.onAdd} title="Ajouter une nouvelle note"><FontAwesomeIcon icon={faPlusCircle}/>{" Note"}</Button>
                     </ButtonGroup>
                     <ButtonGroup className="mr-4" >
-                        <Button variant="primary" onClick={() => this.showGroupForm(true)} title="Ajouter un nouveau groupe de notes"><FontAwesomeIcon icon={faPlusCircle}/>{" Groupe"}</Button>
-                        <Button variant="danger" disabled={this.state.selectedGroup === null} onClick={this.removeNoteGroup} title="Supprimer ce groupe de notes"><FontAwesomeIcon icon={faTrashAlt}/>{" Groupe"}</Button>
-                        <Button variant="primary" disabled={this.state.selectedGroup === null} onClick={() => this.showGroupForm(true)} title="Modifier ce groupe de notes"><FontAwesomeIcon icon={faPencilAlt}/>{" Groupe"}</Button>
+                        <Button variant="primary" onClick={() => this.showGroupForm(true)} title="Ajouter une nouvelle collection de notes"><FontAwesomeIcon icon={faPlusCircle}/>{" Collection"}</Button>
+                        <Button variant="danger" disabled={this.state.selectedGroup === null} onClick={this.removeNoteGroup} title="Supprimer cette collection de notes"><FontAwesomeIcon icon={faTrashAlt}/>{" Collection"}</Button>
+                        <Button variant="primary" disabled={this.state.selectedGroup === null} onClick={() => this.showGroupForm(true)} title="Modifier cette collection de notes"><FontAwesomeIcon icon={faPencilAlt}/>{" Collection"}</Button>
                     </ButtonGroup>
                     <ButtonGroup>
                         <a className="btn btn-primary" href={this.getSuggestedNotesPrintLink()} target="_blank" title="Imprimer les réponses suggérées"><FontAwesomeIcon icon={faPrint}/>{" Imprimer"}</a>

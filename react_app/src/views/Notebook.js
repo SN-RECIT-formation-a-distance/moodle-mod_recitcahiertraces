@@ -514,7 +514,7 @@ class NavActivities extends Component{
                                                         time = UtilsDateTime.formatTime(item.lastUpdate) + " - ";
                                                     }
                                                     if (item.cmName.length == 0){
-                                                        item.cmName = "Cette note n'a pas été intégrée.";
+                                                        item.cmName = "Cette note n'a pas été complétée.";
                                                     }
                                                     if (item.feedback.length > 0){
                                                         retro = 
