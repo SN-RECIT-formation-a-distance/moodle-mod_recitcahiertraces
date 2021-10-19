@@ -123,7 +123,7 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
         //list($course, $cm) = get_course_and_cm_from_gId($result->gId);
         $context = context_course::instance($dbData->courseId);
         $result = UserNote::create($dbData, $context);
-        
+
         return $result;
     }
 
