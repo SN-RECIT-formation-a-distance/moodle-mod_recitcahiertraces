@@ -73,7 +73,14 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
         
             foreach($tmp as $item){
                 $obj = new stdClass();
-                $obj->text = file_rewrite_pluginfile_urls($item->note, 'pluginfile.php', $context->id, 'mod_recitcahiercanada', 'personalnote', $item->noteItemId);
+                
+                $itemId = $item->userId;
+                if($this->moodleFileExist($context->id, 'mod_recitcahiercanada', 'personalnote',  $item->noteItemId)){
+                    $itemId = $item->noteItemId;
+                }
+                
+                $obj->text = file_rewrite_pluginfile_urls($item->note, 'pluginfile.php', $context->id, 'mod_recitcahiercanada', 'personalnote', $itemId);
+                
                 $obj->itemid = $item->noteItemId;
                 $item->note = $obj;
                 unset($item->noteItemId);	
@@ -142,12 +149,25 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
         
         //$result->note = file_rewrite_pluginfile_urls($result->note, 'pluginfile.php', $context->id, 'mod_recitcahiercanada', 'personalnote', $result->ccCmId);
         $obj = new stdClass();
-        $obj->text = file_rewrite_pluginfile_urls($result->note, 'pluginfile.php', $context->id, 'mod_recitcahiercanada', 'personalnote', $result->noteItemId);
+        
+        $itemId = $result->userId;
+        if($this->moodleFileExist($context->id, 'mod_recitcahiercanada', 'personalnote',  $result->noteItemId)){
+            $itemId = $result->noteItemId;
+        }
+
+        $obj->text = file_rewrite_pluginfile_urls($result->note, 'pluginfile.php', $context->id, 'mod_recitcahiercanada', 'personalnote', $itemId);
+
         $obj->itemid = $result->noteItemId;
         $result->note = $obj;
         unset($result->noteItemId);
         
         return $result;
+    }
+
+    public function moodleFileExist($contextId, $component, $filearea, $itemId){
+        $query = "select id from {$this->prefix}files where contextid = $contextId and component = '$component' and filearea = '$filearea' and itemid = $itemId limit 1";
+        $result = $this->mysqlConn->execSQLAndGetObject($query);
+        return !empty($result);
     }
 
     public function savePersonalNote($data, $flag){
