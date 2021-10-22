@@ -259,6 +259,7 @@ class WebApi extends recitcommon\MoodleApi
                 foreach ($g as $n){
                     $obj = new NoteDef();
                     $obj->group->name = $n->activityName . " (importé)";
+                    $obj->group->ct->mCmId = $cmId;
                     $obj->group = PersistCtrl::getInstance()->saveNoteGroup($obj->group);
 
                     PersistCtrl::getInstance()->saveNote($obj);
