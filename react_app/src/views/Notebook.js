@@ -523,13 +523,13 @@ class NavActivities extends Component{
                                                     }
                                                     if (item.feedback.length > 0){
                                                         retro = 
-                                                        <div className="balon1 p-2 m-0 position-relative" data-is="Rétroaction" key={"key"+index2}>
-                                                            <div className="float-right" dangerouslySetInnerHTML={{ __html: item.feedback }}></div>
+                                                        <div className="balon1 p-2 m-0 position-relative " data-is="Rétroaction" key={"key"+index2}>
+                                                            <div className="float-right " dangerouslySetInnerHTML={{ __html: item.feedback }}></div>
                                                         </div>
                                                     }
                                                     let row = 
                                                             <div className="balon2 p-2 m-0 position-relative" data-is={time+"Activité: "+that.formatText(item.cmName)} key={index2}>
-                                                                <div className="float-left">                                                                    
+                                                                <div className="float-left w-100">                                                                    
                                                                     <p style={{fontWeight:'bold'}}>
                                                                         {item.noteDef.title}
                                                                         <Button disabled={(item.nCmId === 0)} onClick={() => that.props.onEdit(item)} title="Modifier" variant="link"><FontAwesomeIcon icon={faPencilAlt}/></Button>
