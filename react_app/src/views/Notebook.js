@@ -457,6 +457,14 @@ class NavActivities extends Component{
             return;
         }
 
+        for(let items of result.data){
+            for(let i = 0; i < items.length; i++){
+                if (items[i].nCmId === 0){
+                    items[i].cmName = "Cette note n'a pas été complétée.";
+                }
+            }
+        }
+
         // If the user is trying to load automatically some note by URL
         if(!$glVars.urlParams.groupLoaded){
             let item = null;
@@ -513,9 +521,6 @@ class NavActivities extends Component{
                                                     if (item.lastUpdate > 0){
                                                         time = UtilsDateTime.formatTime(item.lastUpdate) + " - ";
                                                     }
-                                                    if (item.cmName.length == 0){
-                                                        item.cmName = "Cette note n'a pas été complétée.";
-                                                    }
                                                     if (item.feedback.length > 0){
                                                         retro = 
                                                         <div className="balon1 p-2 m-0 position-relative" data-is="Rétroaction" key={"key"+index2}>
@@ -527,7 +532,7 @@ class NavActivities extends Component{
                                                                 <div className="float-left">                                                                    
                                                                     <p style={{fontWeight:'bold'}}>
                                                                         {item.noteDef.title}
-                                                                        <Button onClick={() => that.props.onEdit(item)} title="Modifier" variant="link"><FontAwesomeIcon icon={faPencilAlt}/></Button>
+                                                                        <Button disabled={(item.nCmId === 0)} onClick={() => that.props.onEdit(item)} title="Modifier" variant="link"><FontAwesomeIcon icon={faPencilAlt}/></Button>
                                                                     </p>
                                                                     <p dangerouslySetInnerHTML={{ __html: item.noteContent.text }}></p>
                                                                 </div>

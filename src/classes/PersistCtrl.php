@@ -135,12 +135,8 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
                 $data->note->text = file_save_draft_area_files($data->note->itemid, $context->id, 'mod_recitcahiertraces', 'usernote', $data->note->itemid, array('subdirs'=>true), $data->note->text);	
 
                 $data->lastUpdate = time();
-                $fields = array("nid", "userid", "note", "note_itemid", "lastupdate");
-                $values = array($data->nId, $data->userId, $data->note->text, $data->note->itemid, $data->lastUpdate);
-                if (isset($data->nCmId)){
-                    $fields[] = "cmid";
-                    $values[] = $data->nCmId;
-                }
+                $fields = array("nid", "userid", "note", "note_itemid", "lastupdate", "cmid");
+                $values = array($data->nId, $data->userId, $data->note->text, $data->note->itemid, $data->lastUpdate, $data->nCmId);
             }
             else{
                 $fields = array("nid", "userid", "feedback");
@@ -150,9 +146,6 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
             if($data->unId == 0){
                 $query = $this->mysqlConn->prepareStmt("insertorupdate", "{$this->prefix}recitct_user_notes", $fields, $values);
                 $this->mysqlConn->execSQL($query);
-
-                //$obj = $this->mysqlConn->execSQLAndGetObject("select id from {$this->prefix}recitct_user_notes where gid = $data->gid and userid = $data->userId");
-                //$data->personalNoteId = $obj->id;
             }
             else{
                 $query = $this->mysqlConn->prepareStmt("update", "{$this->prefix}recitct_user_notes", $fields, $values, array("id"), array($data->unId));
@@ -187,14 +180,14 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
         return true;
     }
 
-    /*public function getUserFromItemId($itemId){
+    public function getUserFromItemId($itemId){
         
         $query = "select userId FROM {$this->prefix}recitct_user_notes where note_itemid = $itemId";
         
         $result = $this->mysqlConn->execSQLAndGetObject($query);
         if (!$result) return 0;
         return $result->userId;
-    }*/
+    }
 
     public function getGroupList($cmId){
         
