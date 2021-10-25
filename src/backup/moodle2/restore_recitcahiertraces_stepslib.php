@@ -35,6 +35,7 @@ class restore_recitcahiertraces_activity_structure_step extends restore_activity
         $paths[] = new restore_path_element('recitcahiertraces', '/activity/recitcahiertraces');
         $paths[] = new restore_path_element('recitct_groups', '/activity/recitcahiertraces/recitct_groups');
         $paths[] = new restore_path_element('recitct_notes', '/activity/recitcahiertraces/recitct_groups/recitct_notes');
+        $paths[] = new restore_path_element('recitct_user_notes', '/activity/recitcahiertraces/recitct_groups/recitct_notes/recitct_user_notes');
 
         // Return the paths wrapped into standard activity structure
         return $this->prepare_activity_structure($paths);
@@ -80,12 +81,21 @@ class restore_recitcahiertraces_activity_structure_step extends restore_activity
         $newitemid = $DB->insert_record('recitct_notes', $data); // insert the recitct_notes record
         $this->set_mapping('recitct_notes', $oldid, $newitemid, true);        
     }
+    protected function process_recitct_user_notes($data) {
+         global $DB;
+ 
+         $data = (object)$data;
+         $data->nid = $this->get_mappingid('recitct_notes', $data->nid);
+ 
+         // insert the recitcc_user_notes record
+         $newitemid = $DB->insert_record('recitct_user_notes', $data);
+     }
 
     protected function after_execute() {
         // Add recitcahiertraces related files, no need to match by itemname (just internally handled context)
         $this->add_related_files('mod_recitcahiertraces', 'intro', null);
-        //$this->add_related_files('mod_recitct_user_notes', 'note', null);
-        //$this->add_related_files('mod_recitct_user_notes', 'feedback', null);
+        $this->add_related_files('mod_recitcahiertraces', 'usernote', null);
+        //$this->add_related_files('mod_recitcahiertraces', 'feedback', null);
     }
 }
 

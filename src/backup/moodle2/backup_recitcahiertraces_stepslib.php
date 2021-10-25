@@ -41,15 +41,18 @@ class backup_recitcahiertraces_activity_structure_step extends backup_activity_s
         $recitct_notes = new backup_nested_element('recitct_notes', array('id'), array(
             'intcode', 'gid', 'title', 'slot', 'templatenote', 'suggestednote', 'teachertip', 'notifyteacher', 'lastupdate'));
 
+       $recitct_user_notes = new backup_nested_element('recitct_user_notes', array('id'), array('nid', 'userid', 'note', 'note_itemid', 'feedback', 'grade', 'lastupdate', 'cmid'));
 
         // Build the tree
        $recitct_groups->add_child($recitct_notes);
+       $recitct_notes->add_child($recitct_user_notes);
        $recitcahiertraces->add_child($recitct_groups);
 
         // Define sources
         $recitcahiertraces->set_source_table('recitcahiertraces', array('id' => backup::VAR_ACTIVITYID));
         $recitct_groups->set_source_table('recitct_groups', array('ctid' => backup::VAR_PARENTID));
         $recitct_notes->set_source_table('recitct_notes', array('gid' => backup::VAR_PARENTID));
+        $recitct_user_notes->set_source_table('recitct_user_notes', array('nid' => backup::VAR_PARENTID));
 
         // Define id annotations
         //$recitcahiertraces->annotate_ids('question', 'questionid');
@@ -57,8 +60,8 @@ class backup_recitcahiertraces_activity_structure_step extends backup_activity_s
         // Define file annotations
         $recitcahiertraces->annotate_files('mod_recitcahiertraces', 'intro', null); 
         $recitct_notes->annotate_files('recitct_notes', 'templatenote', null);
-       // $mdl_recitct_user_notes->annotate_files('mdl_recitct_user_notes', 'note', null); // This file area hasn't itemid
-       // $mdl_recitct_user_notes->annotate_files('mdl_recitct_user_notes', 'feedback', null); // This file area hasn't itemid       
+        $recitct_user_notes->annotate_files('recitct_user_notes', 'note', null); // This file area hasn't itemid
+        $recitct_user_notes->annotate_files('recitct_user_notes', 'feedback', null); // This file area hasn't itemid       
 
         // Return the root element (recitcahiertraces), wrapped into standard activity structure
         return $this->prepare_activity_structure($recitcahiertraces);
