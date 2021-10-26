@@ -247,24 +247,15 @@ class WebApi extends recitcommon\MoodleApi
     public function importCC($request){
         global $DB, $USER;
         try{            
-            $cmId = intval($request['cmId']);
+            $mCmId = intval($request['cmId']);
             $importcmId = intval($request['importcmid']);
 
-            $this->canUserAccess('a', $cmId);
+            $this->canUserAccess('a', $mCmId);
             $this->canUserAccess('a', $importcmId);
             
-            $data = \recitcahiercanada\PersistCtrl::getInstance($DB, $USER)->getPersonalNotes($importcmId, 0);
+            $data = \recitcahiercanada\PersistCtrl::getInstance($DB, $USER)->getCmSuggestedNotes($importcmId);
 
-            foreach ($data as $g){
-                foreach ($g as $n){
-                    $obj = new NoteDef();
-                    $obj->group->name = $n->activityName . " (importé)";
-                    $obj->group->ct->mCmId = $cmId;
-                    $obj->group = PersistCtrl::getInstance()->saveNoteGroup($obj->group);
-
-                    PersistCtrl::getInstance()->saveNote($obj);
-                }
-            }
+            PersistCtrl::getInstance()->importCahierCanada($mCmId, $data);            
             
             return new WebApiResult(true);
         }

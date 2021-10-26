@@ -723,7 +723,6 @@ class ImportForm extends Component{
             </div>;
 
         let main = <Modal title={`Importer un cahier canada`} body={body} footer={footer} onClose={this.props.onClose} width={"400px"}/>;
-
         return main;
     }
 
@@ -737,9 +736,13 @@ class ImportForm extends Component{
         let that = this;
         this.setState({importing: true});
         let callback = function(result){
-            if(!result.success){
-                FeedbackCtrl.instance.showError($glVars.i18n.appName, result.msg);
+            if(result.success){
+                $glVars.feedback.showInfo($glVars.i18n.tags.appName, $glVars.i18n.tags.msgSuccess, 3);
             }
+            else{
+                $glVars.feedback.showError($glVars.i18n.appName, result.msg);
+            }
+
             that.setState({importing: false});
             that.props.onClose(that.state.data.name);
         }

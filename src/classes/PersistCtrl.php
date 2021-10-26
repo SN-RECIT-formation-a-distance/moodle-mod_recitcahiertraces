@@ -205,6 +205,17 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
         return $result;
     }
 
+    public function getGroupByName($name){
+        $name = mysqli_real_escape_string($this->mysqlConn->getMySQLi(), $name);
+
+        $query = "select t1.id as gId, t1.name as groupName, t1.ctid as ctId FROM {$this->prefix}recitct_groups as t1
+        where t1.name = \"$name\" order by name asc limit 1";
+        
+        $result = $this->mysqlConn->execSQLAndGetObject($query);
+
+        return (empty($result) ? null : NoteGroup::create($result));
+    }
+
     public function saveNoteGroup($data){
         try{		   
             if($data->ct->id == 0){
@@ -216,14 +227,14 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
 
             if($data->id == 0){
                 $query = $this->mysqlConn->prepareStmt("insert", "{$this->prefix}recitct_groups", $fields, $values);
+                $this->mysqlConn->execSQL($query);
                 $data->id = $this->mysqlConn->getLastInsertId("{$this->prefix}recitct_groups", "id");
             }
             else{
                 $query = $this->mysqlConn->prepareStmt("update", "{$this->prefix}recitct_groups", $fields, $values, array("id"), array($data->id));
+                $this->mysqlConn->execSQL($query);
             }
 
-            $this->mysqlConn->execSQL($query);
-            
             return $data;
         }
         catch(Exception $ex){
@@ -565,6 +576,53 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
         }
 
         return $result;
+    }
+
+    public function importCahierCanada($mCmId, $data){
+        try{
+            $this->mysqlConn->beginTransaction();
+
+            foreach ($data as $collection){
+                foreach ($collection as $note){
+                    if($note->garbage == 1){ continue; }
+
+                    $query = "select t1.id FROM {$this->prefix}recitct_notes as t1 where t1.intcode = \"$note->intCode\" order by id desc limit 1";
+                    $intCode = $this->mysqlConn->execSQLAndGetObject($query);
+
+                    if(!empty($intCode)){ continue;}
+                    
+                    $obj = new NoteDef();
+    
+                    $obj->group->name = $note->activityName . " (importé)";
+                    $obj->group->ct->mCmId = $mCmId;
+    
+                    $group = $this->getGroupByName($obj->group->name);
+                    
+                    if($group == null){
+                        $obj->group = PersistCtrl::getInstance()->saveNoteGroup($obj->group);
+                    }
+                    else{
+                        $obj->group = $group;
+                        
+                    }
+                   
+                    $obj->intCode = $note->intCode;
+                    $obj->title = $note->noteTitle;
+                    $obj->templateNote = $note->templateNote;
+                    $obj->suggestedNote = $note->suggestedNote;
+                    $obj->teacherTip = $note->teacherTip;
+                    $obj->slot = $note->slot;
+                    $obj->notifyTeacher = $note->notifyTeacher;
+                    PersistCtrl::getInstance()->saveNote($obj);
+                }
+            }
+
+            $this->mysqlConn->commitTransaction();
+        }
+        catch(Exception $ex){
+            $this->mysqlConn->rollbackTransaction();
+            throw $ex;
+        }
     }
 }
 
