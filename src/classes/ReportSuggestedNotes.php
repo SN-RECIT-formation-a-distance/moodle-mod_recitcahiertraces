@@ -7,7 +7,7 @@ use recitcommon\Utils;
 use recitcahiercanada\PersistCtrl;
 
 $cmId = required_param('cmId', PARAM_INT);
-$cId = required_param('cId', PARAM_INT);
+$mCmId = required_param('cId', PARAM_INT);
 
 require_login();
 
@@ -15,7 +15,7 @@ require_login();
 
 $theme = theme_config::load('recit');
 
-list ($course, $cm) = get_course_and_cm_from_cmid($cId, 'recitcahiercanada');
+list ($course, $cm) = get_course_and_cm_from_cmid($mCmId, 'recitcahiercanada');
 
 $brandImage = "{$CFG->wwwroot}/mod/recitcahiercanada/pix/recit-logo.png";
 $customerLogo = $theme->setting_file_url('logo', 'logo');
@@ -34,7 +34,7 @@ if(!Utils::isAdminRole($roles)){
 }
 
 
-$pNotes = PersistCtrl::getInstance($DB, $USER)->getCmSuggestedNotes($course->id, $cmId);
+$pNotes = PersistCtrl::getInstance($DB, $USER)->getCmSuggestedNotes($mCmId, $cmId);
 
 $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahiercanada'), get_string('suggestednote', 'mod_recitcahiercanada'), get_string('printedOn', 'mod_recitcahiercanada'), date('Y-m-d H:i:s'));
 ?>

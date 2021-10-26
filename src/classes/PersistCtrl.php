@@ -238,11 +238,8 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
         return $result;
     }
 
-    /**
-     * Fetch a cmNote (by unique ID = ccCmId) or a set of cmNotes (cmId+ccId = cmId and CahierCanada ID)
-     */
-    public function getCmSuggestedNotes($cId = 0, $cmId = 0){
-        $cIdStmt = ($cId == 0 ? "1" : " t1_1.course = $cId");
+    public function getCmSuggestedNotes($mCmId = 0, $cmId = 0){
+        $mCmIdStmt = ($mCmId == 0 ? "1" : " t2.id = $mCmId");
 
         $cmStmt = "1";
         if($cmId > 0){
@@ -253,7 +250,8 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
                     t1.teachertip as teacherTip, t1.lastupdate as lastUpdate,  t1.notifyteacher as notifyTeacher
                     from {$this->prefix}recitcc_cm_notes as t1
                     inner join {$this->prefix}recitcahiercanada as t1_1 on t1.ccid = t1_1.id
-                    where $cIdStmt and $cmStmt
+                    inner join {$this->prefix}course_modules as t2 on t1_1.id = t2.instance and module = (select id from {$this->prefix}modules where name = 'recitcahiercanada')
+                    where $cmStmt and $mCmIdStmt
                     group by t1.id
                     order by slot asc";
 
@@ -335,8 +333,6 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
             throw $ex;
         }
     }
-
-
 
     public function switchCcCmNoteSlot($from, $to){
         try{
@@ -611,6 +607,7 @@ class CmNote
     public $lastUpdate = 0;
     public $notifyTeacher = 0;
     public $tagList = array();
+    public $garbage = 0;
 }
 
 class PersonalNote
