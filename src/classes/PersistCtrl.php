@@ -403,6 +403,19 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
 
         return (!$result ? false : true);
     }
+    
+    public function removeCCUserdata($id){
+        $query = "DELETE t3
+        FROM {$this->prefix}recitcahiertraces as t1
+        left join {$this->prefix}recitct_groups as t4 on t1.id = t4.ctid
+        left JOIN {$this->prefix}recitct_notes as t2 ON t4.id = t2.gid
+        left JOIN {$this->prefix}recitct_user_notes as t3 ON t2.id = t3.nid
+        WHERE t1.id = $id";
+
+        $result = $this->mysqlConn->execSQL($query);
+
+        return (!$result ? false : true);
+    }
 
     public function createInstantMessage($userFrom, $userTo, $courseId, $msg, $component = 'mod_recitcahiertraces', $name = 'note_updated', $subject = 'Notification Cahier de Traces', $notification = '1'){
         $message = new \core\message\message();

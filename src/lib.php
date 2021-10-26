@@ -100,6 +100,32 @@ function recitcahiertraces_delete_instance($id) {
     return PersistCtrl::getInstance($DB, $USER)->removeCcInstance($id);
 }
 
+function recitcahiertraces_reset_userdata($data) {
+    global $DB, $USER;
+    if (!empty($data->reset_userdata)) {
+        $recitcahiertraces = $DB->get_records('recitcahiertraces', array('course'=>$data->courseid));
+        foreach ($recitcahiertraces as $v){
+            $id = $v->id;
+            PersistCtrl::getInstance($DB, $USER)->removeCCUserdata($id);
+        }
+    }
+    return array(
+        array('component' => get_string('modulenameplural', 'recitcahiertraces'),
+        'item' => get_string('modulenameplural', 'recitcahiertraces'),
+        'error' => false)
+    );
+}
+
+function recitcahiertraces_reset_course_form_defaults($course) {
+    return array('reset_userdata' => 1);
+}
+
+function recitcahiertraces_reset_course_form_definition(&$mform) {
+    $mform->addElement('header', 'recitcahiertracesheader', get_string('modulenameplural', 'recitcahiertraces'));
+
+    $mform->addElement('checkbox', 'reset_userdata', get_string('reset'));
+
+}
 
 /**
  * file serving callback
