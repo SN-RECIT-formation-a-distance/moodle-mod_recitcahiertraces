@@ -72,7 +72,7 @@ $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahie
             $note = current($group);
             echo '<div class="activity-container">';
 
-            echo sprintf("<h4 class='activity-name'>%s: %s</h4>", get_string('group', 'mod_recitcahiertraces'), $userNote->noteDef->group->name);
+            echo sprintf("<h4 class='activity-name'>%s: %s</h4>", get_string('group', 'mod_recitcahiertraces'), $note->noteDef->group->name);
 
             foreach($group as $note){
                 // overflow = hidden for the notes that overflow the page dimensions
