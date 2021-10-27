@@ -508,8 +508,8 @@ class NavActivities extends Component{
 
         let studentView = 
             <Row>
-                <Col sm={12} md={12} lg={12} xl={3}>{navItems}</Col>
-                <Col sm={12} md={12} lg={12} xl={9}>
+                <Col sm={12} md={12} lg={5} xl={4}>{navItems}</Col>
+                <Col sm={12} md={12} lg={7} xl={8}>
                     <Tab.Content>
                         {this.state.dataProvider.map(function(items, index){
                             let result=
