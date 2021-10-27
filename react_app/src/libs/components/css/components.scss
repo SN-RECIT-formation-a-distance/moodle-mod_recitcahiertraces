@@ -31,47 +31,44 @@
 }
 
 
-.groupContent {
-    overflow-y: auto;
-    height: 40vh;
-    
-.balon1, .balon2 {
-	margin-top: 10px !important;
-	margin-bottom: 10px !important;
-}
+.groupContent {      
+    .balon1, .balon2 {
+        margin-top: 10px !important;
+        margin-bottom: 10px !important;
+    }
 
 
-.balon1 div {
-	background: #42a5f5;
-	color: #fff !important;
-	border-radius: 20px 20px 3px 20px;
-	display: block;
-	max-width: 75%;
-	padding: 7px 13px 7px 13px;
-}
+    .balon1 div {
+        background: #42a5f5;
+        color: #fff !important;
+        border-radius: 20px 20px 3px 20px;
+        display: block;
+        max-width: 75%;
+        padding: 7px 13px 7px 13px;
+    }
 
 
-.balon2 div {
-	background: #f1f1f1;
-	color: #000 !important;
-	border-radius: 20px 20px 20px 3px;
-	display: block;
-	max-width: 75%;
-	padding: 7px 13px 7px 13px;
-}
-	
-.balon1:after, .balon2:after {
-	content: attr(data-is);
-	position: absolute;
-	left: 15px;
-	bottom: -15px;
-	display: block;
-	font-size: .750rem;
-	color: rgba(84, 110, 122,1.0);  
-}
+    .balon2 div {
+        background: #f1f1f1;
+        color: #000 !important;
+        border-radius: 20px 20px 20px 3px;
+        display: block;
+        max-width: 75%;
+        padding: 7px 13px 7px 13px;
+    }
+        
+    .balon1:after, .balon2:after {
+        content: attr(data-is);
+        position: absolute;
+        left: 15px;
+        bottom: -15px;
+        display: block;
+        font-size: .750rem;
+        color: rgba(84, 110, 122,1.0);  
+    }
 
-.balon1:after {
-    left: unset;
-    right: 15px;
-}
+    .balon1:after {
+        left: unset;
+        right: 15px;
+    }
 }

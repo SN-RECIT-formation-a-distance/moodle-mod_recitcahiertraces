@@ -489,7 +489,7 @@ class NavActivities extends Component{
         let that = this;
 
         let navItems = 
-            <Nav variant="pills" className="flex-column">
+            <>
                 {this.state.dataProvider.map(function(items, index){
                     let groupName = JsNx.at(items, 0).noteDef.group.name;
 
@@ -504,11 +504,15 @@ class NavActivities extends Component{
                                 </Nav.Link>
                             </Nav.Item>;
                 })}
-            </Nav>;
+            </>;
 
         let studentView = 
             <Row>
-                <Col sm={12} md={12} lg={5} xl={4}>{navItems}</Col>
+                <Col sm={12} md={12} lg={5} xl={4}>
+                    <Nav variant="pills" className="flex-column">
+                        {navItems}
+                    </Nav>
+                </Col>
                 <Col sm={12} md={12} lg={7} xl={8}>
                     <Tab.Content>
                         {this.state.dataProvider.map(function(items, index){
@@ -551,7 +555,11 @@ class NavActivities extends Component{
 
         let teacherView = 
             <div>
-                <Row>{navItems}</Row>
+                <Row>
+                    <Nav variant="pills" className="flex-row">
+                        {navItems}
+                    </Nav>    
+                </Row>
                 <Row>
                     <Tab.Content style={{width: "100%"}}>
                         {this.state.dataProvider.map(function(items, index){
