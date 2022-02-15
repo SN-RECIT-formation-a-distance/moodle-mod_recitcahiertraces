@@ -1,5 +1,5 @@
 echo off
-set zipName=mod_recitcahiertraces
+set zipName=mod_recitcahiercanada
 set pluginName=recitcahiercanada
 
 rem remove the current 
