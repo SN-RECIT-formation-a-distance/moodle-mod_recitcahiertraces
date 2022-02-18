@@ -5,3 +5,4 @@ Release notes
 	
 	In this version, the backend files PersistCtrlCahierTraces and 	ApiCahierTraces were finally removed from local_recitcommon. This implies that only installations with R13 can move to R14. The installations of R12 or less which try to go directly to R14 will have a problem with required files.
 	
+	

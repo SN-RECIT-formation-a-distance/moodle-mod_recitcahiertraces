@@ -16,6 +16,7 @@ require_login();
 $theme = theme_config::load('recit');
 
 list ($course, $cm) = get_course_and_cm_from_cmId($cId);
+
 $brandImage = "{$CFG->wwwroot}/mod/recitcahiertraces/pix/recit-logo.png";
 $customerLogo = $theme->setting_file_url('logo', 'logo');
 if(!empty($customerLogo)){
