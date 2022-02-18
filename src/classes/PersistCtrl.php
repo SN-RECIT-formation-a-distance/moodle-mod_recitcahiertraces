@@ -505,7 +505,6 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
         $result = array();
         foreach($recipients as $userId){
             $message = $this->createInstantMessage($this->signedUser, \core_user::get_user($userId), $courseId, $msg);
-
             $result[] = message_send($message);
         }
         

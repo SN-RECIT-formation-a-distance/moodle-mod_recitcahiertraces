@@ -122,7 +122,6 @@ class WebApi extends recitcommon\MoodleApi
             $cmId = intval($request['cmId']);
 
             $result = PersistCtrl::getInstance()->getGroupList($cmId);
-
             $this->prepareJson($result);
             return new WebApiResult(true, $result);
         }
@@ -180,7 +179,6 @@ class WebApi extends recitcommon\MoodleApi
             $this->canUserAccess('a', $cmId);
             
             PersistCtrl::getInstance()->removeNoteGroup($gId);
-
             return new WebApiResult(true);
         }
         catch(Exception $ex){
