@@ -255,9 +255,11 @@ class WebApi extends recitcommon\MoodleApi
             
             $data = \recitcahiercanada\PersistCtrl::getInstance($DB, $USER)->getCmSuggestedNotes($importcmId);
 
-            PersistCtrl::getInstance()->importCahierCanada($mCmId, $data);            
+            $info = PersistCtrl::getInstance()->importCahierCanada($mCmId, $data);
+            $result = array('info' => $info['imported'] . " notes ont été importé, " . $info['group'] . " groupes de notes ont été créé, " . $info['skipped'] . " notes ont été ignoré, " . $info['error'] . " notes ont échoué l'importation", 'data' => $info);
+            $this->prepareJson($result);
             
-            return new WebApiResult(true);
+            return new WebApiResult(true, $result);
         }
         catch(Exception $ex){
             return new WebApiResult(false, null, $ex->GetMessage());

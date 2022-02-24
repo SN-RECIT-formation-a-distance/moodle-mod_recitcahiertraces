@@ -581,15 +581,25 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
     public function importCahierCanada($mCmId, $data){
         try{
             $this->mysqlConn->beginTransaction();
+            $numImported = 0;
+            $numSkipped = 0;
+            $numError = 0;
+            $groupCreated = 0;
 
             foreach ($data as $collection){
                 foreach ($collection as $note){
-                    if($note->garbage == 1){ continue; }
+                    if($note->garbage == 1){ 
+                        $numSkipped++;
+                        continue; 
+                    }
 
                     $query = "select t1.id FROM {$this->prefix}recitct_notes as t1 where t1.intcode = \"$note->intCode\" order by id desc limit 1";
                     $intCode = $this->mysqlConn->execSQLAndGetObject($query);
 
-                    if(!empty($intCode)){ continue;}
+                    if(!empty($intCode)){ 
+                        $numSkipped++;
+                        continue;
+                    }
                     
                     $obj = new NoteDef();
     
@@ -600,10 +610,10 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
                     
                     if($group == null){
                         $obj->group = PersistCtrl::getInstance()->saveNoteGroup($obj->group);
+                        $groupCreated++;
                     }
                     else{
                         $obj->group = $group;
-                        
                     }
                    
                     $obj->intCode = $note->intCode;
@@ -613,11 +623,17 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
                     $obj->teacherTip = $note->teacherTip;
                     $obj->slot = $note->slot;
                     $obj->notifyTeacher = $note->notifyTeacher;
-                    PersistCtrl::getInstance()->saveNote($obj);
+                    $note = PersistCtrl::getInstance()->saveNote($obj);
+                    if ($note){
+                        $numImported++;
+                    }else{
+                        $numError++;
+                    }
                 }
             }
 
             $this->mysqlConn->commitTransaction();
+            return array('imported' => $numImported, 'skipped' => $numSkipped, 'error' => $numError, 'group' => $groupCreated);
         }
         catch(Exception $ex){
             $this->mysqlConn->rollbackTransaction();
