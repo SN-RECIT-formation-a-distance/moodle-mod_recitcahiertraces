@@ -737,7 +737,7 @@ class ImportForm extends Component{
         this.setState({importing: true});
         let callback = function(result){
             if(result.success){
-                $glVars.feedback.showInfo($glVars.i18n.tags.appName, result.data.info, 3);
+                $glVars.feedback.showInfo($glVars.i18n.tags.appName, result.data.info);
             }
             else{
                 $glVars.feedback.showError($glVars.i18n.appName, result.msg);
