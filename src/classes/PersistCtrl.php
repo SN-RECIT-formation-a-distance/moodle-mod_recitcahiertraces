@@ -92,11 +92,14 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
      * Other method: gid and userId
      * From filter plugin method: userId and intCode
      */
-    public function getUserNote($nId, $userId, $intCode = null){
+    public function getUserNote($nId, $userId, $intCode = null, $courseId = null){
         $whereStmt = "0";
         
         if($intCode != null){
             $whereStmt = " (t1.intcode = '$intCode') ";
+            if($courseId != null){
+                $whereStmt .= " and (t1_1.course = $courseId) ";
+            }
         }
         else if($nId > 0){
             $whereStmt = " t1.id = $nId";
