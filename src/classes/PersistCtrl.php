@@ -89,21 +89,21 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
 
     /**
      * Fetch the user note (modified to work with exporting/importing the cahier de traces on the same database or elsewhere)
-     * Other method: gid and userId
-     * From filter plugin method: userId and intCode
+     * From filter plugin method: userId and intCode and courseId
      */
-    public function getUserNote($nId, $userId, $intCode = null, $courseId = null){
+    public function getUserNote($nId, $userId, $intCode = null, $courseId = 0){
         $whereStmt = "0";
         
-        if($intCode != null){
-            $whereStmt = " (t1.intcode = '$intCode') ";
-            if($courseId != null){
-                $whereStmt .= " and (t1_1.course = $courseId) ";
-            }
+        if(($userId > 0) && ($intCode != null) && ($courseId > 0)){
+            $whereStmt = " (t1.intcode = '$intCode' and t1_1.course = $courseId) ";
         }
         else if($nId > 0){
             $whereStmt = " t1.id = $nId";
         }
+        else{
+            throw new Exception("Cette fonction requiert comme paramètre 'nId=$nId' ou '(userId=$userId et intCode=$intCode et courseId=$courseId)'.");
+        }
+
         //(case length(recit_strip_tags(coalesce(t2.note, ''))) when 0 then t1.templatenote else t2.note end) as note,
         $query = "select t1.title as title, t1.gid as gId, t3.ctid as ctId, coalesce(t1.intcode, '') as intCode,
         t2.id unId, t2.userid as userId, t1.id as nId,
@@ -206,18 +206,7 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
         }
         
         return $result;
-    }
-
-    public function getGroupByName($name){
-        $name = mysqli_real_escape_string($this->mysqlConn->getMySQLi(), $name);
-
-        $query = "select t1.id as gId, t1.name as groupName, t1.ctid as ctId FROM {$this->prefix}recitct_groups as t1
-        where t1.name = \"$name\" order by name asc limit 1";
-        
-        $result = $this->mysqlConn->execSQLAndGetObject($query);
-
-        return (empty($result) ? null : NoteGroup::create($result));
-    }
+    }  
 
     public function saveNoteGroup($data){
         try{		   
@@ -596,7 +585,13 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
                         continue; 
                     }
 
-                    $query = "select t1.id FROM {$this->prefix}recitct_notes as t1 where t1.intcode = \"$note->intCode\" order by id desc limit 1";
+                    // check if the integration code already exists
+                    $query = "select t1.id, t3.course FROM {$this->prefix}recitct_notes as t1 
+                    inner join {$this->prefix}recitct_groups as t2 on t1.gid = t2.id
+                    inner join {$this->prefix}recitcahiertraces as t3 on t2.ctid = t3.id
+                    where t1.intcode = \"{$note->intCode}\" and t3.course = (select course from mdl_course_modules where id = $mCmId)
+                    order by id desc limit 1";
+
                     $intCode = $this->mysqlConn->execSQLAndGetObject($query);
 
                     if(!empty($intCode)){ 
@@ -608,8 +603,14 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
     
                     $obj->group->name = $note->activityName . " (importé)";
                     $obj->group->ct->mCmId = $mCmId;
-    
-                    $group = $this->getGroupByName($obj->group->name);
+                    $obj->group->ct->id = $this->getCtIdFromCmId($mCmId);
+
+                    // check if the collection already exists
+                    $name = mysqli_real_escape_string($this->mysqlConn->getMySQLi(), $obj->group->name);
+                    $query = "select t1.id as gId, t1.name as groupName, t1.ctid as ctId FROM {$this->prefix}recitct_groups as t1
+                        where t1.name = \"$name\" and t1.ctid = {$obj->group->ct->id} order by name asc limit 1";
+                    $result = $this->mysqlConn->execSQLAndGetObject($query);
+                    $group = (empty($result) ? null : NoteGroup::create($result));
                     
                     if($group == null){
                         $obj->group = PersistCtrl::getInstance()->saveNoteGroup($obj->group);

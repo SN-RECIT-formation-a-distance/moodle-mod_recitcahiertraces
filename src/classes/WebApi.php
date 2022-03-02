@@ -231,7 +231,7 @@ class WebApi extends recitcommon\MoodleApi
             $modinfo = get_fast_modinfo($course->id);
 
             foreach ($modinfo->cms as $cm){
-                if ($cm->modname == 'recitcahiercanada'){
+                if ($cm->modname == 'recitcahiercanada' && $cm->deletioninprogress == 0){
                     $result[] = array('id' => $cm->id, 'name' => $cm->name);
                 }
             }
@@ -249,6 +249,10 @@ class WebApi extends recitcommon\MoodleApi
         try{            
             $mCmId = intval($request['cmId']);
             $importcmId = intval($request['importcmid']);
+
+            if(($mCmId == 0) || ($importcmId == 0)){
+                return new WebApiResult(true, null, "Aucune donnée n'a été importée.");
+            }
 
             $this->canUserAccess('a', $mCmId);
             $this->canUserAccess('a', $importcmId);
