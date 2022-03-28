@@ -14,7 +14,6 @@
 	.cahier-traces-print-notes .activity-container{margin-bottom: 3rem;}
 	.cahier-traces-print-notes .activity-container .activity-name{font-weight: 400; background-color: #fafafa; padding: .5rem; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd;}
 	.cahier-traces-print-notes .activity-container .note-container{overflow: hidden; margin-top: 2rem; margin-bottom: 2rem; padding: 1rem;}
-	.cahier-traces-print-notes .activity-container .note-container .note-title{font-weight: bold; font-size: 1.18rem; margin-bottom: 2rem;}
 	.cahier-traces-print-notes .activity-container .note-container .student-note{margin-right: 5%;}
 	.cahier-traces-print-notes .activity-container .note-container .teacher-feedback{margin-top: 15px; margin-left: 15%;}
 }

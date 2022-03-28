@@ -48,4 +48,4 @@ $string['email'] = 'Courriel';
 $string['tags'] = 'Tags';
 $string['typeToSearch'] = 'Tapez pour rechercher...';
 $string['messageprovider:note_updated'] = 'Notification du Cahier de Traces';
-$string['group'] = 'Groupe';
+$string['group'] = 'Collection';

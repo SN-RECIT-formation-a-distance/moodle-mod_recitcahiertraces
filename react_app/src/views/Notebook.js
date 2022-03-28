@@ -585,11 +585,11 @@ class NavActivities extends Component{
                                                             <DataGrid.Body.Cell>{that.formatText(item.feedback)}</DataGrid.Body.Cell>
                                                             <DataGrid.Body.Cell>{that.formatText(item.cmName, 35)}</DataGrid.Body.Cell>
                                                             <DataGrid.Body.Cell style={{textAlign: "center"}}>{(item.noteDef.notifyTeacher === 1 ? 
-                                                                <Button disabled={true} title="Rétroaction requise" size="sm" variant="warning"><FontAwesomeIcon icon={faCommentDots}/></Button> : null)}
+                                                                <Button disabled={true} title="Rétroaction requise" size="sm" variant="outline-warning"><FontAwesomeIcon icon={faCommentDots}/></Button> : null)}
                                                             </DataGrid.Body.Cell>
                                                             <DataGrid.Body.Cell style={{textAlign: 'center'}}>
-                                                                <ButtonGroup size="sm">
-                                                                    <Button onClick={() => that.props.onEdit(item)} title="Modifier" variant="primary"><FontAwesomeIcon icon={faPencilAlt}/></Button>
+                                                                <ButtonGroup >
+                                                                    <Button  size="sm" onClick={() => that.props.onEdit(item)} title="Modifier" variant="outline-primary"><FontAwesomeIcon icon={faPencilAlt}/></Button>
                                                                 </ButtonGroup>
                                                             </DataGrid.Body.Cell>
                                                         </DataGrid.Body.Row>
@@ -779,8 +779,8 @@ class ActionBar extends Component{
     render(){
         let main = 
             <div style={{marginBottom: "1rem"}}>
-                <a href={this.getPrintLink(1)} target="_blank"><FontAwesomeIcon icon={faPrint}/>{" Imprimer des notes"}</a>
-                {$glVars.signedUser.portfolioUrl && <a href={$glVars.signedUser.portfolioUrl} target="_blank" style={{marginLeft:'15px'}}><FontAwesomeIcon icon={faFileExport}/>{" Exporter des notes vers portfolio"}</a>}
+                <a className='btn btn-outline-primary' href={this.getPrintLink(1)} target="_blank"><FontAwesomeIcon icon={faPrint}/>{" Imprimer des notes"}</a>
+                {$glVars.signedUser.portfolioUrl && <a href={$glVars.signedUser.portfolioUrl} className='btn btn-outline-primary' target="_blank" style={{marginLeft:'15px'}}><FontAwesomeIcon icon={faFileExport}/>{" Exporter des notes vers portfolio"}</a>}
             </div>;
 
         return main;

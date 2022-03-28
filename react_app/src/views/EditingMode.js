@@ -1,7 +1,7 @@
 
 import React, { Component } from 'react';
-import {ButtonGroup, Button, Form, Col, Tabs, Tab, ButtonToolbar, DropdownButton, Dropdown} from 'react-bootstrap';
-import {faPencilAlt, faPlusCircle, faWrench, faTrashAlt, faCopy, faPrint, faGripVertical, faFileImport, faArrowsAlt} from '@fortawesome/free-solid-svg-icons';
+import {ButtonGroup, Button, Form, Col, Tabs, Tab, ButtonToolbar} from 'react-bootstrap';
+import {faPencilAlt, faPlusCircle, faWrench, faTrashAlt, faCopy, faPrint,  faFileImport, faArrowsAlt, faSortAmountDownAlt} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {ComboBox, FeedbackCtrl, DataGrid, InputNumber, ToggleButtons, Modal} from '../libs/components/Components';
 import {JsNx, UtilsMoodle} from '../libs/utils/Utils';
@@ -377,15 +377,15 @@ export class EditionMode extends Component{
                         </Form.Group>
                     </Form.Row>
                 </Form>
-                <ButtonToolbar>
+                <ButtonToolbar style={{justifyContent: 'space-between'}}>
                     <ButtonGroup className="mr-4" >
-                        <Button variant="primary" disabled={this.state.selectedGroup === null} onClick={this.onAdd} title="Ajouter une nouvelle note"><FontAwesomeIcon icon={faPlusCircle}/>{" Note"}</Button>
+                        <Button variant="primary" disabled={this.state.selectedGroup === null} onClick={this.onAdd} title="Ajouter une nouvelle note"><FontAwesomeIcon icon={faPlusCircle}/>{" Ajouter note"}</Button>
                     </ButtonGroup>
-                    <ButtonGroup className="mr-4" >
-                        <Button variant="primary" onClick={() => this.showGroupForm(true)} title="Ajouter une nouvelle collection de notes"><FontAwesomeIcon icon={faPlusCircle}/>{" Collection"}</Button>
-                        <Button variant="danger" disabled={this.state.selectedGroup === null} onClick={this.removeNoteGroup} title="Supprimer cette collection de notes"><FontAwesomeIcon icon={faTrashAlt}/>{" Collection"}</Button>
-                        <Button variant="primary" onClick={() => this.showGroupOrderForm(true)} title="Ordonner cette collection de notes">{"Ordre Collection"}</Button>
-                        <Button variant="primary" disabled={this.state.selectedGroup === null} onClick={() => this.showGroupForm(true)} title="Modifier cette collection de notes"><FontAwesomeIcon icon={faPencilAlt}/>{" Collection"}</Button>
+                    <ButtonGroup className="mr-4">
+                        <Button variant="primary" onClick={() => this.showGroupForm(true)} title="Ajouter une nouvelle collection de notes"><FontAwesomeIcon icon={faPlusCircle}/>{" Ajouter collection"}</Button>
+                        <Button variant="warning" disabled={this.state.selectedGroup === null} onClick={this.removeNoteGroup} title="Supprimer cette collection de notes"><FontAwesomeIcon icon={faTrashAlt}/>{" Supprimer collection"}</Button>
+                        <Button variant="primary" onClick={() => this.showGroupOrderForm(true)} title="Ordonner cette collection de notes"><FontAwesomeIcon icon={faSortAmountDownAlt}/>{" Ordre Collection"}</Button>
+                        <Button variant="primary" disabled={this.state.selectedGroup === null} onClick={() => this.showGroupForm(true)} title="Modifier cette collection de notes"><FontAwesomeIcon icon={faPencilAlt}/>{" Modifier collection"}</Button>
                     </ButtonGroup>
                     <ButtonGroup>
                         <a className="btn btn-primary" href={this.getSuggestedNotesPrintLink()} target="_blank" title="Imprimer les réponses suggérées"><FontAwesomeIcon icon={faPrint}/>{" Imprimer"}</a>
@@ -402,20 +402,20 @@ export class EditionMode extends Component{
                             <DataGrid.Header.Cell style={{width: 200}}>{"Code d'intégration"}</DataGrid.Header.Cell>
                             <DataGrid.Header.Cell  style={{width: 120}}></DataGrid.Header.Cell>
                         </DataGrid.Header.Row>
-                    </DataGrid.Header>
+                    </DataGrid.Header> 
                     <DataGrid.Body>
                         {this.state.groupNoteList.map((item, index) => {                            
                                 let row = 
                                     <DataGrid.Body.RowDraggable key={index} data={item} onDbClick={() => this.onEdit(item.id)} onDrag={this.onDragRow} onDrop={this.onDropRow}>
-                                        <DataGrid.Body.Cell><FontAwesomeIcon icon={faGripVertical} title="Déplacer l'item"/></DataGrid.Body.Cell>
+                                        <DataGrid.Body.Cell><FontAwesomeIcon icon={faArrowsAlt} title="Déplacer l'item"/></DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell>{item.slot}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell>{item.title}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell>{item.intCode}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell style={{textAlign: 'center'}}>
                                             <ButtonGroup size="sm">
-                                                <Button onClick={() => this.onEdit(item.id)} title="Modifier" variant="primary"><FontAwesomeIcon icon={faPencilAlt}/></Button>
-                                                <Button onClick={() => this.onRemove(item)} title="Supprimer" variant="primary"><FontAwesomeIcon icon={faTrashAlt}/></Button>
-                                                <Button onClick={() => this.onCopy(item.intCode)} title="Code d'intégration" variant="primary"><FontAwesomeIcon icon={faCopy}/></Button>
+                                                <Button onClick={() => this.onEdit(item.id)} title="Modifier" variant="outline-primary"><FontAwesomeIcon icon={faPencilAlt}/></Button>
+                                                <Button onClick={() => this.onRemove(item)} title="Supprimer" variant="outline-primary"><FontAwesomeIcon icon={faTrashAlt}/></Button>
+                                                <Button onClick={() => this.onCopy(item.intCode)} title="Code d'intégration" variant="outline-primary"><FontAwesomeIcon icon={faCopy}/></Button>
                                             </ButtonGroup>
                                         </DataGrid.Body.Cell>
                                     </DataGrid.Body.RowDraggable>
@@ -696,7 +696,7 @@ class GroupOrderForm extends Component{
                     <DataGrid.Header>
                         <DataGrid.Header.Row>
                             <DataGrid.Header.Cell style={{width: 40}}></DataGrid.Header.Cell>
-                            <DataGrid.Header.Cell style={{width: 80}}>{"#"}</DataGrid.Header.Cell>
+                            <DataGrid.Header.Cell style={{width: 80}}>{"Ordre"}</DataGrid.Header.Cell>
                             <DataGrid.Header.Cell >{"Nom"}</DataGrid.Header.Cell>
                         </DataGrid.Header.Row>
                     </DataGrid.Header>
@@ -705,7 +705,7 @@ class GroupOrderForm extends Component{
                             let row =
                                 <DataGrid.Body.RowDraggable data={item} onDrag={this.onDragRow} onDrop={this.onDropRow} key={index}>
                                     <DataGrid.Body.Cell><FontAwesomeIcon icon={faArrowsAlt} title="Déplacer l'item"/></DataGrid.Body.Cell>
-                                    <DataGrid.Body.Cell>{index}</DataGrid.Body.Cell>
+                                    <DataGrid.Body.Cell>{item.slot.toString()}</DataGrid.Body.Cell>
                                     <DataGrid.Body.Cell>{item.name}</DataGrid.Body.Cell>
                                 </DataGrid.Body.RowDraggable>;
 
@@ -721,7 +721,7 @@ class GroupOrderForm extends Component{
             <Button variant="secondary" onClick={() => this.props.onClose()}>{"Fermer"}</Button>
             </div>;
 
-        let main = <Modal title={`Ordonner collection de notes`} body={body} footer={footer} onClose={() => this.props.onClose()} width={"400px"}/>;
+        let main = <Modal title={`Ordonner les collections de notes`} body={body} footer={footer} onClose={() => this.props.onClose()} width={"500px"}/>;
 
         return main;
     }

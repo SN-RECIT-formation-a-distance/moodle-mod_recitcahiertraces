@@ -77,8 +77,7 @@ $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahie
             foreach($group as $note){
                 // overflow = hidden for the notes that overflow the page dimensions
                 echo "<div class='note-container'>";
-                echo "<div class=''>";
-                echo sprintf("<div class='text-muted note-title'>%s: <span style='font-weight:normal'>%s</span></div>",  get_string('noteTitle', 'mod_recitcahiertraces'), $note->noteDef->title);
+                echo sprintf("<div class='text-muted'><strong>%s:</strong> %s</div>",  get_string('noteTitle', 'mod_recitcahiertraces'), $note->noteDef->title);
                 
                 echo sprintf("<div class='alert alert-secondary student-note'>%s</div>", $note->noteContent->text);
 
@@ -91,7 +90,6 @@ $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahie
                     echo sprintf('<div class="alert alert-primary teacher-feedback" role="alert"><strong>%s:</strong><br/>%s</div>', get_string('teacherFeedback', 'mod_recitcahiertraces'), $note->feedback);
                 }
                 
-                echo "</div>";
                 echo "</div>";
             }
 
