@@ -1,7 +1,7 @@
 
 import React, { Component } from 'react';
 import {ButtonGroup, Button, Form, Col, Tabs, Tab, ButtonToolbar, DropdownButton, Dropdown} from 'react-bootstrap';
-import {faPencilAlt, faPlusCircle, faWrench, faTrashAlt, faCopy, faPrint, faGripVertical, faFileImport} from '@fortawesome/free-solid-svg-icons';
+import {faPencilAlt, faPlusCircle, faWrench, faTrashAlt, faCopy, faPrint, faGripVertical, faFileImport, faArrowsAlt} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {ComboBox, FeedbackCtrl, DataGrid, InputNumber, ToggleButtons, Modal} from '../libs/components/Components';
 import {JsNx, UtilsMoodle} from '../libs/utils/Utils';
@@ -310,7 +310,7 @@ export class EditionMode extends Component{
         this.onDropRow = this.onDropRow.bind(this);
         this.onCopy = this.onCopy.bind(this);
 
-        this.state = {selectedGroup: null, nId: -1, groupList: [], groupNoteList: [], draggingItem: null, copyIC: "", showGroupForm: false, importForm: false};
+        this.state = {selectedGroup: null, nId: -1, groupList: [], groupNoteList: [], draggingItem: null, copyIC: "", showGroupForm: false, importForm: false, showGroupOrderForm: false, groupListRaw: []};
 
         this.intCodeRef = React.createRef();
     }
@@ -340,7 +340,7 @@ export class EditionMode extends Component{
                 groupList.push({value: item.id, text: item.name, data: item});
             }
 
-            that.setState({groupList: groupList});
+            that.setState({groupList: groupList, groupListRaw: result.data});
         }
 
         $glVars.webApi.getGroupList($glVars.urlParams.id, callback);
@@ -384,6 +384,7 @@ export class EditionMode extends Component{
                     <ButtonGroup className="mr-4" >
                         <Button variant="primary" onClick={() => this.showGroupForm(true)} title="Ajouter une nouvelle collection de notes"><FontAwesomeIcon icon={faPlusCircle}/>{" Collection"}</Button>
                         <Button variant="danger" disabled={this.state.selectedGroup === null} onClick={this.removeNoteGroup} title="Supprimer cette collection de notes"><FontAwesomeIcon icon={faTrashAlt}/>{" Collection"}</Button>
+                        <Button variant="primary" onClick={() => this.showGroupOrderForm(true)} title="Ordonner cette collection de notes">{"Ordre Collection"}</Button>
                         <Button variant="primary" disabled={this.state.selectedGroup === null} onClick={() => this.showGroupForm(true)} title="Modifier cette collection de notes"><FontAwesomeIcon icon={faPencilAlt}/>{" Collection"}</Button>
                     </ButtonGroup>
                     <ButtonGroup>
@@ -427,6 +428,7 @@ export class EditionMode extends Component{
                 {this.state.nId >= 0 && <NoteForm nId={this.state.nId} selectedGroup={this.state.selectedGroup} onClose={this.onClose}/>}
                 
                 {this.state.showGroupForm && <GroupForm onClose={() => this.showGroupForm(false)} data={this.state.selectedGroup}/>}
+                {this.state.showGroupOrderForm && <GroupOrderForm onClose={() => this.showGroupOrderForm(false)} data={this.state.groupListRaw}/>}
 
                 {this.state.importForm && <ImportForm onClose={this.onCloseImport}/>}
 
@@ -462,6 +464,9 @@ export class EditionMode extends Component{
 
     showGroupForm(show){
         this.setState({showGroupForm: show});
+    }
+    showGroupOrderForm(show){
+        this.setState({showGroupOrderForm: show});
     }
 
     getSuggestedNotesPrintLink(){
@@ -618,7 +623,7 @@ class GroupForm extends Component{
         this.onSave = this.onSave.bind(this);
         this.onDataChange = this.onDataChange.bind(this);
 
-        this.state = {data: props.data || {id: 0, name: "", ct: {id:0, mCmId: $glVars.urlParams.id}}};
+        this.state = {data: props.data || {id: 0, name: "", ct: {id:0, mCmId: $glVars.urlParams.id}, slot: 0}};
     }
 
     render(){        
@@ -663,6 +668,100 @@ class GroupForm extends Component{
         }
 
         $glVars.webApi.saveNoteGroup(this.state.data, callback);
+    }
+}
+
+class GroupOrderForm extends Component{
+    static defaultProps = {        
+        onClose: null,
+        data: null
+    };
+
+    constructor(props){
+        super(props);
+
+        this.onSave = this.onSave.bind(this);
+        this.onDataChange = this.onDataChange.bind(this);
+        this.onDragRow = this.onDragRow.bind(this);
+        this.onDropRow = this.onDropRow.bind(this);
+
+        this.state = {data: props.data, draggingItem: null};
+    }
+
+    render(){
+        let data = this.state.data.sort((item, item2) => { return item.slot - item2.slot });
+        let body = 
+        <div style={{maxHeight: 500, overflowY: 'scroll'}}>
+            <DataGrid>
+                    <DataGrid.Header>
+                        <DataGrid.Header.Row>
+                            <DataGrid.Header.Cell style={{width: 40}}></DataGrid.Header.Cell>
+                            <DataGrid.Header.Cell style={{width: 80}}>{"#"}</DataGrid.Header.Cell>
+                            <DataGrid.Header.Cell >{"Nom"}</DataGrid.Header.Cell>
+                        </DataGrid.Header.Row>
+                    </DataGrid.Header>
+                <DataGrid.Body>
+                    {data.map((item, index) => {
+                            let row =
+                                <DataGrid.Body.RowDraggable data={item} onDrag={this.onDragRow} onDrop={this.onDropRow} key={index}>
+                                    <DataGrid.Body.Cell><FontAwesomeIcon icon={faArrowsAlt} title="Déplacer l'item"/></DataGrid.Body.Cell>
+                                    <DataGrid.Body.Cell>{index}</DataGrid.Body.Cell>
+                                    <DataGrid.Body.Cell>{item.name}</DataGrid.Body.Cell>
+                                </DataGrid.Body.RowDraggable>;
+
+                            return row;
+                        }
+                    )}
+                </DataGrid.Body>
+            </DataGrid>
+        </div>;
+
+        let footer = 
+            <div className="btn-tollbar" style={{width: "100%", display: "flex", justifyContent: "flex-end"}}>
+            <Button variant="secondary" onClick={() => this.props.onClose()}>{"Fermer"}</Button>
+            </div>;
+
+        let main = <Modal title={`Ordonner collection de notes`} body={body} footer={footer} onClose={() => this.props.onClose()} width={"400px"}/>;
+
+        return main;
+    }
+
+    onDragRow(item, index){
+        this.setState({draggingItem: item});
+    }
+
+    onDropRow(item, index){
+        let data = this.state.data;
+        item = JsNx.getItem(data, 'id', item.id, null);
+        let draggingItem = JsNx.getItem(data, 'id', this.state.draggingItem.id, null);
+        
+        if(item.id === draggingItem.id){ return; }
+
+        let oldSlot = item.slot;
+        if (oldSlot == draggingItem.slot) oldSlot = oldSlot + 1;
+        item.slot = draggingItem.slot;
+        draggingItem.slot = oldSlot;
+
+        this.setState({flags: {dataChanged: true}}, () => {this.onSave(item); this.onSave(draggingItem)});
+    }
+
+    onDataChange(event){
+        let data = this.state.data;
+        data[event.target.name] = event.target.value;
+        this.setState({data: data});
+    }
+
+    onSave(item){
+        let that = this;
+        let callback = function(result){
+            if(result.success){
+            }
+            else{
+                $glVars.feedback.showError($glVars.i18n.tags.appName, result.msg);
+            }
+        }
+
+        $glVars.webApi.saveNoteGroup(item, callback);
     }
 }
 

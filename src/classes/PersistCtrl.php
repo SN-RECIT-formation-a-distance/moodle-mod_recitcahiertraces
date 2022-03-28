@@ -53,7 +53,7 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
 
     public function getUserNotes($cmId, $userId){
         $query = "select t1.id as mCmId, t2.id as gId, t2.ctid as ctId, t4.title, t4.slot, t5.id as unId, 
-                coalesce(t5.note, '') as note, t2.name as groupName, t4.id as nId, t5.cmid as nCmId,
+                coalesce(t5.note, '') as note, t2.name as groupName, t2.slot as groupSlot, t4.id as nId, t5.cmid as nCmId,
                 coalesce(t5.userid, 0) as userId, coalesce(t5.feedback, '') as feedback, t4.templatenote as templateNote, 
                 t5.lastupdate as lastUpdate, concat(find_in_set(t4.gid, t2.name), t4.slot) as orderByCustom, t3.name as ctName,
                 t3.course as courseId, coalesce(t5.note_itemid,0) as noteItemId, t4.notifyteacher as notifyTeacher, if(t5.id > 0 and length(t5.note) > 0, 0, 1) as isTemplate
@@ -63,7 +63,7 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
                 inner join {$this->prefix}recitct_notes as t4 on t2.id = t4.gid
                 left join {$this->prefix}recitct_user_notes as t5 on t4.id = t5.nid and t5.userId = $userId
                 where t1.id = $cmId
-                order by length(orderByCustom) asc, orderByCustom asc";
+                order by groupSlot, length(orderByCustom) asc, orderByCustom asc";
                 
         $tmp = $this->mysqlConn->execSQLAndGetObjects($query);
 
@@ -194,9 +194,9 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
 
     public function getGroupList($cmId){
         
-        $query = "select t1.id as gId, t1.name as groupName, t1.ctid as ctId FROM {$this->prefix}course_modules as t2
+        $query = "select t1.id as gId, t1.name as groupName, t1.slot as groupSlot, t1.ctid as ctId FROM {$this->prefix}course_modules as t2
         inner join {$this->prefix}recitct_groups as t1 on t2.instance = t1.ctid
-        where t2.id = $cmId";
+        where t2.id = $cmId order by t1.slot";
         
         $tmp = $this->mysqlConn->execSQLAndGetObjects($query);
 
@@ -214,8 +214,8 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
                 $data->ct->id = $this->getCtIdFromCmId($data->ct->mCmId);
             }
 
-            $fields = array("name", "ctid");
-            $values = array($data->name, $data->ct->id);
+            $fields = array("name", "ctid", "slot");
+            $values = array($data->name, $data->ct->id, $data->slot);
 
             if($data->id == 0){
                 $query = $this->mysqlConn->prepareStmt("insert", "{$this->prefix}recitct_groups", $fields, $values);
@@ -286,7 +286,7 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
         }
         
         $query = "select t1.id as nId, coalesce(t1.intcode, '') as intCode, t1_1.id as ctId, t1.gid as gId, t1.title as title, t1.slot, t1.templatenote as templateNote, t1.suggestednote as suggestedNote, 
-                    t1.teachertip as teacherTip, t1.lastupdate as lastUpdate,  t1.notifyteacher as notifyTeacher, t3.name as groupName
+                    t1.teachertip as teacherTip, t1.lastupdate as lastUpdate,  t1.notifyteacher as notifyTeacher, t3.name as groupName, t3.slot as groupSlot
                     from {$this->prefix}recitct_notes as t1
                     inner join {$this->prefix}recitct_groups as t3 on t1.gid = t3.id
                     inner join {$this->prefix}recitcahiertraces as t1_1 on t3.ctid = t1_1.id
@@ -506,7 +506,7 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
     public function getRequiredNotes($cmId){
         $query = "select t4.id as nId, t2.ctid as ctId, t4.gId as gId, t4.title, t4.slot, t5.id as unId, 
         coalesce(t5.userid, 0) as userId, concat(find_in_set(t4.gId, t2.name), t4.slot) as orderByCustom, 
-        t3.course as courseId, concat(t6.firstname, ' ', t6.lastname) as username, t2.name as groupName,
+        t3.course as courseId, concat(t6.firstname, ' ', t6.lastname) as username, t2.name as groupName, t2.slot as groupSlot,
         coalesce(t5.note_itemid,0) as noteItemId, coalesce(t5.note, '') as note, t4.notifyteacher as notifyTeacher, t5.cmid as nCmId
         from {$this->prefix}course_modules as t1 
         inner join {$this->prefix}recitcahiertraces as t3 on t1.instance = t3.id    
@@ -607,7 +607,7 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
 
                     // check if the collection already exists
                     $name = mysqli_real_escape_string($this->mysqlConn->getMySQLi(), $obj->group->name);
-                    $query = "select t1.id as gId, t1.name as groupName, t1.ctid as ctId FROM {$this->prefix}recitct_groups as t1
+                    $query = "select t1.id as gId, t1.name as groupName, t1.slot as groupSlot, t1.ctid as ctId FROM {$this->prefix}recitct_groups as t1
                         where t1.name = \"$name\" and t1.ctid = {$obj->group->ct->id} order by name asc limit 1";
                     $result = $this->mysqlConn->execSQLAndGetObject($query);
                     $group = (empty($result) ? null : NoteGroup::create($result));
@@ -670,6 +670,7 @@ class CahierTrace{
 class NoteGroup{
     public $id = 0;
     public $name = "";
+    public $slot = 0;
     //@CahierTrace
     public $ct = null;
     
@@ -683,6 +684,7 @@ class NoteGroup{
         $result->ct = CahierTrace::create($dbData);
 
         if(isset($dbData->groupName)){ $result->name = $dbData->groupName; } 
+        if(isset($dbData->groupSlot)){ $result->slot = $dbData->groupSlot; } 
 
         return $result;
     }

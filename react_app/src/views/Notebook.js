@@ -751,7 +751,6 @@ export class StudentNotebook extends Component{
     }
 
     onEdit(item){
-        console.log(item);
         if(item === null){ return; }
 
         let data = this.state.data;
