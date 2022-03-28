@@ -1,0 +1,29 @@
+@media all{
+    body{background-color:#efefef; font-size: 1rem; color:#212529; font-weight: 400;}
+    .Portrait{width:1040px;margin-bottom:10px;text-align:left;background-color:#fff;padding:10px; min-height: 1060px; }
+    .Landscape{width:1220px;margin-bottom:10px;text-align:left;background-color:#fff;padding:10px; min-height: 800px;}
+    .Header{border-spacing:0; margin-left: -10px; margin-bottom: 20px; width: calc(100% + 20px); margin-top: -10px; display: flex; border-bottom: 1px solid #efefef; background-image: linear-gradient(#ddd, #fff);}
+    .Header .Title{font-size:40px;font-weight:700;padding:5px 5px 5px 15px; background-color: tranparent;        color: #333;        text-align: left;}
+    .Header .Subtitle{font-size:20px;padding:0 5px 5px 15px; background-color: tranparent;        text-align: left;        color: #333}
+    .Logo{ width: 215px; display: inline-flex; flex-wrap: wrap; justify-content: flex-end; align-content: center; margin: 10px;}
+	.Logo img{max-width: 100%; max-height: 85px;}
+
+    footer{width:calc(100% - 5px - 5px); height:20px; white-space: nowrap; padding: 5px;color: #5d5d5d; margin-top: 10px; font-size: 12px; text-align: center;}
+    thead {  display: table-row-group;} /* patch for Chrome do not overlap table head*/
+	
+	.cahier-traces-print-notes .activity-container{margin-bottom: 3rem;}
+	.cahier-traces-print-notes .activity-container .activity-name{font-weight: 400; background-color: #fafafa; padding: .5rem; border-top: 1px solid #ddd; border-bottom: 1px solid #ddd;}
+	.cahier-traces-print-notes .activity-container .note-container{overflow: hidden; margin-top: 2rem; margin-bottom: 2rem; padding: 1rem;}
+	.cahier-traces-print-notes .activity-container .note-container .note-title{font-weight: bold; font-size: 1.18rem; margin-bottom: 2rem;}
+	.cahier-traces-print-notes .activity-container .note-container .student-note{margin-right: 5%;}
+	.cahier-traces-print-notes .activity-container .note-container .teacher-feedback{margin-top: 15px; margin-left: 15%;}
+}
+
+@media screen{
+}
+
+@media print {
+    body{background-color:#FFF;}
+    blockquote, pre {border: none;}
+
+}

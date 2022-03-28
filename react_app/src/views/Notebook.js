@@ -506,15 +506,14 @@ class NavActivities extends Component{
                 })}
             </>;
 
-        let studentView = 
+        let studentView = <>
             <Row>
-                <Col sm={12} md={12} lg={5} xl={4}>
-                    <Nav variant="pills" className="flex-column">
-                        {navItems}
-                    </Nav>
-                </Col>
-                <Col sm={12} md={12} lg={7} xl={8}>
-                    <Tab.Content>
+                <Nav variant="pills">
+                    {navItems}
+                </Nav>
+            </Row>
+            <Row>
+                    <Tab.Content className='w-100'>
                         {this.state.dataProvider.map(function(items, index){
                             let result=
                                 <Tab.Pane key={index} eventKey={index}>
@@ -550,8 +549,7 @@ class NavActivities extends Component{
                             return result;
                         })}
                     </Tab.Content>
-                </Col>
-            </Row>;
+            </Row></>;
 
         let teacherView = 
             <div>
@@ -568,13 +566,13 @@ class NavActivities extends Component{
                                    <DataGrid orderBy={true}>
                                         <DataGrid.Header>
                                             <DataGrid.Header.Row>
-                                                <DataGrid.Header.Cell style={{width: 80}}>{"#"}</DataGrid.Header.Cell>
+                                                <DataGrid.Header.Cell style={{width: 62}}>{"#"}</DataGrid.Header.Cell>
                                                 <DataGrid.Header.Cell >{"Titre de la note"}</DataGrid.Header.Cell>
                                                 <DataGrid.Header.Cell style={{width: 300}}>{"Note"}</DataGrid.Header.Cell>
                                                 <DataGrid.Header.Cell style={{width: 300}}>{"Rétroaction"}</DataGrid.Header.Cell>
-                                                <DataGrid.Header.Cell style={{width: 300}}>{"Activité"}</DataGrid.Header.Cell>
-                                                <DataGrid.Header.Cell style={{width: 80}}></DataGrid.Header.Cell>
-                                                <DataGrid.Header.Cell  style={{width: 80}}></DataGrid.Header.Cell>
+                                                <DataGrid.Header.Cell style={{width: 250}}>{"Activité"}</DataGrid.Header.Cell>
+                                                <DataGrid.Header.Cell style={{width: 57}}></DataGrid.Header.Cell>
+                                                <DataGrid.Header.Cell style={{width: 57}}></DataGrid.Header.Cell>
                                             </DataGrid.Header.Row>
                                         </DataGrid.Header>
                                         <DataGrid.Body>
@@ -585,7 +583,7 @@ class NavActivities extends Component{
                                                             <DataGrid.Body.Cell>{` ${item.noteDef.title}`}</DataGrid.Body.Cell>
                                                             <DataGrid.Body.Cell>{that.formatText(item.noteContent.text)}</DataGrid.Body.Cell>
                                                             <DataGrid.Body.Cell>{that.formatText(item.feedback)}</DataGrid.Body.Cell>
-                                                            <DataGrid.Body.Cell>{that.formatText(item.cmName)}</DataGrid.Body.Cell>
+                                                            <DataGrid.Body.Cell>{that.formatText(item.cmName, 35)}</DataGrid.Body.Cell>
                                                             <DataGrid.Body.Cell style={{textAlign: "center"}}>{(item.noteDef.notifyTeacher === 1 ? 
                                                                 <Button disabled={true} title="Rétroaction requise" size="sm" variant="warning"><FontAwesomeIcon icon={faCommentDots}/></Button> : null)}
                                                             </DataGrid.Body.Cell>
@@ -630,13 +628,14 @@ class NavActivities extends Component{
         return result;
     }
 
-    formatText(text){
+    formatText(text, length){
+        length = length || 50;
         let tmp = document.createElement("div");
         tmp.innerHTML = text;
         
         text = tmp.textContent || tmp.innerText || ""; // Retrieve the text property of the element (cross-browser support)
 
-        return (text.length > 50 ? `${text.substr(0, 50)}...` : text);
+        return (text.length > length ? `${text.substr(0, length)}...` : text);
     }
     
     onSelectTab(eventKey){

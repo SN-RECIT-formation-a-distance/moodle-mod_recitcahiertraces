@@ -53,8 +53,8 @@ $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahie
 <head>
     <title><?php echo $pageTitle; ?></title>    
     <link rel="stylesheet" type="text/css" href="<?php echo $CFG->wwwroot . "/theme/styles.php/{$CFG->theme}/{$CFG->themerev}_1/all"?>">
-    <link rel="stylesheet" type="text/css" href="<?php echo $CFG->wwwroot . "/local/recitcommon/css/report.css"; ?>">
-    <link rel="icon" href="../pix/icon.png?v=2"  />
+    <link rel="stylesheet" type="text/css" href="<?php echo $CFG->wwwroot . "/mod/recitcahiertraces/css/report.css"; ?>">
+    <link rel="icon" href="../pix/icon.png" />
 </head>
 
 <body>
@@ -77,12 +77,14 @@ $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahie
             foreach($group as $note){
                 // overflow = hidden for the notes that overflow the page dimensions
                 echo "<div class='note-container'>";
-                echo sprintf("<h5 class='text-muted note-title'>%s: %s</h5>",  get_string('note', 'mod_recitcahiertraces'), $note->noteDef->title);
+                echo "<div class=''>";
+                echo sprintf("<div class='text-muted note-title'>%s: <span style='font-weight:normal'>%s</span></div>",  get_string('noteTitle', 'mod_recitcahiertraces'), $note->noteDef->title);
                 
                 echo sprintf("<div class='alert alert-secondary student-note'>%s</div>", $note->noteContent->text);
 
+
                 echo '<blockquote class="blockquote mb-0">';
-                echo sprintf('<span class="blockquote-footer">%s: %s</span>',  get_string('timestamp', 'mod_recitcahiertraces'), $note->lastUpdateFormat());
+                echo sprintf('<span class="blockquote-footer">%s: %s</span>', get_string('timestamp', 'mod_recitcahiertraces'), $note->lastUpdateFormat());
                 echo '</blockquote>';
                 
                 if(($showFeedback) && (strlen($note->feedback) > 0)){
@@ -90,8 +92,8 @@ $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahie
                 }
                 
                 echo "</div>";
+                echo "</div>";
             }
-            echo "<hr/>";
 
             echo "</div>";
         }

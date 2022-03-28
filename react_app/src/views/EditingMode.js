@@ -101,13 +101,13 @@ class NoteForm extends Component
                         <Form.Row>
                             <Form.Group as={Col}>
                                 <Form.Label>{"Titre"}</Form.Label>
-                                <Form.Control type="text" required value={data.title} name="title" onChange={this.onDataChange}/>
+                                <Form.Control type="text" required value={data.title} maxLength="255" name="title" onChange={this.onDataChange}/>
                             </Form.Group>
                         </Form.Row>
                         <Form.Row>
                             <Form.Group as={Col}>
                                 <Form.Label>{"Position"}</Form.Label>
-                                <InputNumber  value={data.slot} name="slot" min={0} onChange={this.onDataChange}/>
+                                <InputNumber value={data.slot} name="slot" min={0} onChange={this.onDataChange}/>
                             </Form.Group>
                         </Form.Row>
                         <Form.Row>
@@ -121,21 +121,21 @@ class NoteForm extends Component
                             </Form.Group>
                         </Form.Row>
                     </Tab>
-                    <Tab eventKey={1} title="Modèle de note"  style={styleTab}>
+                    <Tab eventKey={1} title="Modèle de note" style={styleTab}>
                         <Form.Row>
                             <Form.Group as={Col}>
                                 <div ref={this.editorTemplateNoteRef}></div>
                             </Form.Group>
                         </Form.Row>
                     </Tab>
-                    <Tab eventKey={2} title="Réponse suggérée"  style={styleTab}>
+                    <Tab eventKey={2} title="Réponse suggérée" style={styleTab}>
                         <Form.Row>
                             <Form.Group as={Col}>
                                 <div ref={this.editorSuggestedNoteRef}></div>
                             </Form.Group>
                         </Form.Row>
                     </Tab>
-                    <Tab eventKey={3} title="Pistes pour valider ta réponse"  style={styleTab}> 
+                    <Tab eventKey={3} title="Pistes pour valider ta réponse" style={styleTab}> 
                         <Form.Row>
                             <Form.Group as={Col}>
                                 <div ref={this.editorTeacherTipRef}></div>
