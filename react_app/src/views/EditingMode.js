@@ -1,7 +1,7 @@
 
 import React, { Component } from 'react';
 import {ButtonGroup, Button, Form, Col, Tabs, Tab, ButtonToolbar} from 'react-bootstrap';
-import {faPencilAlt, faPlusCircle, faWrench, faTrashAlt, faCopy, faPrint,  faFileImport, faArrowsAlt, faSortAmountDownAlt} from '@fortawesome/free-solid-svg-icons';
+import {faPencilAlt, faPlusCircle, faWrench, faTrashAlt, faCopy, faPrint,  faFileImport, faArrowsAlt, faSortAmountDownAlt, faArrowDown, faArrowUp} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {ComboBox, FeedbackCtrl, DataGrid, InputNumber, ToggleButtons, Modal} from '../libs/components/Components';
 import {JsNx, UtilsMoodle} from '../libs/utils/Utils';
@@ -631,7 +631,7 @@ class GroupForm extends Component{
             <Form onSubmit={(event) => (event.preventDefault())}>
                 <Form.Row>
                     <Form.Group as={Col}>
-                        <Form.Label>{"Nom du groupe"}</Form.Label>
+                        <Form.Label>{"Nom de la collection"}</Form.Label>
                         <Form.Control type="text" value={this.state.data.name} name="name" onChange={this.onDataChange}/>
                     </Form.Group>
                 </Form.Row>
@@ -645,7 +645,7 @@ class GroupForm extends Component{
                 </div>
             </div>;
 
-        let main = <Modal title={`Groupe de notes`} body={body} footer={footer} onClose={() => this.props.onClose()} width={"400px"}/>;
+        let main = <Modal title={`Collection de notes`} body={body} footer={footer} onClose={() => this.props.onClose()} width={"400px"}/>;
 
         return main;
     }
@@ -682,32 +682,33 @@ class GroupOrderForm extends Component{
 
         this.onSave = this.onSave.bind(this);
         this.onDataChange = this.onDataChange.bind(this);
-        this.onDragRow = this.onDragRow.bind(this);
-        this.onDropRow = this.onDropRow.bind(this);
 
-        this.state = {data: props.data, draggingItem: null};
+        let data = props.data.sort((item, item2) => { return item.slot - item2.slot });
+        this.state = {data: data};
     }
 
     render(){
-        let data = this.state.data.sort((item, item2) => { return item.slot - item2.slot });
         let body = 
         <div style={{maxHeight: 500, overflowY: 'scroll'}}>
             <DataGrid>
                     <DataGrid.Header>
                         <DataGrid.Header.Row>
-                            <DataGrid.Header.Cell style={{width: 40}}></DataGrid.Header.Cell>
                             <DataGrid.Header.Cell style={{width: 80}}>{"Ordre"}</DataGrid.Header.Cell>
                             <DataGrid.Header.Cell >{"Nom"}</DataGrid.Header.Cell>
+                            <DataGrid.Header.Cell style={{width: 60}}></DataGrid.Header.Cell>
                         </DataGrid.Header.Row>
                     </DataGrid.Header>
                 <DataGrid.Body>
-                    {data.map((item, index) => {
+                    {this.state.data.map((item, index) => {
                             let row =
-                                <DataGrid.Body.RowDraggable data={item} onDrag={this.onDragRow} onDrop={this.onDropRow} key={index}>
-                                    <DataGrid.Body.Cell><FontAwesomeIcon icon={faArrowsAlt} title="Déplacer l'item"/></DataGrid.Body.Cell>
-                                    <DataGrid.Body.Cell>{item.slot.toString()}</DataGrid.Body.Cell>
+                                <DataGrid.Body.Row data={item} key={index}>
+                                    <DataGrid.Body.Cell>{index+1}</DataGrid.Body.Cell>
                                     <DataGrid.Body.Cell>{item.name}</DataGrid.Body.Cell>
-                                </DataGrid.Body.RowDraggable>;
+                                    <DataGrid.Body.Cell>
+                                        {index > 0 && <FontAwesomeIcon style={{cursor:'pointer',marginRight:'5px'}} icon={faArrowUp} title="Déplacer l'item" onClick={() => this.onMoveRow(index, -1)}/>}
+                                        {index < this.state.data.length-1 && <FontAwesomeIcon style={{cursor:'pointer'}} icon={faArrowDown} title="Déplacer l'item" onClick={() => this.onMoveRow(index, 1)}/>}
+                                    </DataGrid.Body.Cell>
+                                </DataGrid.Body.Row>;
 
                             return row;
                         }
@@ -726,23 +727,20 @@ class GroupOrderForm extends Component{
         return main;
     }
 
-    onDragRow(item, index){
-        this.setState({draggingItem: item});
-    }
-
-    onDropRow(item, index){
+    onMoveRow(index, offset){
         let data = this.state.data;
-        item = JsNx.getItem(data, 'id', item.id, null);
-        let draggingItem = JsNx.getItem(data, 'id', this.state.draggingItem.id, null);
+        let item = data[index+offset];
+        let draggingItem = data[index];
         
-        if(item.id === draggingItem.id){ return; }
+        if(!draggingItem || item.id === draggingItem.id){ return; }
 
         let oldSlot = item.slot;
-        if (oldSlot == draggingItem.slot) oldSlot = oldSlot + 1;
+        if (oldSlot == draggingItem.slot) oldSlot = oldSlot + offset;
         item.slot = draggingItem.slot;
         draggingItem.slot = oldSlot;
 
-        this.setState({flags: {dataChanged: true}}, () => {this.onSave(item); this.onSave(draggingItem)});
+        data = data.sort((item, item2) => { return item.slot - item2.slot });
+        this.setState({data:data, flags: {dataChanged: true}}, () => {this.onSave(item); this.onSave(draggingItem)});
     }
 
     onDataChange(event){

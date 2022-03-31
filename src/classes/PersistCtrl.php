@@ -214,15 +214,26 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
                 $data->ct->id = $this->getCtIdFromCmId($data->ct->mCmId);
             }
 
-            $fields = array("name", "ctid", "slot");
-            $values = array($data->name, $data->ct->id, $data->slot);
+            $fields = array("name", "ctid");
+            $values = array($data->name, $data->ct->id);
 
             if($data->id == 0){
+                $query = "select MAX(t1.slot) as groupSlot FROM {$this->prefix}course_modules as t2
+                inner join {$this->prefix}recitct_groups as t1 on t2.instance = t1.ctid
+                where t2.id = {$data->ct->mCmId} order by t1.slot";
+                
+                $result = $this->mysqlConn->execSQLAndGetObject($query);
+                if (!$result) $slot = 0;
+                $slot = $result->groupSlot;
+                $fields[] = "slot";
+                $values[] = $slot;
                 $query = $this->mysqlConn->prepareStmt("insert", "{$this->prefix}recitct_groups", $fields, $values);
                 $this->mysqlConn->execSQL($query);
                 $data->id = $this->mysqlConn->getLastInsertId("{$this->prefix}recitct_groups", "id");
             }
             else{
+                $fields[] = "slot";
+                $values[] = $data->slot;
                 $query = $this->mysqlConn->prepareStmt("update", "{$this->prefix}recitct_groups", $fields, $values, array("id"), array($data->id));
                 $this->mysqlConn->execSQL($query);
             }
