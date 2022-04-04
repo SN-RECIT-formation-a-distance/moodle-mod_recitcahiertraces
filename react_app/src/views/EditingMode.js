@@ -297,11 +297,15 @@ export class EditionMode extends Component{
 
         this.getData = this.getData.bind(this);
         this.getData2 = this.getData2.bind(this);
-        this.onAdd = this.onAdd.bind(this);
-        this.showGroupForm = this.showGroupForm.bind(this);
+        this.onAddNote = this.onAddNote.bind(this);
+        this.onEditNote = this.onEditNote.bind(this);
+        this.onRemoveNote = this.onRemoveNote.bind(this);
+
+        this.onAddCollection = this.onAddCollection.bind(this);
+        this.onEditCollection = this.onEditCollection.bind(this);
+        this.onCloseGroupForm = this.onCloseGroupForm.bind(this);
         this.removeNoteGroup = this.removeNoteGroup.bind(this);
-        this.onEdit = this.onEdit.bind(this);
-        this.onRemove = this.onRemove.bind(this);
+        
         this.onSelectGroup = this.onSelectGroup.bind(this);
         this.onClose = this.onClose.bind(this);
         this.onCloseImport = this.onCloseImport.bind(this);
@@ -379,13 +383,13 @@ export class EditionMode extends Component{
                 </Form>
                 <ButtonToolbar style={{justifyContent: 'space-between'}}>
                     <ButtonGroup className="mr-4" >
-                        <Button variant="primary" disabled={this.state.selectedGroup === null} onClick={this.onAdd} title="Ajouter une nouvelle note"><FontAwesomeIcon icon={faPlusCircle}/>{" Ajouter note"}</Button>
+                        <Button variant="primary" disabled={this.state.selectedGroup === null} onClick={this.onAddNote} title="Ajouter une nouvelle note"><FontAwesomeIcon icon={faPlusCircle}/>{" Ajouter note"}</Button>
                     </ButtonGroup>
                     <ButtonGroup className="mr-4">
-                        <Button variant="primary" onClick={() => this.showGroupForm(true)} title="Ajouter une nouvelle collection de notes"><FontAwesomeIcon icon={faPlusCircle}/>{" Ajouter collection"}</Button>
+                        <Button variant="primary" onClick={this.onAddCollection} title="Ajouter une nouvelle collection de notes"><FontAwesomeIcon icon={faPlusCircle}/>{" Ajouter collection"}</Button>
                         <Button variant="warning" disabled={this.state.selectedGroup === null} onClick={this.removeNoteGroup} title="Supprimer cette collection de notes"><FontAwesomeIcon icon={faTrashAlt}/>{" Supprimer collection"}</Button>
                         <Button variant="primary" onClick={() => this.showGroupOrderForm(true)} title="Ordonner cette collection de notes"><FontAwesomeIcon icon={faSortAmountDownAlt}/>{" Ordre Collection"}</Button>
-                        <Button variant="primary" disabled={this.state.selectedGroup === null} onClick={() => this.showGroupForm(true)} title="Modifier cette collection de notes"><FontAwesomeIcon icon={faPencilAlt}/>{" Modifier collection"}</Button>
+                        <Button variant="primary" disabled={this.state.selectedGroup === null} onClick={this.onEditCollection} title="Modifier cette collection de notes"><FontAwesomeIcon icon={faPencilAlt}/>{" Modifier collection"}</Button>
                     </ButtonGroup>
                     <ButtonGroup>
                         <a className="btn btn-primary" href={this.getSuggestedNotesPrintLink()} target="_blank" title="Imprimer les réponses suggérées"><FontAwesomeIcon icon={faPrint}/>{" Imprimer"}</a>
@@ -406,15 +410,15 @@ export class EditionMode extends Component{
                     <DataGrid.Body>
                         {this.state.groupNoteList.map((item, index) => {                            
                                 let row = 
-                                    <DataGrid.Body.RowDraggable key={index} data={item} onDbClick={() => this.onEdit(item.id)} onDrag={this.onDragRow} onDrop={this.onDropRow}>
+                                    <DataGrid.Body.RowDraggable key={index} data={item} onDbClick={() => this.onEditNote(item.id)} onDrag={this.onDragRow} onDrop={this.onDropRow}>
                                         <DataGrid.Body.Cell><FontAwesomeIcon icon={faArrowsAlt} title="Déplacer l'item"/></DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell>{item.slot}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell>{item.title}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell>{item.intCode}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell style={{textAlign: 'center'}}>
                                             <ButtonGroup size="sm">
-                                                <Button onClick={() => this.onEdit(item.id)} title="Modifier" variant="outline-primary"><FontAwesomeIcon icon={faPencilAlt}/></Button>
-                                                <Button onClick={() => this.onRemove(item)} title="Supprimer" variant="outline-primary"><FontAwesomeIcon icon={faTrashAlt}/></Button>
+                                                <Button onClick={() => this.onEditNote(item.id)} title="Modifier" variant="outline-primary"><FontAwesomeIcon icon={faPencilAlt}/></Button>
+                                                <Button onClick={() => this.onRemoveNote(item)} title="Supprimer" variant="outline-primary"><FontAwesomeIcon icon={faTrashAlt}/></Button>
                                                 <Button onClick={() => this.onCopy(item.intCode)} title="Code d'intégration" variant="outline-primary"><FontAwesomeIcon icon={faCopy}/></Button>
                                             </ButtonGroup>
                                         </DataGrid.Body.Cell>
@@ -427,7 +431,7 @@ export class EditionMode extends Component{
                                 
                 {this.state.nId >= 0 && <NoteForm nId={this.state.nId} selectedGroup={this.state.selectedGroup} onClose={this.onClose}/>}
                 
-                {this.state.showGroupForm && <GroupForm onClose={() => this.showGroupForm(false)} data={this.state.selectedGroup}/>}
+                {this.state.showGroupForm && <GroupForm onClose={this.onCloseGroupForm} data={this.state.selectedGroup}/>}
                 {this.state.showGroupOrderForm && <GroupOrderForm onClose={() => this.showGroupOrderForm(false)} data={this.state.groupListRaw}/>}
 
                 {this.state.importForm && <ImportForm onClose={this.onCloseImport}/>}
@@ -462,9 +466,18 @@ export class EditionMode extends Component{
         }
     }
 
-    showGroupForm(show){
-        this.setState({showGroupForm: show});
+    onAddCollection(){
+        this.setState({showGroupForm: true, selectedGroup: null});
     }
+
+    onEditCollection(){
+        this.setState({showGroupForm: true});
+    }
+
+    onCloseGroupForm(){
+        this.setState({showGroupForm: false});
+    }
+
     showGroupOrderForm(show){
         this.setState({showGroupOrderForm: show});
     }
@@ -491,15 +504,15 @@ export class EditionMode extends Component{
         $glVars.webApi.switchNoteSlot(this.state.draggingItem.id, item.id, callback);
     }
 
-    onAdd(){
+    onAddNote(){
         this.setState({nId: 0});
     }
 
-    onEdit(nId){
+    onEditNote(nId){
         this.setState({nId: nId});
     }
     
-    onRemove(item){
+    onRemoveNote(item){
         let callback = function(result){
             if(result.success){
                 $glVars.feedback.showInfo($glVars.i18n.tags.appName, $glVars.i18n.tags.msgSuccess, 3);
@@ -693,8 +706,8 @@ class GroupOrderForm extends Component{
             <DataGrid>
                     <DataGrid.Header>
                         <DataGrid.Header.Row>
-                            <DataGrid.Header.Cell style={{width: 80}}>{"Ordre"}</DataGrid.Header.Cell>
-                            <DataGrid.Header.Cell >{"Nom"}</DataGrid.Header.Cell>
+                            <DataGrid.Header.Cell style={{width: 90}}>{"Ordre"}</DataGrid.Header.Cell>
+                            <DataGrid.Header.Cell >{"Collection"}</DataGrid.Header.Cell>
                             <DataGrid.Header.Cell style={{width: 60}}></DataGrid.Header.Cell>
                         </DataGrid.Header.Row>
                     </DataGrid.Header>
@@ -704,7 +717,7 @@ class GroupOrderForm extends Component{
                                 <DataGrid.Body.Row data={item} key={index}>
                                     <DataGrid.Body.Cell>{index+1}</DataGrid.Body.Cell>
                                     <DataGrid.Body.Cell>{item.name}</DataGrid.Body.Cell>
-                                    <DataGrid.Body.Cell>
+                                    <DataGrid.Body.Cell style={{textAlign: 'center'}}>
                                         {index > 0 && <FontAwesomeIcon style={{cursor:'pointer',marginRight:'5px'}} icon={faArrowUp} title="Déplacer l'item" onClick={() => this.onMoveRow(index, -1)}/>}
                                         {index < this.state.data.length-1 && <FontAwesomeIcon style={{cursor:'pointer'}} icon={faArrowDown} title="Déplacer l'item" onClick={() => this.onMoveRow(index, 1)}/>}
                                     </DataGrid.Body.Cell>
