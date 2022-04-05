@@ -36,7 +36,7 @@ class backup_recitcahiertraces_activity_structure_step extends backup_activity_s
         $recitcahiertraces = new backup_nested_element('recitcahiertraces', array('id'), array(
             'course', 'name', 'intro', 'introformat', 'display', 'timemodified'));
 
-        $recitct_groups = new backup_nested_element('recitct_groups', array('id'), array('ctid', 'name'));
+        $recitct_groups = new backup_nested_element('recitct_groups', array('id'), array('ctid', 'name', 'slot'));
 
         $recitct_notes = new backup_nested_element('recitct_notes', array('id'), array(
             'intcode', 'gid', 'title', 'slot', 'templatenote', 'suggestednote', 'teachertip', 'notifyteacher', 'lastupdate'));

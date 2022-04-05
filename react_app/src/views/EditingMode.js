@@ -706,19 +706,19 @@ class GroupOrderForm extends Component{
             <DataGrid>
                     <DataGrid.Header>
                         <DataGrid.Header.Row>
-                            <DataGrid.Header.Cell style={{width: 90}}>{"Ordre"}</DataGrid.Header.Cell>
+                            <DataGrid.Header.Cell style={{width: 100}}>{"Ordre"}</DataGrid.Header.Cell>
                             <DataGrid.Header.Cell >{"Collection"}</DataGrid.Header.Cell>
-                            <DataGrid.Header.Cell style={{width: 60}}></DataGrid.Header.Cell>
+                            <DataGrid.Header.Cell style={{width: 70}}></DataGrid.Header.Cell>
                         </DataGrid.Header.Row>
                     </DataGrid.Header>
                 <DataGrid.Body>
                     {this.state.data.map((item, index) => {
                             let row =
                                 <DataGrid.Body.Row data={item} key={index}>
-                                    <DataGrid.Body.Cell>{index+1}</DataGrid.Body.Cell>
+                                    <DataGrid.Body.Cell>{item.slot}</DataGrid.Body.Cell>
                                     <DataGrid.Body.Cell>{item.name}</DataGrid.Body.Cell>
                                     <DataGrid.Body.Cell style={{textAlign: 'center'}}>
-                                        {index > 0 && <FontAwesomeIcon style={{cursor:'pointer',marginRight:'5px'}} icon={faArrowUp} title="Déplacer l'item" onClick={() => this.onMoveRow(index, -1)}/>}
+                                        {index > 0 && <FontAwesomeIcon style={{cursor:'pointer',marginRight:'1rem'}} icon={faArrowUp} title="Déplacer l'item" onClick={() => this.onMoveRow(index, -1)}/>}
                                         {index < this.state.data.length-1 && <FontAwesomeIcon style={{cursor:'pointer'}} icon={faArrowDown} title="Déplacer l'item" onClick={() => this.onMoveRow(index, 1)}/>}
                                     </DataGrid.Body.Cell>
                                 </DataGrid.Body.Row>;
@@ -747,8 +747,11 @@ class GroupOrderForm extends Component{
         
         if(!draggingItem || item.id === draggingItem.id){ return; }
 
-        let oldSlot = item.slot;
-        if (oldSlot == draggingItem.slot) oldSlot = oldSlot + offset;
+        let oldSlot = (item.slot <= 0 ? 1 : item.slot);
+        
+        if (oldSlot == draggingItem.slot){
+            oldSlot = (oldSlot + offset <= 0 ? 1 : oldSlot + offset);         
+        }
         item.slot = draggingItem.slot;
         draggingItem.slot = oldSlot;
 

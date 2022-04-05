@@ -487,6 +487,7 @@ class NavActivities extends Component{
 
     render(){
         let that = this;
+        let isStudent = (this.props.isTeacher ? false : true);
 
         let navItems = 
             <>
@@ -506,52 +507,60 @@ class NavActivities extends Component{
                 })}
             </>;
 
-        let studentView = <>
+        let view = <>
             <Row>
                 <Nav variant="pills">
                     {navItems}
                 </Nav>
             </Row>
             <Row>
-                    <Tab.Content className='w-100'>
-                        {this.state.dataProvider.map(function(items, index){
-                            let result=
-                                <Tab.Pane key={index} eventKey={index}>
-                                    <div className="groupContent card border-0 m-0 p-0 position-relative bg-transparent">
-                                        {items.map((item, index2) => {
-                                                    let retro = null;
-                                                    let time = "";
-                                                    if (item.lastUpdate > 0){
-                                                        time = UtilsDateTime.formatTime(item.lastUpdate) + " - ";
-                                                    }
-                                                    if (item.feedback.length > 0){
-                                                        retro = 
-                                                        <div className="balon1 p-2 m-0 position-relative " data-is="Rétroaction" key={"key"+index2}>
-                                                            <div className="float-right " dangerouslySetInnerHTML={{ __html: item.feedback }}></div>
-                                                        </div>
-                                                    }
-                                                    let row = 
-                                                            <div className="balon2 p-2 m-0 position-relative" data-is={time+"Activité: "+that.formatText(item.cmName)} key={index2}>
-                                                                <div className="float-left w-100">                                                                    
-                                                                    <p style={{fontWeight:'bold'}}>
-                                                                        {item.noteDef.title}
-                                                                        <Button disabled={(item.nCmId === 0)} onClick={() => that.props.onEdit(item)} title="Modifier" variant="link"><FontAwesomeIcon icon={faPencilAlt}/></Button>
-                                                                    </p>
-                                                                    <p dangerouslySetInnerHTML={{ __html: item.noteContent.text }}></p>
-                                                                </div>
-                                                            </div>
-                                                    return [row, retro];                                    
+                <Tab.Content className='w-100'>
+                    {this.state.dataProvider.map(function(items, index){
+                        let result=
+                            <Tab.Pane key={index} eventKey={index}>
+                                <div className="groupContent card border-0 m-0 p-0 position-relative bg-transparent">
+                                    {items.map((item, index2) => {
+                                                let retro = null;
+                                                let time = "";
+                                                if (item.lastUpdate > 0){
+                                                    time = UtilsDateTime.formatTime(item.lastUpdate) + " - ";
                                                 }
-                                            )}
-                                    </div>
-                                </Tab.Pane>;
-                                // {(item.noteDef.notifyTeacher === 1 ? <Button disabled={true} title="Rétroaction requise" size="sm" variant="warning"><FontAwesomeIcon icon={faCommentDots}/></Button> : null)}
-                            return result;
-                        })}
-                    </Tab.Content>
+
+                                                if (isStudent && item.feedback.length > 0){
+                                                    retro = that.createFeedbackView(index2, item);
+                                                }
+                                                else if(that.props.isTeacher){
+                                                    retro = that.createFeedbackView(index2, item);
+                                                }
+
+                                                let row = 
+                                                        <div className="balon2 p-2 m-0 position-relative" data-is={time+"Activité: "+that.formatText(item.cmName)} key={index2}>
+                                                            <div className="float-left w-100">                                                                    
+                                                                <p style={{fontWeight:'bold'}}>
+                                                                    
+                                                                    {that.props.isTeacher && item.noteDef.notifyTeacher === 1 ? 
+                                                                        <span title="Rétroaction requise" className="btn-link"><FontAwesomeIcon icon={faCommentDots}/></span> : null
+                                                                    }
+                                                                    {` ${index2 + 1}. `}
+                                                                    {`${item.noteDef.title}`}
+                                                                </p>
+                                                                <p dangerouslySetInnerHTML={{ __html: item.noteContent.text }}></p>
+                                                            </div>
+                                                            {isStudent && <Button disabled={(item.nCmId === 0)} onClick={() => that.props.onEdit(item)} title="Modifier" variant="link"><FontAwesomeIcon icon={faPencilAlt}/></Button>}
+                                                            
+                                                        </div>
+                                                return [row, retro];                                    
+                                            }
+                                        )}
+                                </div>
+                            </Tab.Pane>;
+                            // {(item.noteDef.notifyTeacher === 1 ? <Button disabled={true} title="Rétroaction requise" size="sm" variant="warning"><FontAwesomeIcon icon={faCommentDots}/></Button> : null)}
+                        return result;
+                    })}
+                </Tab.Content>
             </Row></>;
 
-        let teacherView = 
+        /*let teacherView = 
             <div>
                 <Row>
                     <Nav variant="pills" className="flex-row">
@@ -603,14 +612,25 @@ class NavActivities extends Component{
                         })}
                     </Tab.Content>
                 </Row>
-            </div>;
-
+            </div>;*/
+//
         let main = 
             <Tab.Container id="tabActivities" activeKey={this.state.activeTab} onSelect={this.onSelectTab}>
-                {this.props.isTeacher ? teacherView : studentView}
+                {view}
             </Tab.Container>;
 
         return main;
+    }
+
+    createFeedbackView(index, item){
+        let text = (item.feedback.length === 0 ? '<span style="opacity: .6">Donner une rétroaction</span>' : item.feedback);
+        let result = 
+            <div className="balon1 p-2 m-0 position-relative d-flex" data-is="Rétroaction" key={"key"+index} style={{justifyContent: 'flex-end', alignItems: 'flex-start'}}>
+                {this.props.isTeacher && <Button className="" onClick={() => this.props.onEdit(item)} title="Modifier" variant="link"><FontAwesomeIcon icon={faPencilAlt}/></Button>}
+                <div className=""  style={{minWidth: "30%", minHeight: "3rem"}} dangerouslySetInnerHTML={{ __html: text }}></div>
+            </div>
+
+        return result;
     }
 
     getPctProgress(items){
