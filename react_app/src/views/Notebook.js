@@ -627,7 +627,7 @@ class NavActivities extends Component{
         let result = 
             <div className="balon1 p-2 m-0 position-relative d-flex" data-is="Rétroaction de l'enseignant" key={"key"+index} style={{justifyContent: 'flex-end', alignItems: 'flex-start'}}>
                 {this.props.isTeacher && <Button className="" onClick={() => this.props.onEdit(item)} title="Modifier la rétroaction" variant="link"><FontAwesomeIcon icon={faPencilAlt}/></Button>}
-                {this.props.isTeacher && item.noteDef.suggestedNote.length > 0 && <Button className="" onClick={() => this.onSendSuggestedNote(item)} title="Envoyé la réponse suggérée" variant="link"><FontAwesomeIcon icon={faCopy}/></Button>}
+                {this.props.isTeacher && item.noteDef.suggestedNote.length > 0 && <Button className="" onClick={() => this.onSendSuggestedNote(item)} title="Envoyer la réponse suggérée" variant="link"><FontAwesomeIcon icon={faCopy}/></Button>}
                 <div className=""  style={{minWidth: "30%", minHeight: "3rem"}} dangerouslySetInnerHTML={{ __html: text }}></div>
             </div>
 
