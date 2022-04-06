@@ -432,7 +432,7 @@ export class EditionMode extends Component{
                 {this.state.nId >= 0 && <NoteForm nId={this.state.nId} selectedGroup={this.state.selectedGroup} onClose={this.onClose}/>}
                 
                 {this.state.showGroupForm && <GroupForm onClose={this.onCloseGroupForm} data={this.state.selectedGroup}/>}
-                {this.state.showGroupOrderForm && <GroupOrderForm onClose={() => this.showGroupOrderForm(false)} data={this.state.groupListRaw}/>}
+                {this.state.showGroupOrderForm && <GroupOrderForm onClose={() => this.showGroupOrderForm(false)} ctId={$glVars.urlParams.id}/>}
 
                 {this.state.importForm && <ImportForm onClose={this.onCloseImport}/>}
 
@@ -687,7 +687,6 @@ class GroupForm extends Component{
 class GroupOrderForm extends Component{
     static defaultProps = {        
         onClose: null,
-        data: null
     };
 
     constructor(props){
@@ -696,8 +695,26 @@ class GroupOrderForm extends Component{
         this.onSave = this.onSave.bind(this);
         this.onDataChange = this.onDataChange.bind(this);
 
-        let data = props.data.sort((item, item2) => { return item.slot - item2.slot });
-        this.state = {data: data};
+        this.state = {data: []};
+        this.getData();
+    }
+
+    getData(){
+        let that = this;
+
+        let callback = function(result){
+            if(!result.success){
+                FeedbackCtrl.instance.showError($glVars.i18n.appName, result.msg);
+                return;
+            }
+                
+            let data = result.data.sort((item, item2) => { return item.slot - item2.slot });
+
+            that.setState({data: data});
+        }
+
+        $glVars.webApi.getGroupList($glVars.urlParams.id, callback);
+
     }
 
     render(){
@@ -715,7 +732,7 @@ class GroupOrderForm extends Component{
                     {this.state.data.map((item, index) => {
                             let row =
                                 <DataGrid.Body.Row data={item} key={index}>
-                                    <DataGrid.Body.Cell>{item.slot}</DataGrid.Body.Cell>
+                                    <DataGrid.Body.Cell>{item.slot.toString()}</DataGrid.Body.Cell>
                                     <DataGrid.Body.Cell>{item.name}</DataGrid.Body.Cell>
                                     <DataGrid.Body.Cell style={{textAlign: 'center'}}>
                                         {index > 0 && <FontAwesomeIcon style={{cursor:'pointer',marginRight:'1rem'}} icon={faArrowUp} title="Déplacer l'item" onClick={() => this.onMoveRow(index, -1)}/>}
@@ -732,12 +749,28 @@ class GroupOrderForm extends Component{
 
         let footer = 
             <div className="btn-tollbar" style={{width: "100%", display: "flex", justifyContent: "flex-end"}}>
-            <Button variant="secondary" onClick={() => this.props.onClose()}>{"Fermer"}</Button>
+            <Button variant="secondary" onClick={() => this.reorderGroups()}>{"Réordonner"}</Button>
+            <Button variant="primary" onClick={() => this.props.onClose()}>{"Fermer"}</Button>
             </div>;
 
         let main = <Modal title={`Ordonner les collections de notes`} body={body} footer={footer} onClose={() => this.props.onClose()} width={"500px"}/>;
 
         return main;
+    }
+
+    reorderGroups(){
+        let that = this;
+        let callback = function(result){
+            if(result.success){
+                that.getData();
+            }
+            else{
+                $glVars.feedback.showError($glVars.i18n.tags.appName, result.msg);
+            }
+        }
+
+        $glVars.webApi.reorderNoteGroups($glVars.urlParams.id, callback);
+
     }
 
     onMoveRow(index, offset){
@@ -750,7 +783,8 @@ class GroupOrderForm extends Component{
         let oldSlot = (item.slot <= 0 ? 1 : item.slot);
         
         if (oldSlot == draggingItem.slot){
-            oldSlot = (oldSlot + offset <= 0 ? 1 : oldSlot + offset);         
+            oldSlot = (oldSlot + offset <= 0 ? 1 : oldSlot + offset);
+            //alert("Veuillez appuyer sur réordonner pour avoir un résultat optimal");        
         }
         item.slot = draggingItem.slot;
         draggingItem.slot = oldSlot;

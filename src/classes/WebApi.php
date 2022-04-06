@@ -183,7 +183,21 @@ class WebApi extends recitcommon\MoodleApi
         }
         catch(Exception $ex){
             return new WebApiResult(false, null, $ex->GetMessage());
-        }     
+        }  
+    }
+    
+    public function reorderNoteGroups($request){
+        try{
+            $cmId = intval($request['cmId']);
+
+            $this->canUserAccess('a', $cmId);
+            
+            PersistCtrl::getInstance()->reorderNoteGroups($cmId);
+            return new WebApiResult(true);
+        }
+        catch(Exception $ex){
+            return new WebApiResult(false, null, $ex->GetMessage());
+        }  
     }
     
     public function saveNoteGroup($request){

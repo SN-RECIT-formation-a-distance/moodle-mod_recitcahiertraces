@@ -208,6 +208,19 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
         return $result;
     }  
 
+    public function reorderNoteGroups($cmId){
+        $list = $this->getGroupList($cmId);
+        $sql = "";
+        $slot = 1;
+        foreach($list as $g){
+            $sql = "UPDATE {$this->prefix}recitct_groups SET slot=$slot WHERE id={$g->id};";
+            $slot++;
+            $this->mysqlConn->execSQL($sql);
+        }
+        
+        return true;
+    }  
+
     public function saveNoteGroup($data){
         try{		   
             if($data->ct->id == 0){
@@ -224,7 +237,7 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
                 
                 $result = $this->mysqlConn->execSQLAndGetObject($query);
                 if (!$result) $slot = 0;
-                $slot = $result->groupSlot;
+                $slot = $result->groupSlot + 1;
                 $fields[] = "slot";
                 $values[] = $slot;
                 $query = $this->mysqlConn->prepareStmt("insert", "{$this->prefix}recitct_groups", $fields, $values);

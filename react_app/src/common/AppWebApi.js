@@ -76,6 +76,11 @@ export class AppWebApi extends WebApi
         this.post(this.gateway, data, onSuccess);
     }
 
+    reorderNoteGroups(cmId, onSuccess){
+        let data = {cmId: cmId, service: "reorderNoteGroups"};
+        this.post(this.gateway, data, onSuccess);
+    }
+
     switchNoteSlot(from, to, onSuccess){
         if(from === to){ return;}
 
