@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { ButtonGroup, Form, Button, Col, Tab, DropdownButton, Dropdown, Row, Nav, Tabs, Badge} from 'react-bootstrap';
-import {faArrowLeft, faArrowRight, faPencilAlt, faBars, faEye, faPrint, faCompass, faCommentDots, faTasks, faCheckSquare, faSquare, faFileExport} from '@fortawesome/free-solid-svg-icons';
+import {faCopy, faArrowLeft, faArrowRight, faPencilAlt, faBars, faEye, faPrint, faCompass, faCommentDots, faTasks, faCheckSquare, faSquare, faFileExport} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {FeedbackCtrl, DataGrid, ComboBox} from '../libs/components/Components';
 import {UtilsMoodle, JsNx, UtilsDateTime} from '../libs/utils/Utils';
@@ -411,7 +411,7 @@ class NavActivities extends Component{
     static defaultProps = {
         userId: 0,
         isTeacher: false,
-        onEdit: null
+        onEdit: null,
     };
 
     constructor(props){
@@ -448,7 +448,7 @@ class NavActivities extends Component{
             return;
         }
         
-        $glVars.webApi.getUserNotes($glVars.urlParams.id, this.props.userId, 0, this.getDataResult);
+        $glVars.webApi.getUserNotes($glVars.urlParams.id, this.props.userId, this.props.isTeacher ? 't' : 's', this.getDataResult);
     }
 
     getDataResult(result){
@@ -625,12 +625,28 @@ class NavActivities extends Component{
     createFeedbackView(index, item){
         let text = (item.feedback.length === 0 ? '<span style="opacity: .6">Donner une rétroaction</span>' : item.feedback);
         let result = 
-            <div className="balon1 p-2 m-0 position-relative d-flex" data-is="Rétroaction" key={"key"+index} style={{justifyContent: 'flex-end', alignItems: 'flex-start'}}>
-                {this.props.isTeacher && <Button className="" onClick={() => this.props.onEdit(item)} title="Modifier" variant="link"><FontAwesomeIcon icon={faPencilAlt}/></Button>}
+            <div className="balon1 p-2 m-0 position-relative d-flex" data-is="Rétroaction de l'enseignant" key={"key"+index} style={{justifyContent: 'flex-end', alignItems: 'flex-start'}}>
+                {this.props.isTeacher && <Button className="" onClick={() => this.props.onEdit(item)} title="Modifier la rétroaction" variant="link"><FontAwesomeIcon icon={faPencilAlt}/></Button>}
+                {this.props.isTeacher && item.noteDef.suggestedNote.length > 0 && <Button className="" onClick={() => this.onSendSuggestedNote(item)} title="Envoyé la réponse suggérée" variant="link"><FontAwesomeIcon icon={faCopy}/></Button>}
                 <div className=""  style={{minWidth: "30%", minHeight: "3rem"}} dangerouslySetInnerHTML={{ __html: text }}></div>
             </div>
 
         return result;
+    }
+
+    onSendSuggestedNote(item){
+        let data = {};
+        data.userId = this.props.userId;
+        data.courseId = item.noteDef.group.ct.courseId;
+        data.nId = item.noteDef.id;
+        data.unId = item.id;
+        if (item.feedback.length > 0){
+            data.feedback = item.feedback + "<br>" + item.noteDef.suggestedNote;
+        }else{
+            data.feedback = item.noteDef.suggestedNote;
+        }
+        let flags = {mode: 't', teacherFeedbackUpdated: 1};
+        $glVars.webApi.saveUserNote(data, flags, (result) => {});
     }
 
     getPctProgress(items){

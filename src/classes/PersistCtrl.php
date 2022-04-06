@@ -51,10 +51,14 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
         parent::__construct($mysqlConn, $signedUser);
     }
 
-    public function getUserNotes($cmId, $userId){
+    public function getUserNotes($cmId, $userId, $flag = 's'){
+        $fields = "";
+        if ($flag != 's'){
+            $fields = "t4.suggestednote as suggestedNote,";
+        }
         $query = "select t1.id as mCmId, t2.id as gId, t2.ctid as ctId, t4.title, t4.slot, t5.id as unId, 
                 coalesce(t5.note, '') as note, t2.name as groupName, t2.slot as groupSlot, t4.id as nId, t5.cmid as nCmId,
-                coalesce(t5.userid, 0) as userId, coalesce(t5.feedback, '') as feedback, t4.templatenote as templateNote, 
+                coalesce(t5.userid, 0) as userId, coalesce(t5.feedback, '') as feedback, t4.templatenote as templateNote, $fields
                 t5.lastupdate as lastUpdate, concat(find_in_set(t4.gid, t2.name), t4.slot) as orderByCustom, t3.name as ctName,
                 t3.course as courseId, coalesce(t5.note_itemid,0) as noteItemId, t4.notifyteacher as notifyTeacher, if(t5.id > 0 and length(t5.note) > 0, 0, 1) as isTemplate
                 from {$this->prefix}course_modules as t1 

@@ -33,8 +33,8 @@ export class AppWebApi extends WebApi
         this.post(this.gateway, data, onSuccess);
     }
     
-    getUserNotes(cmId, userId, garbage, onSuccess){
-        let data = {cmId: cmId, userId: userId, service: "getUserNotes"};
+    getUserNotes(cmId, userId, flag, onSuccess){
+        let data = {cmId: cmId, userId: userId, flag: flag, service: "getUserNotes"};
         this.post(this.gateway, data, onSuccess);
     }
 

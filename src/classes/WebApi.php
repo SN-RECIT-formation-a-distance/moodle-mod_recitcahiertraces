@@ -43,10 +43,11 @@ class WebApi extends recitcommon\MoodleApi
         try{
             $cmId = intval($request['cmId']);
             $userId = intval($request['userId']);
+            $flag = $request['flag'];
 
             $this->canUserAccess('s', $cmId, $userId);
 
-            $result = PersistCtrl::getInstance()->getUserNotes($cmId, $userId);
+            $result = PersistCtrl::getInstance()->getUserNotes($cmId, $userId, $flag);
             $this->prepareJson($result);
             return new WebApiResult(true, $result);
         }
