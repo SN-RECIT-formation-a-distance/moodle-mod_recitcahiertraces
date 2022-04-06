@@ -535,7 +535,7 @@ class NavActivities extends Component{
 
                                                 let row = 
                                                         <div className="balon2 p-2 m-0 position-relative" data-is={time+"Activité: "+that.formatText(item.cmName)} key={index2}>
-                                                            <div className="float-left w-100">                                                                    
+                                                            <div className="float-left w-100 balon2-content">                                                                    
                                                                 <p style={{fontWeight:'bold'}}>
                                                                     
                                                                     {that.props.isTeacher && item.noteDef.notifyTeacher === 1 ? 
@@ -628,7 +628,7 @@ class NavActivities extends Component{
             <div className="balon1 p-2 m-0 position-relative d-flex" data-is="Rétroaction de l'enseignant" key={"key"+index} style={{justifyContent: 'flex-end', alignItems: 'flex-start'}}>
                 {this.props.isTeacher && <Button className="" onClick={() => this.props.onEdit(item)} title="Modifier la rétroaction" variant="link"><FontAwesomeIcon icon={faPencilAlt}/></Button>}
                 {this.props.isTeacher && item.noteDef.suggestedNote.length > 0 && <Button className="" onClick={() => this.onSendSuggestedNote(item)} title="Envoyer la réponse suggérée" variant="link"><FontAwesomeIcon icon={faCopy}/></Button>}
-                <div className=""  style={{minWidth: "30%", minHeight: "3rem"}} dangerouslySetInnerHTML={{ __html: text }}></div>
+                <div className="balon1-content"  style={{minWidth: "30%", minHeight: "3rem"}} dangerouslySetInnerHTML={{ __html: text }}></div>
             </div>
 
         return result;
