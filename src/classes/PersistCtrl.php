@@ -249,7 +249,7 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
                 $values[] = $slot;
                 $query = $this->mysqlConn->prepareStmt("insert", "{$this->prefix}recitct_groups", $fields, $values);
                 $this->mysqlConn->execSQL($query);
-                //$data->id = $this->mysqlConn->getLastInsertId("{$this->prefix}recitct_groups", "id");
+                $data->id = $this->mysqlConn->getLastInsertId("{$this->prefix}recitct_groups", "id");
             }
             else{
                 $fields[] = "slot";
@@ -258,8 +258,7 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
                 $this->mysqlConn->execSQL($query);
             }
 
-            //return $data;
-            return true;
+            return $data;
         }
         catch(Exception $ex){
             throw $ex;
