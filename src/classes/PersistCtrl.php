@@ -198,7 +198,7 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
 
     public function getGroupList($cmId){
         
-        $query = "select t1.id as gId, t1.name as groupName, t1.slot as groupSlot, t1.ctid as ctId FROM {$this->prefix}course_modules as t2
+        $query = "select t1.id as gId, t1.name as groupName, t1.slot as groupSlot, t1.ctid as ctId, t2.id as mCmId FROM {$this->prefix}course_modules as t2
         inner join {$this->prefix}recitct_groups as t1 on t2.instance = t1.ctid
         where t2.id = $cmId order by t1.slot";
         
@@ -240,13 +240,16 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
                 where t2.id = {$data->ct->mCmId} order by t1.slot";
                 
                 $result = $this->mysqlConn->execSQLAndGetObject($query);
-                if (!$result) $slot = 0;
+                if (!$result){
+                    $slot = 0;
+                } 
+
                 $slot = $result->groupSlot + 1;
                 $fields[] = "slot";
                 $values[] = $slot;
                 $query = $this->mysqlConn->prepareStmt("insert", "{$this->prefix}recitct_groups", $fields, $values);
                 $this->mysqlConn->execSQL($query);
-                $data->id = $this->mysqlConn->getLastInsertId("{$this->prefix}recitct_groups", "id");
+                //$data->id = $this->mysqlConn->getLastInsertId("{$this->prefix}recitct_groups", "id");
             }
             else{
                 $fields[] = "slot";
@@ -255,7 +258,8 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
                 $this->mysqlConn->execSQL($query);
             }
 
-            return $data;
+            //return $data;
+            return true;
         }
         catch(Exception $ex){
             throw $ex;

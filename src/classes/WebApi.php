@@ -205,10 +205,13 @@ class WebApi extends recitcommon\MoodleApi
         try{
             $data = json_decode(json_encode($request['data']), FALSE);
 
-            $this->canUserAccess('a', $data->ct->mCmId);
+            foreach($data as $item){
+                $this->canUserAccess('a', $item->ct->mCmId);
             
-            $result = PersistCtrl::getInstance()->saveNoteGroup($data);
-            $this->prepareJson($result);
+                PersistCtrl::getInstance()->saveNoteGroup($item);
+            }
+            
+            //$this->prepareJson($result);
             
             return new WebApiResult(true);
         }

@@ -680,7 +680,7 @@ class GroupForm extends Component{
             }
         }
 
-        $glVars.webApi.saveNoteGroup(this.state.data, callback);
+        $glVars.webApi.saveNoteGroup([this.state.data], callback);
     }
 }
 
@@ -790,7 +790,7 @@ class GroupOrderForm extends Component{
         draggingItem.slot = oldSlot;
 
         data = data.sort((item, item2) => { return item.slot - item2.slot });
-        this.setState({data:data, flags: {dataChanged: true}}, () => {this.onSave(item); this.onSave(draggingItem)});
+        this.setState({data:data, flags: {dataChanged: true}}, () => {this.onSave([item, draggingItem]);});
     }
 
     onDataChange(event){
@@ -799,17 +799,14 @@ class GroupOrderForm extends Component{
         this.setState({data: data});
     }
 
-    onSave(item){
-        let that = this;
+    onSave(items){
         let callback = function(result){
-            if(result.success){
-            }
-            else{
+            if(!result.success){
                 $glVars.feedback.showError($glVars.i18n.tags.appName, result.msg);
             }
         }
 
-        $glVars.webApi.saveNoteGroup(item, callback);
+        $glVars.webApi.saveNoteGroup(items, callback);
     }
 }
 
