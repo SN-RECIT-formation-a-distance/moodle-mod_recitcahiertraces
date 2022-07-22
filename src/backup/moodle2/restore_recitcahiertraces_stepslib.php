@@ -81,15 +81,19 @@ class restore_recitcahiertraces_activity_structure_step extends restore_activity
         $newitemid = $DB->insert_record('recitct_notes', $data); // insert the recitct_notes record
         $this->set_mapping('recitct_notes', $oldid, $newitemid, true);        
     }
+    
     protected function process_recitct_user_notes($data) {
-         global $DB;
+        global $DB;
  
-         $data = (object)$data;
-         $data->nid = $this->get_mappingid('recitct_notes', $data->nid);
+        $data = (object)$data;
+        $data->nid = $this->get_mappingid('recitct_notes', $data->nid);
+        $data->userid = $this->get_mappingid('user', $data->userid);
+        $data->cmid = -1;
+
  
-         // insert the recitcc_user_notes record
-         $newitemid = $DB->insert_record('recitct_user_notes', $data);
-     }
+        // insert the recitcc_user_notes record
+        $newitemid = $DB->insert_record('recitct_user_notes', $data);
+    }
 
     protected function after_execute() {
         // Add recitcahiertraces related files, no need to match by itemname (just internally handled context)

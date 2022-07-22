@@ -73,7 +73,7 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
 
         $result = array();
         if(count($tmp) > 0){
-            $context = \context_course::instance(current($tmp)->courseId);
+            $context = $this->getCtContext(current($tmp)->mCmId);
             $modinfo = get_fast_modinfo(current($tmp)->courseId);
         
             foreach($tmp as $dbData){
@@ -127,16 +127,16 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
             throw new Exception("La note n'a pas été trouvée. (nId: $nId, userId: $userId, intCode: $intCode)");
         }
 
-        //list($course, $cm) = get_course_and_cm_from_gId($result->gId);
-        $context = context_course::instance($dbData->courseId);
+        $context = $this->getCtContext($dbData->mCmId);
         $result = UserNote::create($dbData, $context);
 
         return $result;
     }
 
     public function saveUserNote($data, $flag){
-        try{		
-            $context = context_course::instance($data->courseId);
+        try{
+            $cmId = $this->getCmIdFromNoteId($data->nId);
+            $context = $this->getCtContext($cmId);
     
             if($flag == "s"){
                 $data->note->text = file_save_draft_area_files($data->note->itemid, $context->id, 'mod_recitcahiertraces', 'usernote', $data->note->itemid, array('subdirs'=>true), $data->note->text);	
@@ -273,6 +273,22 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
         $result = $this->mysqlConn->execSQLAndGetObject($query);
         if (!$result) return 0;
         return $result->instance;
+    }
+
+    public function getCmIdFromNoteId($nId){
+        $query = "select t2.id from {$this->prefix}course_modules as t2
+        inner join {$this->prefix}recitcahiertraces as t1_1 on t2.instance = t1_1.id
+        inner join {$this->prefix}recitct_groups as t3 on t1_1.id = t3.ctid
+        inner join {$this->prefix}recitct_notes as t4 on t4.gid = t3.id
+        where t2.module = (select id from {$this->prefix}modules where name = 'recitcahiertraces') and t4.id = $nId";
+        
+        $result = $this->mysqlConn->execSQLAndGetObject($query);
+        if (!$result) return 0;
+        return $result->id;
+    }
+
+    public function getCtContext($mCmId){
+        return \context_module::instance($mCmId);
     }
 
     /**
@@ -538,7 +554,7 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
         $query = "select t4.id as nId, t2.ctid as ctId, t4.gId as gId, t4.title, t4.slot, t5.id as unId, 
         coalesce(t5.userid, 0) as userId, concat(find_in_set(t4.gId, t2.name), t4.slot) as orderByCustom, 
         t3.course as courseId, concat(t6.firstname, ' ', t6.lastname) as username, t2.name as groupName, t2.slot as groupSlot,
-        coalesce(t5.note_itemid,0) as noteItemId, coalesce(t5.note, '') as note, t4.notifyteacher as notifyTeacher, t5.cmid as nCmId
+        coalesce(t5.note_itemid,0) as noteItemId, coalesce(t5.note, '') as note, t4.notifyteacher as notifyTeacher, t5.cmid as nCmId, t1.id as mCmId
         from {$this->prefix}course_modules as t1 
         inner join {$this->prefix}recitcahiertraces as t3 on t1.instance = t3.id    
         inner join {$this->prefix}recitct_groups as t2 on t3.id = t2.ctid            
@@ -557,7 +573,7 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
 
         $result = array();
         if(count($tmp) > 0){
-            $context = \context_course::instance(current($tmp)->courseId);
+            $context = $this->getCtContext(current($tmp)->mCmId);
             $modinfo = get_fast_modinfo(current($tmp)->courseId);
         
             foreach($tmp as $dbData){
@@ -766,7 +782,7 @@ class UserNote
     public $id = 0;       // user note id
     //@ NoteDef
     public $noteDef = null;
-    public $nCmId = 0;      // course module id
+    public $nCmId = 0;      // course module id in which the note has been integrated
     public $cmName = "";    // course module name
     public $userId = 0;
     public $username = "";
@@ -783,8 +799,12 @@ class UserNote
         $result = new UserNote();
         $result->id = $dbData->unId;
         $result->noteDef = NoteDef::create($dbData);
-        if(isset($dbData->nCmId)){ $result->nCmId = $dbData->nCmId; }
-        if(isset($dbData->cmName)){ $result->cmName = $dbData->cmName; }
+        if(isset($dbData->cmName)){
+            $result->cmName = $dbData->cmName;
+        }
+        if(isset($dbData->nCmId)){ 
+            $result->nCmId = $dbData->nCmId;
+        }
 
         $result->userId = $dbData->userId;
         

@@ -462,6 +462,9 @@ class NavActivities extends Component{
                 if (items[i].nCmId === 0){
                     items[i].cmName = "Cette note n'a pas été complétée.";
                 }
+                if (items[i].nCmId == -1){
+                    items[i].cmName = '(L\'activité dans laquelle la note a été prise ne peut pas être restaurée.)';
+                }
             }
         }
 
@@ -534,7 +537,7 @@ class NavActivities extends Component{
                                                 }
 
                                                 let row = 
-                                                        <div className="balon2 p-2 m-0 position-relative" data-is={time+"Activité: "+that.formatText(item.cmName)} key={index2}>
+                                                        <div className="balon2 p-2 m-0 position-relative" data-is={time+"Activité: "+(that.formatText(item.cmName))} key={index2}>
                                                             <div className="float-left w-100 balon2-content">                                                                    
                                                                 <p style={{fontWeight:'bold'}}>
                                                                     
@@ -665,7 +668,7 @@ class NavActivities extends Component{
     }
 
     formatText(text, length){
-        length = length || 50;
+        length = length || 150;
         let tmp = document.createElement("div");
         tmp.innerHTML = text;
         
