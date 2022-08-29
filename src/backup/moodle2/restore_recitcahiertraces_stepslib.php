@@ -31,11 +31,15 @@
 class restore_recitcahiertraces_activity_structure_step extends restore_activity_structure_step {
     protected function define_structure() {
 
+        $userinfo = $this->get_setting_value('userinfo');
+        
         $paths = array();
         $paths[] = new restore_path_element('recitcahiertraces', '/activity/recitcahiertraces');
         $paths[] = new restore_path_element('recitct_groups', '/activity/recitcahiertraces/recitct_groups');
         $paths[] = new restore_path_element('recitct_notes', '/activity/recitcahiertraces/recitct_groups/recitct_notes');
-        $paths[] = new restore_path_element('recitct_user_notes', '/activity/recitcahiertraces/recitct_groups/recitct_notes/recitct_user_notes');
+        if ($userinfo){
+            $paths[] = new restore_path_element('recitct_user_notes', '/activity/recitcahiertraces/recitct_groups/recitct_notes/recitct_user_notes');
+        }
 
         // Return the paths wrapped into standard activity structure
         return $this->prepare_activity_structure($paths);
