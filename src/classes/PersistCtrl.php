@@ -140,6 +140,7 @@ class PersistCtrl extends recitcommon\MoodlePersistCtrl
     
             if($flag == "s"){
                 $data->note->text = file_save_draft_area_files($data->note->itemid, $context->id, 'mod_recitcahiertraces', 'usernote', $data->note->itemid, array('subdirs'=>true), $data->note->text);	
+                $data->note->text = file_rewrite_pluginfile_urls($data->note->text, 'pluginfile.php', $context->id, 'mod_recitcahiertraces', 'usernote', $data->note->itemid, ['reverse' => true]);
 
                 $data->lastUpdate = time();
                 $fields = array("nid", "userid", "note", "note_itemid", "lastupdate", "cmid");
