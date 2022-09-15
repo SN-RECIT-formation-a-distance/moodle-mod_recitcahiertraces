@@ -1,9 +1,10 @@
 <?php
 $string['pluginname'] = 'Cahier de traces v2';
+$string['privacy:metadata'] = 'This plugin does not store any personal data.';
 $string['userpreferences'] = 'User preferences';
 $string['modulename'] = 'Cahier de traces v2';
 $string['modulenameplural'] = "Cahier de traces";
-$string['modulename_help'] = "L'activité \"Cahier de traces\" doit être la DERNIÈRE ACTIVITÉ DE LA LISTE dans chaque section du cours. Les paramètres de cette activité déterminent la présence ou non d'un espace de prise de note pour chaque activité de la section. Elle contient toutes les notes de l'élève relatives à cette section.";
+$string['modulename_help'] = "The activity \"Cahier de traces\" must be last.";
 $string['pluginadministration'] = "Cahier de traces module administration";
 $string['sectionActivities'] = "Section Activities";
 $string['turnOnEditingMode'] = "Turn On Editing Mode";
