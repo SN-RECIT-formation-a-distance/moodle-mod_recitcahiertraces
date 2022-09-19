@@ -1,6 +1,5 @@
 <?php
 $string['pluginname'] = 'Cahier de traces';
-$string['privacy:metadata'] = 'This plugin does not store any personal data.';
 $string['userpreferences'] = 'User preferences';
 $string['modulename'] = 'Cahier de traces';
 $string['modulenameplural'] = "Cahier de traces";
