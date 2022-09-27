@@ -26,12 +26,12 @@ class PersonalNoteForm extends Component{
         this.onCollapse = this.onCollapse.bind(this);
         
         let mode = "";// it is a student?
-         if(UtilsMoodle.checkRoles($glVars.signedUser.roles, UtilsMoodle.rolesL3)){
-             mode = "s";
-        }
         // it is a teacher
-        else if(UtilsMoodle.checkRoles($glVars.signedUser.roles, UtilsMoodle.rolesL2)){
+        if(UtilsMoodle.checkRoles($glVars.signedUser.roles, UtilsMoodle.rolesL2)){
             mode = "t";
+        }
+        else if(UtilsMoodle.checkRoles($glVars.signedUser.roles, UtilsMoodle.rolesL3)){
+             mode = "s";
         }
         this.state = {data: null, remoteData: null, dropdownLists: null, mode: mode, collapse: {note: true, suggestedNote: false, feedback: true}};
 
@@ -121,7 +121,6 @@ class PersonalNoteForm extends Component{
             suggestedNote = <div style={styleText} dangerouslySetInnerHTML={{__html: this.state.remoteData.noteDef.suggestedNote}}></div>;
         }
         else{
-            console.log(this.state);
             return null;
         }
         let styleHeader = {cursor: "pointer"};
