@@ -22,17 +22,18 @@
 namespace recitcahiertraces;
 
 require_once(dirname(__FILE__).'../../../../config.php');
-require_once "$CFG->dirroot/local/recitcommon/php/WebApi.php";
-require_once($CFG->dirroot . "/mod/recitcahiercanada/classes/PersistCtrl.php");
+require_once dirname(__FILE__)."/recitcommon/WebApi.php";
 require_once 'PersistCtrl.php';
+if (file_exists($CFG->dirroot . "/mod/recitcahiercanada/classes/PersistCtrl.php")){
+    require_once($CFG->dirroot . "/mod/recitcahiercanada/classes/PersistCtrl.php");
+}
 
 use recitcahiertraces\PersistCtrl;
-use recitcommon;
-use recitcommon\WebApiResult;
+use recitcahiertraces\WebApiResult;
 use Exception;
 use stdClass;
 
-class WebApi extends recitcommon\MoodleApi
+class WebApi extends MoodleApi
 {
     public function __construct($DB, $COURSE, $USER){
         parent::__construct($DB, $COURSE, $USER);

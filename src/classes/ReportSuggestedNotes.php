@@ -1,9 +1,9 @@
 <?php
 require('../../../config.php');
 require_once($CFG->dirroot . "/mod/recitcahiertraces/classes/PersistCtrl.php");
-require_once($CFG->dirroot . "/local/recitcommon/php/Utils.php");
+require_once dirname(__FILE__)."/recitcommon/Utils.php";
 
-use recitcommon\Utils;
+use recitcahiertraces\Utils;
 use recitcahiertraces\PersistCtrl;
 
 $gId = required_param('gId', PARAM_INT);

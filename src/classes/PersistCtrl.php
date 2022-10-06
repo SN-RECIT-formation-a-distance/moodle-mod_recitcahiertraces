@@ -21,7 +21,7 @@
  */
 namespace recitcahiertraces;
 
-require_once "$CFG->dirroot/local/recitcommon/php/PersistCtrl.php";
+require_once dirname(__FILE__)."/recitcommon/PersistCtrl.php";
 
 use recitcommon;
 use stdClass;
@@ -31,7 +31,7 @@ use context_course;
 /**
  * Singleton class
  */
-class PersistCtrl extends recitcommon\MoodlePersistCtrl
+class PersistCtrl extends MoodlePersistCtrl
 {
     protected static $instance = null;
     
