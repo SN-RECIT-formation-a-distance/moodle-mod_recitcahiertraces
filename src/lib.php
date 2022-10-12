@@ -23,10 +23,10 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once($CFG->dirroot . "/local/recitcommon/php/Utils.php");
+require_once(__DIR__ . "/classes/recitcommon/Utils.php");
 require_once(__DIR__ . "/classes/PersistCtrl.php");
 
-use recitcommon\Utils;
+use recitcahiertraces\Utils;
 use recitcahiertraces\PersistCtrl;
 
 /**

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import ReactDOM from "react-dom";
+import { createRoot } from 'react-dom/client';
 /**************************************************************************************
  *  il ne faut pas charger le bootstrap de base car il est déjà chargé dans le thème
  * //import 'bootstrap/dist/css/bootstrap.min.css';  
@@ -65,6 +65,7 @@ class App extends Component {
 
 document.addEventListener('DOMContentLoaded', function(){ 
     const domContainer = document.getElementById('recit_cahiertraces');
+    const root = createRoot(domContainer);
     
     let signedUser = {
         userId: domContainer.getAttribute('data-student-id'), 
@@ -72,8 +73,7 @@ document.addEventListener('DOMContentLoaded', function(){
         portfolioUrl: (domContainer.hasAttribute('data-portfolio-url') ? domContainer.getAttribute('data-portfolio-url') : null)
     };
 
-    ReactDOM.render(<App signedUser={signedUser}/>, domContainer);
-//	document.body.style.backgroundColor = 'transparent';
+    root.render(<App signedUser={signedUser}/>);
 }, false);
 
 
