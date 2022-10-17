@@ -35,16 +35,32 @@ use recitcahiertraces\PersistCtrl;
  * @return mixed True if module supports feature, false if not, null if doesn't know
  */
 function recitcahiertraces_supports($feature) {
+    global $CFG;
+    if ($CFG->version >= 2022041900){//Moodle 4.0
+        return recitcahiertraces_supports_moodle4($feature);
+    }else{
+        return recitcahiertraces_supports_moodle3($feature);
+    }
+}
+
+function recitcahiertraces_supports_moodle3($feature) {
     switch($feature) {
-        //case FEATURE_MOD_ARCHETYPE:           return MOD_ARCHETYPE_RESOURCE;
-        //case FEATURE_GROUPS:                  return false;
-        //case FEATURE_GROUPINGS:               return false;
         case FEATURE_MOD_INTRO:               return true;
         case FEATURE_COMPLETION_TRACKS_VIEWS: return true;
-        //case FEATURE_GRADE_HAS_GRADE:         return false;
-        //case FEATURE_GRADE_OUTCOMES:          return false;
         case FEATURE_BACKUP_MOODLE2:          return true;
         case FEATURE_SHOW_DESCRIPTION:        return true;
+
+        default: return null;
+    }
+}
+
+function recitcahiertraces_supports_moodle4($feature) {
+    switch($feature) {
+        case FEATURE_MOD_INTRO:               return true;
+        case FEATURE_COMPLETION_TRACKS_VIEWS: return true;
+        case FEATURE_BACKUP_MOODLE2:          return true;
+        case FEATURE_SHOW_DESCRIPTION:        return true;
+        case FEATURE_MOD_PURPOSE: return MOD_PURPOSE_COMMUNICATION;
 
         default: return null;
     }
