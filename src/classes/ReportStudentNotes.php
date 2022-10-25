@@ -16,7 +16,7 @@ list ($course, $cm) = get_course_and_cm_from_cmId($cmId);
 
 //$PAGE->set_context(context_module::instance($cm->id));
 
-$theme = theme_config::load('recit');
+$theme = theme_config::load($PAGE->theme->name);
 
 $brandImage = "{$CFG->wwwroot}/mod/recitcahiertraces/pix/recit-logo.png";
 $customerLogo = $theme->setting_file_url('logo', 'logo');
@@ -54,7 +54,7 @@ $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahie
     <title><?php echo $pageTitle; ?></title>    
     <link rel="stylesheet" type="text/css" href="<?php echo $CFG->wwwroot . "/theme/styles.php/{$CFG->theme}/{$CFG->themerev}_1/all"?>">
     <link rel="stylesheet" type="text/css" href="<?php echo $CFG->wwwroot . "/mod/recitcahiertraces/css/report.css"; ?>">
-    <link rel="icon" href="../pix/icon.png" />
+    <link rel="icon" href="<?php echo Utils::getFavicon(); ?>" />
 </head>
 
 <body>

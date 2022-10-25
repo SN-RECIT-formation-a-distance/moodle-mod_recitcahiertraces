@@ -46,6 +46,15 @@ class Utils
         return $result;
     }
 
+    public static function getFavicon(){
+        global $CFG;
+        if ($CFG->version >= 2022041900){//Moodle 4.0
+            return "../pix/monologo.jpg";
+        }else{
+            return "../pix/icon.png";
+        }
+    }
+
     public static function printOut($data){
         echo "<pre>";
         print_r($data);
