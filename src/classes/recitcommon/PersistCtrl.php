@@ -176,6 +176,33 @@ abstract class MoodlePersistCtrl extends APersistCtrl{
         return $stmt;
     }
 
+    public function getCourseTeachers($courseId, $groupIds = array()){
+        $whereStmt = "";
+        if(!empty($groupIds)){
+            $whereStmt = sprintf(" and t6.groupid in (%s)", implode(",", $groupIds));
+        }
+
+        $query = "select t1.id as id, t1.firstname, t1.lastname, t1.email, t5.shortname as role, concat(t1.firstname, ' ', t1.lastname) as imagealt, 
+        group_concat(t6.groupid) as groupIds
+        from {$this->prefix}user as t1  
+        inner join {$this->prefix}user_enrolments as t2 on t1.id = t2.userid and t1.deleted = 0 and t1.suspended = 0
+        inner join {$this->prefix}enrol as t3 on t2.enrolid = t3.id
+        inner join {$this->prefix}role_assignments as t4 on t1.id = t4.userid
+        inner join {$this->prefix}role as t5 on t4.roleid = t5.id
+        left join {$this->prefix}groups_members as t6 on t1.id = t6.userid
+        where t3.courseid = $courseId and t4.contextid in (select id from {$this->prefix}context where instanceid = $courseId) 
+                and t5.shortname in ('teacher', 'editingteacher', 'noneditingteacher') $whereStmt 
+        group by t1.id, t5.id";
+
+        $result = $this->mysqlConn->execSQLAndGetObjects($query);
+
+        foreach($result as $item){
+            $item->groupIds = explode(",", $item->groupIds);
+        }
+
+        return $result;
+    }
+
 
 	public function getEnrolledUserList($cmId = 0, $userId = 0, $courseId = 0){
         $cmStmt = " 1 ";

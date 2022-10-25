@@ -637,7 +637,7 @@ class PersistCtrl extends MoodlePersistCtrl
                     $query = "select t1.id, t3.course FROM {$this->prefix}recitct_notes as t1 
                     inner join {$this->prefix}recitct_groups as t2 on t1.gid = t2.id
                     inner join {$this->prefix}recitcahiertraces as t3 on t2.ctid = t3.id
-                    where t1.intcode = \"{$note->intCode}\" and t3.course = (select course from mdl_course_modules where id = $mCmId)
+                    where t1.intcode = \"{$note->intCode}\" and t3.course = (select course from {$this->prefix}course_modules where id = $mCmId)
                     order by id desc limit 1";
 
                     $intCode = $this->mysqlConn->execSQLAndGetObject($query);
