@@ -323,14 +323,17 @@ class PersistCtrl extends MoodlePersistCtrl
     }
 
     /**
-     * Fetch a cmNote (by unique ID = gid) or a set of cmNotes (gId+ctid = gId and CahierCanada ID)
+     * Fetch a cmNote (by unique ID = gid) or a set of cmNotes
      */
-    public function getCmSuggestedNotes($cId = 0, $gId = 0){
+    public function getCmSuggestedNotes($cId = 0, $gId = 0, $ctId = 0){
         $cIdStmt = ($cId == 0 ? "1" : " t1_1.course = $cId");
 
         $cmStmt = "1";
         if($gId > 0){
             $cmStmt = " (t1.gid = $gId)";
+        }
+        if($ctId > 0){
+            $cmStmt = " (t3.ctid = $ctId)";
         }
         
         $query = "select t1.id as nId, coalesce(t1.intcode, '') as intCode, t1_1.id as ctId, t1.gid as gId, t1.title as title, t1.slot, t1.templatenote as templateNote, t1.suggestednote as suggestedNote, 
@@ -340,7 +343,7 @@ class PersistCtrl extends MoodlePersistCtrl
                     inner join {$this->prefix}recitcahiertraces as t1_1 on t3.ctid = t1_1.id
                     where $cIdStmt and $cmStmt
                     group by t1.id
-                    order by slot asc";
+                    order by t3.id, slot asc";
 
         $tmp = $this->mysqlConn->execSQLAndGetObjects($query);
 

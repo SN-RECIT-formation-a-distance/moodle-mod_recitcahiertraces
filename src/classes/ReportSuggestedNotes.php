@@ -11,11 +11,10 @@ $cId = required_param('cmId', PARAM_INT);
 
 require_login();
 
-//$PAGE->set_context(context_module::instance($cm->id));
+list ($course, $cm) = get_course_and_cm_from_cmId($cId);
+$PAGE->set_context(context_module::instance($cm->id));
 
 $theme = theme_config::load($PAGE->theme->name);
-
-list ($course, $cm) = get_course_and_cm_from_cmId($cId);
 
 $brandImage = "{$CFG->wwwroot}/mod/recitcahiertraces/pix/recit-logo.png";
 $customerLogo = $theme->setting_file_url('logo', 'logo');
@@ -33,7 +32,8 @@ if(!Utils::isAdminRole($roles)){
     }
 }
 
-$pNotes = PersistCtrl::getInstance($DB, $USER)->getCmSuggestedNotes($course->id, $gId);
+$ctId = PersistCtrl::getInstance($DB, $USER)->getCtIdFromCmId($cId);
+$pNotes = PersistCtrl::getInstance($DB, $USER)->getCmSuggestedNotes($course->id, $gId, $ctId);
 
 $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahiertraces'), get_string('suggestednote', 'mod_recitcahiertraces'), get_string('printedOn', 'mod_recitcahiertraces'), date('Y-m-d H:i:s'));
 ?>

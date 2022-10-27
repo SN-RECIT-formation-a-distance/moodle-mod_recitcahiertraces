@@ -14,7 +14,7 @@ require_login();
 
 list ($course, $cm) = get_course_and_cm_from_cmId($cmId);
 
-//$PAGE->set_context(context_module::instance($cm->id));
+$PAGE->set_context(context_module::instance($cm->id));
 
 $theme = theme_config::load($PAGE->theme->name);
 
