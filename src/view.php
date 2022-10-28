@@ -72,16 +72,8 @@ class MainView
         $this->page->set_pagelayout('incourse');
         $this->page->set_title($this->course->shortname.': '.$this->cm->name);
         $this->page->set_heading($this->course->fullname);
-        $this->page->requires->css(new moodle_url('./react_app_build/index.css'), true);
-        $this->page->requires->js(new moodle_url('./react_app_build/index.js'), true);
-        $this->page->requires->js(new moodle_url("{$this->cfg->wwwroot}/local/recitcommon/js/Components.js"), true);
-
-       /* if($this->editorOption == "2"){
-            $this->page->requires->css(new moodle_url("{$this->cfg->wwwroot}/local/recitcommon/js/recit_rich_editor/build/index.css"), true);
-            $this->page->requires->js(new moodle_url("{$this->cfg->wwwroot}/local/recitcommon/js/recit_rich_editor/build/index.js"), true);
-        }*/
-
-        //$this->page->requires->js(new moodle_url('/lib/editor/atto/yui/build/moodle-editor_atto-editor/moodle-editor_atto-editor-min.js'), true);
+        $this->page->requires->css(new moodle_url('./react/build/index.css'), true);
+        $this->page->requires->js(new moodle_url('./react/build/index.js'), true);
 
         echo $this->output->header();
         echo $this->output->heading(format_string($this->cm->name), 2);
