@@ -22,7 +22,7 @@
  */
 namespace recitcahiertraces;
 require('../../config.php');
-require_once($CFG->dirroot . "/local/recitcommon/php/Utils.php");
+require_once(dirname(__FILE__) . "/classes/recitcommon/Utils.php");
 require_once($CFG->libdir . '/portfoliolib.php');
 
 use recitcommon;
@@ -34,11 +34,8 @@ list ($course, $cm) = get_course_and_cm_from_cmId($id, 'recitcahiertraces');
 //require_course_login($course, true, $cm);
 require_login();
 
-//$context = context_module::instance($cm->id);
-//require_capability('mod/recitcahiertraces:view', $context);
 $view = new MainView($PAGE, $course, $cm, $OUTPUT, $USER, $DB, $CFG);
 
-//$modeAdmin = intval(has_capability('mod/recitcahiertraces:viewadmin', context_system::instance()));
 $view->display();
 
 class MainView
@@ -78,8 +75,8 @@ class MainView
         echo $this->output->header();
         echo $this->output->heading(format_string($this->cm->name), 2);
                         
-        $roles = recitcommon\Utils::getUserRoles($this->course->id, $this->user->id);
-        $studentId = (in_array('ad', $roles) ? 0 : $this->user->id);
+        $roles = Utils::getUserRoles($this->course->id, $this->user->id);
+        $studentId = (in_array('t', $roles) ? 0 : $this->user->id);
         $portfolioUrl = $this->getPortfolioUrl();
         
         echo $this->getEditorOption("recit_cahiertraces_editor", 1);        

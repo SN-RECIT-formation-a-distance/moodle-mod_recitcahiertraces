@@ -249,23 +249,16 @@ abstract class MoodleApi extends AWebApi
             $userRoles = Utils::getUserRoles($this->course->id, $this->signedUser->id);
         }
 
-        //$desc = print_r($userRoles, true);
-        //throw new Exception($desc);
-
-        // if the user is admin then it has access to all
-        if(Utils::isAdminRole($userRoles)){
-            return true;
-        }
          // if the level is admin then the user must have a admin role to have access
-        else if(($level == 'a') && Utils::isAdminRole($userRoles)){
+        if(($level == 'a') && in_array('t', $userRoles)){
             return true;
         }
         // if the user is student then it has access only if it is accessing its own stuff
-        else if(($level == 's') && ($userId == $this->signedUser->id)){
+        else if(($level == 's') && in_array('s', $userRoles)){
             return true;
         }
         else{
-            throw new Exception(get_string('accessdenied'));
+            throw new Exception(get_string('accessdenied', 'admin'));
         }
     }
 

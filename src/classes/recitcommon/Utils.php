@@ -46,6 +46,18 @@ class Utils
         return $result;
     }
 
+    public static function getUserRoles($courseId, $userId){
+        $roles = array();
+        $ccontext = \context_course::instance($courseId);
+        if (has_capability('mod/recitcahiertraces:view', $ccontext, $userId, false)) {
+            $roles[] = 's';
+        }
+        if (has_capability('mod/recitcahiertraces:viewadmin', $ccontext, $userId, false)) {
+            $roles[] = 't';
+        }
+        return $roles;
+    }
+
     public static function getFavicon(){
         global $CFG;
         if ($CFG->version >= 2022041900){//Moodle 4.0
@@ -82,60 +94,5 @@ class Utils
 
         $result .= "</div>";
         return $result;
-    }
-
-    public static function getUserRoles($courseId, $userId){
-        // get the course context (there are system context, module context, etc.)
-        $context = \context_course::instance($courseId);
-
-        return Utils::getUserRolesOnContext($context, $userId);
-    }
-
-    public static function getUserRolesOnContext($context, $userId){
-        $userRoles1 = get_user_roles($context, $userId);
-
-        $userRoles2 = array();
-        foreach($userRoles1 as $item){
-            $userRoles2[] = $item->shortname;
-        }
-
-        $ret = self::moodleRoles2RecitRoles($userRoles2);
-
-        if(is_siteadmin($userId)){
-            $ret[] = 'ad';
-        }
-        
-        return $ret;
-    }
-    
-    public static function moodleRoles2RecitRoles($userRoles){
-        $ret = array();
-
-        foreach($userRoles as $name){
-            switch($name){
-                case 'manager': $ret[] = 'mg'; break;
-                case 'coursecreator': $ret[] = 'cc'; break;
-                case 'editingteacher': $ret[] = 'et'; break;
-                case 'teacher': $ret[] = 'tc'; break;
-                case 'student': $ret[] = 'sd'; break;
-                case 'guest': $ret[] = 'gu'; break;
-                case 'frontpage': $ret[] = 'fp'; break;
-            }
-        }
-
-        return $ret;
-    }
-    
-    public static function isAdminRole($roles){
-        $adminRoles = array('ad', 'mg', 'cc', 'et', 'tc');
-
-        if(empty($roles)){ return false;}
-
-        foreach($roles as $role){
-            if(in_array($role, $adminRoles)){
-                return true;
-            }
-        }
-        return false;
     }
 }
