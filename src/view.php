@@ -17,8 +17,8 @@
 /**
  *
  * @package   mod_recitcahiertraces
- * @copyright 2019 RÉCIT FAD
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @copyright 2019 RÉCIT 
+ * @license   {@link http://www.gnu.org/licenses/gpl-3.0.html} GNU GPL v3 or later
  */
 namespace recitcahiertraces;
 require('../../config.php');

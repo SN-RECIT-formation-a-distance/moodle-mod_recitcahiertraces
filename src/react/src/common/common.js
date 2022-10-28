@@ -1,86 +1,31 @@
-//import Moment from 'moment'
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ *
+ * @package   mod_recitcahiertraces
+ * @copyright 2019 RÉCIT 
+ * @license   {@link http://www.gnu.org/licenses/gpl-3.0.html} GNU GPL v3 or later
+ */
+
 import {I18n} from "../libs/utils/Utils";
 import {FeedbackCtrl} from "../libs/components/Feedback";
 import {AppWebApi} from "./AppWebApi";
 
 export * from "./Options";
 
-/*export class EditorMoodle{
-    constructor(id){
-        this.id = id || "recitCCEditorContainer";
-        this.dom = null;
-        this.format = null;
-        this.count = 0;
-
-        this.init = this.init.bind(this);
-
-        this.init();
-    }
-
-    init(){
-        this.dom = document.getElementById(this.id);
-        console.log("Loading Editor Moodle...");
-
-        this.count++;
-
-        if(this.count >= 10){ return console.log("Failure no loading Editor Moodle..."); }
-
-        if(this.dom === null){
-            window.setTimeout(this.init, 500);
-            return;
-        }
-
-        this.format = this.dom.getAttribute("data-format");
-    }
-
-    show(){
-        this.dom.style.display = 'block';
-    }
-
-    close(){
-        this.setValue("");
-        this.dom.style.display = 'none';
-        document.body.appendChild(this.dom);
-    }
-
-    dispose(){
-        this.dom.remove();
-    }
-    
-    setValue(value){
-        switch(this.format){
-            case 'atto_texteditor':
-                this.dom.getElementsByClassName("editor_atto_content")[0].innerHTML = value;
-                //this.atto.editor.setHTML(value);
-                break;
-            case 'tinymce_texteditor':
-                // the tinymce does not work on the popup
-                //this.dom.getElementsByTagName("textarea")[0].value = value;
-                //tinymce.activeEditor.setContent(value);
-                break;
-            case 'textarea_texteditor':
-                this.dom.getElementsByTagName("textarea")[0].value = value;
-                break;
-            default: 
-                alert("Editor: unknown format");
-        }
-    }
-
-    getValue(){
-        switch(this.format){
-            case 'atto_texteditor':
-                return this.dom.getElementsByClassName("editor_atto_content")[0].innerHTML;
-                // this.atto.editor.getHTML();
-            case 'tinymce_texteditor':
-                // return this.dom.getElementsByTagName("textarea")[0].value;
-                return tinymce.activeEditor.getContent();
-            case 'textarea_texteditor':
-                return this.dom.getElementsByTagName("textarea")[0].value;
-            default: 
-                return "Editor: unknown format";
-        }
-    }
-}*/
 
 export const $glVars = {
     signedUser: {userId: 0, roles: []},
