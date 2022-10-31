@@ -25,11 +25,11 @@
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
         <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="slot" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Order"/>
-        <FIELD NAME="ctid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Cahier Traces Id"/>
+        <FIELD NAME="ct_id" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Cahier Traces Id, ctid was reserved by Postgres"/>
       </FIELDS>
       <KEYS>
         <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-        <KEY NAME="fkctid" TYPE="foreign" FIELDS="ctid" REFTABLE="recitcahiertraces" REFFIELDS ="id"/>
+        <KEY NAME="fkctid" TYPE="foreign" FIELDS="ct_id" REFTABLE="recitcahiertraces" REFFIELDS ="id"/>
       </KEYS>
     </TABLE>
 

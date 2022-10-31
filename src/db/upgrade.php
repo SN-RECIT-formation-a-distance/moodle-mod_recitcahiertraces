@@ -37,7 +37,19 @@ function xmldb_recitcahiertraces_upgrade($oldversion) {
             $dbman->add_field($table, $field);
         }
 
-           upgrade_plugin_savepoint(true, $newversion, 'mod', 'recitcahiertraces');
+        upgrade_plugin_savepoint(true, $newversion, 'mod', 'recitcahiertraces');
+    }
+
+    $newversion = 2022100102;
+    if ($oldversion < $newversion) {
+        $table = new xmldb_table('recitct_groups');
+        $field = new xmldb_field('ctid', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, null, 0);
+
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->rename_field($table, $field, 'ct_id');
+        }
+
+        upgrade_plugin_savepoint(true, $newversion, 'mod', 'recitcahiertraces');
     }
 
     return true;

@@ -22,7 +22,6 @@
 
 namespace recitcahiertraces;
 
-require_once __DIR__ . '/MySQLiConn.php';
 require_once __DIR__ . '/Utils.php';
 
 abstract class APersistCtrl
@@ -37,7 +36,7 @@ abstract class APersistCtrl
     protected function __construct($mysqlConn, $signedUser){
         global $CFG;
 
-        $this->mysqlConn = new RecitMySQLConn($mysqlConn);
+        $this->mysqlConn = $mysqlConn;
         $this->signedUser = $signedUser;
         $this->prefix = $CFG->prefix;
     }
@@ -166,22 +165,12 @@ abstract class MoodlePersistCtrl extends APersistCtrl{
         }
     }
 
-    protected function getStmtStudentRole($userId, $courseId){
-        // contextlevel = 50 = course context
-        // user has role student and it is enrolled in the course
-        $stmt = "(exists(select st1.id from {$this->prefix}role as st1 inner join {$this->prefix}role_assignments as st2 on st1.id = st2.roleid
-        where st2.userid = $userId and st2.contextid in (select id from {$this->prefix}context where instanceid = $courseId and contextlevel = 50) and st1.shortname in ('student'))
-        and exists(select st1.id from {$this->prefix}enrol as st1 inner join {$this->prefix}user_enrolments as st2 on st1.id = st2.enrolid where st1.courseid = $courseId and st2.userid = $userId limit 1))";
-
-        return $stmt;
-    }
-
     public function getCourseTeachers($courseId, $groupIds = array()){
         $coursecontext = context_course::instance($courseId);
         $users = get_users_by_capability($coursecontext, 'mod/recitcahiertraces:viewadmin', '', '', '', '', null, null, false);
 
         foreach($users as $item){
-            $item->groupIds = groups_get_user_groups($courseId, $item->id);;
+            $item->groupIds = groups_get_user_groups($courseId, $item->id);
         }
 
         return $users;
