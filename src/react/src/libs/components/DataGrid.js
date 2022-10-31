@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { Table, Button } from 'react-bootstrap';
 import {faSort, faSortAmountUpAlt, faSortAmountDownAlt} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { i18n } from '../../common/i18n';
 
 export class DataGrid extends Component {
     static defaultProps = {
@@ -106,7 +107,7 @@ class Body extends Component {
     
     render() {
         if(this.state.nbRows === 0){
-            return (<caption style={{captionSide: "bottom"}}>Aucun élément</caption>);
+            return (<caption style={{captionSide: "bottom"}}>{i18n.get_string('nodata')}</caption>);
         }
         else{
             //return (<tbody>{this.renderChildren()}</tbody>);

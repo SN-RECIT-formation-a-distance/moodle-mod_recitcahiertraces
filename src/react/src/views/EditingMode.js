@@ -27,6 +27,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {ComboBox, FeedbackCtrl, DataGrid, InputNumber, ToggleButtons, Modal} from '../libs/components/Components';
 import {JsNx, UtilsMoodle} from '../libs/utils/Utils';
 import {$glVars} from '../common/common';
+import { i18n } from '../common/i18n';
 
 export class BtnModeEdition extends Component{
     static defaultProps = {
@@ -115,48 +116,48 @@ class NoteForm extends Component
                     <Tab eventKey={0} title="Note" style={styleTab}>
                         <Form.Row>
                             <Form.Group as={Col}>
-                                <Form.Label>{"Collection de notes:"}</Form.Label>
-                                <ComboBox placeholder={"Sélectionnez votre option"} required={true}  name="gId" value={data.gId} options={this.state.dropdownLists.groupList} onChange={this.onDataChange} />
+                                <Form.Label>{i18n.get_string('notegroup')+":"}</Form.Label>
+                                <ComboBox placeholder={i18n.get_string('selectOption')} required={true}  name="gId" value={data.gId} options={this.state.dropdownLists.groupList} onChange={this.onDataChange} />
                             </Form.Group>
                         </Form.Row>
                         <Form.Row>
                             <Form.Group as={Col}>
-                                <Form.Label>{"Titre"}</Form.Label>
+                                <Form.Label>{i18n.get_string('title')}</Form.Label>
                                 <Form.Control type="text" required value={data.title} maxLength="255" name="title" onChange={this.onDataChange}/>
                             </Form.Group>
                         </Form.Row>
                         <Form.Row>
                             <Form.Group as={Col}>
-                                <Form.Label>{"Position"}</Form.Label>
+                                <Form.Label>{i18n.get_string('position')}</Form.Label>
                                 <InputNumber value={data.slot} name="slot" min={0} onChange={this.onDataChange}/>
                             </Form.Group>
                         </Form.Row>
                         <Form.Row>
                             <Form.Group as={Col}>
-                                <Form.Label>{"Notifier l'enseignant lors d'une mise à jour"}</Form.Label>
+                                <Form.Label>{i18n.get_string('notifyteacheruponupdate')}</Form.Label>
                                 <ToggleButtons name="notifyTeacher" defaultValue={[data.notifyTeacher]} onChange={this.onDataChange} 
                                         options={[
-                                            {value: 1, text:"Oui"},
-                                            {value: 0, text:"Non"}
+                                            {value: 1, text: i18n.get_string('yes')},
+                                            {value: 0, text: i18n.get_string('no')}
                                         ]}/>
                             </Form.Group>
                         </Form.Row>
                     </Tab>
-                    <Tab eventKey={1} title="Modèle de note" style={styleTab}>
+                    <Tab eventKey={1} title={i18n.get_string('notetemplate')} style={styleTab}>
                         <Form.Row>
                             <Form.Group as={Col}>
                                 <div ref={this.editorTemplateNoteRef}></div>
                             </Form.Group>
                         </Form.Row>
                     </Tab>
-                    <Tab eventKey={2} title="Réponse suggérée" style={styleTab}>
+                    <Tab eventKey={2} title={i18n.get_string('suggestedresponse')} style={styleTab}>
                         <Form.Row>
                             <Form.Group as={Col}>
                                 <div ref={this.editorSuggestedNoteRef}></div>
                             </Form.Group>
                         </Form.Row>
                     </Tab>
-                    <Tab eventKey={3} title="Pistes pour valider ta réponse" style={styleTab}> 
+                    <Tab eventKey={3} title={i18n.get_string('teachertips')} style={styleTab}> 
                         <Form.Row>
                             <Form.Group as={Col}>
                                 <div ref={this.editorTeacherTipRef}></div>
@@ -169,12 +170,12 @@ class NoteForm extends Component
         let footer = 
             <div className="btn-tollbar" style={{width: "100%", display: "flex", justifyContent: "flex-end"}}>
                 <div className="btn-group">
-                    <Button  variant="secondary" onClick={this.onClose}>{"Annuler"}</Button>
-                    <Button  variant="success"  onClick={this.onSubmit}>{"Enregistrer"}</Button>
+                    <Button  variant="secondary" onClick={this.onClose}>{i18n.get_string('cancel')}</Button>
+                    <Button  variant="success"  onClick={this.onSubmit}>{i18n.get_string('save')}</Button>
                 </div>
             </div>;
 
-        let main = <Modal title={`Note: ${data.title}`} body={body} footer={footer} onClose={this.props.onClose} />;
+        let main = <Modal title={i18n.get_string('note')+': '+data.title} body={body} footer={footer} onClose={this.props.onClose} />;
 
         return (main);
     }
@@ -229,7 +230,7 @@ class NoteForm extends Component
             this.setState(this.prepareNewState(result.data.data, {groupList: result.data.groupList}), this.facadeUpdateEditor);
         }
         else{
-            $glVars.feedback.showError($glVars.i18n.tags.appname, result.msg);
+            $glVars.feedback.showError(i18n.get_string('pluginname'), result.msg);
         }
     }
 
@@ -301,10 +302,10 @@ class NoteForm extends Component
         if(result.success){
             this.onClose();
 
-            $glVars.feedback.showInfo($glVars.i18n.tags.appName, $glVars.i18n.tags.msgSuccess, 3);
+            $glVars.feedback.showInfo(i18n.get_string('pluginname'), i18n.get_string('msgsuccess'), 3);
         }
         else{
-            $glVars.feedback.showError($glVars.i18n.tags.appName, result.msg);
+            $glVars.feedback.showError(i18n.get_string('pluginname'), result.msg);
         }
     }
 }
@@ -356,7 +357,7 @@ export class EditionMode extends Component{
 
         let callback = function(result){
             if(!result.success){
-                FeedbackCtrl.instance.showError($glVars.i18n.appName, result.msg);
+                FeedbackCtrl.instance.showError(i18n.get_string('pluginname'), result.msg);
                 return;
             }
             
@@ -376,7 +377,7 @@ export class EditionMode extends Component{
 
         let callback = function(result){
             if(!result.success){
-                $glVars.feedback.showError($glVars.i18n.tags.appName, result.msg);
+                $glVars.feedback.showError(i18n.get_string('pluginname'), result.msg);
                 return;
             }
             
@@ -397,24 +398,24 @@ export class EditionMode extends Component{
                 <Form>
                     <Form.Row>
                         <Form.Group as={Col}>
-                            <Form.Label>{"Sélectionnez la collection de notes:"}</Form.Label>
-                            <ComboBox placeholder={"Sélectionnez votre option"} value={(this.state.selectedGroup !== null ? this.state.selectedGroup.id : 0)} options={this.state.groupList} onChange={this.onSelectGroup} />
+                            <Form.Label>{i18n.get_string('selectnotegroup')+":"}</Form.Label>
+                            <ComboBox placeholder={i18n.get_string('selectOption')} value={(this.state.selectedGroup !== null ? this.state.selectedGroup.id : 0)} options={this.state.groupList} onChange={this.onSelectGroup} />
                         </Form.Group>
                     </Form.Row>
                 </Form>
                 <ButtonToolbar style={{justifyContent: 'space-between'}}>
                     <ButtonGroup className="mr-4" >
-                        <Button variant="primary" disabled={this.state.selectedGroup === null} onClick={this.onAddNote} title="Ajouter une nouvelle note"><FontAwesomeIcon icon={faPlusCircle}/>{" Ajouter note"}</Button>
+                        <Button variant="primary" disabled={this.state.selectedGroup === null} onClick={this.onAddNote}><FontAwesomeIcon icon={faPlusCircle}/> {i18n.get_string('addnote')}</Button>
                     </ButtonGroup>
                     <ButtonGroup className="mr-4">
-                        <Button variant="primary" onClick={this.onAddCollection} title="Ajouter une nouvelle collection de notes"><FontAwesomeIcon icon={faPlusCircle}/>{" Ajouter collection"}</Button>
-                        <Button variant="warning" disabled={this.state.selectedGroup === null} onClick={this.removeNoteGroup} title="Supprimer cette collection de notes"><FontAwesomeIcon icon={faTrashAlt}/>{" Supprimer collection"}</Button>
-                        <Button variant="primary" onClick={() => this.showGroupOrderForm(true)} title="Ordonner cette collection de notes"><FontAwesomeIcon icon={faSortAmountDownAlt}/>{" Ordre Collection"}</Button>
-                        <Button variant="primary" disabled={this.state.selectedGroup === null} onClick={this.onEditCollection} title="Modifier cette collection de notes"><FontAwesomeIcon icon={faPencilAlt}/>{" Modifier collection"}</Button>
+                        <Button variant="primary" onClick={this.onAddCollection}><FontAwesomeIcon icon={faPlusCircle}/> {i18n.get_string('addgroup')}</Button>
+                        <Button variant="warning" disabled={this.state.selectedGroup === null} onClick={this.removeNoteGroup}><FontAwesomeIcon icon={faTrashAlt}/> {i18n.get_string('deletegroup')}</Button>
+                        <Button variant="primary" onClick={() => this.showGroupOrderForm(true)}><FontAwesomeIcon icon={faSortAmountDownAlt}/> {i18n.get_string('ordergroup')}</Button>
+                        <Button variant="primary" disabled={this.state.selectedGroup === null} onClick={this.onEditCollection}><FontAwesomeIcon icon={faPencilAlt}/> {i18n.get_string('editgroup')}</Button>
                     </ButtonGroup>
                     <ButtonGroup>
-                        <a className="btn btn-primary" href={this.getSuggestedNotesPrintLink()} target="_blank" title="Imprimer les réponses suggérées"><FontAwesomeIcon icon={faPrint}/>{" Imprimer"}</a>
-                        <Button variant="primary" onClick={this.onImport} title="Importer cahier canada"><FontAwesomeIcon icon={faFileImport} />{" Importer"}</Button>
+                        <a className="btn btn-primary" href={this.getSuggestedNotesPrintLink()} target="_blank" title={i18n.get_string('print')}><FontAwesomeIcon icon={faPrint}/> {i18n.get_string('print')}</a>
+                        <Button variant="primary" onClick={this.onImport} title={i18n.get_string('importcc')}><FontAwesomeIcon icon={faFileImport} /> {i18n.get_string('importcc')}</Button>
                     </ButtonGroup>
                 </ButtonToolbar>
                 <hr/><br/>
@@ -423,8 +424,8 @@ export class EditionMode extends Component{
                         <DataGrid.Header.Row>
                             <DataGrid.Header.Cell style={{width: 40}}></DataGrid.Header.Cell>
                             <DataGrid.Header.Cell style={{width: 80}}>{"#"}</DataGrid.Header.Cell>
-                            <DataGrid.Header.Cell >{"Titre de la note"}</DataGrid.Header.Cell>
-                            <DataGrid.Header.Cell style={{width: 200}}>{"Code d'intégration"}</DataGrid.Header.Cell>
+                            <DataGrid.Header.Cell >{i18n.get_string('note')}</DataGrid.Header.Cell>
+                            <DataGrid.Header.Cell style={{width: 200}}>{i18n.get_string('integrationCode')}</DataGrid.Header.Cell>
                             <DataGrid.Header.Cell  style={{width: 120}}></DataGrid.Header.Cell>
                         </DataGrid.Header.Row>
                     </DataGrid.Header> 
@@ -432,15 +433,15 @@ export class EditionMode extends Component{
                         {this.state.groupNoteList.map((item, index) => {                            
                                 let row = 
                                     <DataGrid.Body.RowDraggable key={index} data={item} onDbClick={() => this.onEditNote(item.id)} onDrag={this.onDragRow} onDrop={this.onDropRow}>
-                                        <DataGrid.Body.Cell><FontAwesomeIcon icon={faArrowsAlt} title="Déplacer l'item"/></DataGrid.Body.Cell>
+                                        <DataGrid.Body.Cell><FontAwesomeIcon icon={faArrowsAlt} title={i18n.get_string('moveitem')}/></DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell>{item.slot}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell>{item.title}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell>{item.intCode}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell style={{textAlign: 'center'}}>
                                             <ButtonGroup size="sm">
-                                                <Button onClick={() => this.onEditNote(item.id)} title="Modifier" variant="outline-primary"><FontAwesomeIcon icon={faPencilAlt}/></Button>
-                                                <Button onClick={() => this.onRemoveNote(item)} title="Supprimer" variant="outline-primary"><FontAwesomeIcon icon={faTrashAlt}/></Button>
-                                                <Button onClick={() => this.onCopy(item.intCode)} title="Code d'intégration" variant="outline-primary"><FontAwesomeIcon icon={faCopy}/></Button>
+                                                <Button onClick={() => this.onEditNote(item.id)} title={i18n.get_string('edit')} variant="outline-primary"><FontAwesomeIcon icon={faPencilAlt}/></Button>
+                                                <Button onClick={() => this.onRemoveNote(item)} title={i18n.get_string('remove')} variant="outline-primary"><FontAwesomeIcon icon={faTrashAlt}/></Button>
+                                                <Button onClick={() => this.onCopy(item.intCode)} title={i18n.get_string('integrationCode')} variant="outline-primary"><FontAwesomeIcon icon={faCopy}/></Button>
                                             </ButtonGroup>
                                         </DataGrid.Body.Cell>
                                     </DataGrid.Body.RowDraggable>
@@ -479,10 +480,10 @@ export class EditionMode extends Component{
                 that.setState({selectedGroup: null, groupNoteList: []});
             }
             else{
-                $glVars.feedback.showError($glVars.i18n.tags.appName, result.msg);
+                $glVars.feedback.showError(i18n.get_string('pluginname'), result.msg);
             }
         }
-        if(window.confirm(`${$glVars.i18n.tags.msgConfirmDeletion}\n\n${$glVars.i18n.tags.msgIrreversible}`)){
+        if(window.confirm(i18n.get_string('msgConfirmDeletion'))){
             $glVars.webApi.removeNoteGroup($glVars.urlParams.id, this.state.selectedGroup.id, callback);
         }
     }
@@ -519,7 +520,7 @@ export class EditionMode extends Component{
                 that.getData2();
             }
             else{
-                $glVars.feedback.showError($glVars.i18n.tags.appName, result.msg);
+                $glVars.feedback.showError(i18n.get_string('pluginname'), result.msg);
             }
         }
         $glVars.webApi.switchNoteSlot(this.state.draggingItem.id, item.id, callback);
@@ -536,14 +537,14 @@ export class EditionMode extends Component{
     onRemoveNote(item){
         let callback = function(result){
             if(result.success){
-                $glVars.feedback.showInfo($glVars.i18n.tags.appName, $glVars.i18n.tags.msgSuccess, 3);
+                $glVars.feedback.showInfo(i18n.get_string('pluginname'), i18n.get_string('msgsuccess'), 3);
             }
             else{
-                $glVars.feedback.showError($glVars.i18n.tags.appName, result.msg);
+                $glVars.feedback.showError(i18n.get_string('pluginname'), result.msg);
             }
         }
 
-        if(window.confirm(`${$glVars.i18n.tags.msgConfirmDeletion}\n\n${$glVars.i18n.tags.msgIrreversible}`)){
+        if(window.confirm(i18n.get_string('msgConfirmDeletion'))){
             $glVars.webApi.removeNote(item.id, $glVars.urlParams.id, callback);
         }
     }    
@@ -584,28 +585,28 @@ class ModalGenerateIntCode extends Component{
             <Form >
                 <Form.Row>
                     <Form.Group as={Col}>
-                        <Form.Label>{"Nombre de lignes"}</Form.Label>
+                        <Form.Label>{i18n.get_string('nblines')}</Form.Label>
                         <InputNumber  value={this.state.data.nbLines} name="nbLines" min={1} onChange={this.onDataChange}/>
                     </Form.Group>
                 </Form.Row>
                 <Form.Row>
                     <Form.Group as={Col}>
-                        <Form.Label>{"Couleur"}</Form.Label>
+                        <Form.Label>{i18n.get_string('color')}</Form.Label>
                         <Form.Control type="color" value={this.state.data.color} name="color" onChange={this.onDataChange} style={{width: "80px"}}/>
                     </Form.Group>
                 </Form.Row>
                 <Form.Row>
                     <Form.Group as={Col}>
-                        <Form.Label>{"Bouton 'Enregistrer'"}</Form.Label>
+                        <Form.Label>{i18n.get_string('savebtn')}</Form.Label>
                         <Form.Control type="text" value={this.state.data.btnSaveVariant} name="btnSaveVariant" onChange={this.onDataChange}/>
-                        <Form.Text className="text-muted">{"Défaut: vide. Ex: btn-danger"}</Form.Text>
+                        <Form.Text className="text-muted">{i18n.get_string('savebtndesc')}</Form.Text>
                     </Form.Group>
                 </Form.Row>
                 <Form.Row>
                     <Form.Group as={Col}>
-                        <Form.Label>{"Bouton 'Réinitialiser'"}</Form.Label>
+                        <Form.Label>{i18n.get_string('resetbtn')}</Form.Label>
                         <Form.Control type="text" value={this.state.data.btnResetVariant} name="btnResetVariant" onChange={this.onDataChange}/>
-                        <Form.Text className="text-muted">{"Défaut: vide. Ex: btn-danger"}</Form.Text>
+                        <Form.Text className="text-muted">{i18n.get_string('resetbtndesc')}</Form.Text>
                     </Form.Group>
                 </Form.Row>
                 <Form.Control type="hidden" ref={this.intCodeRef}/>
@@ -614,12 +615,12 @@ class ModalGenerateIntCode extends Component{
         let footer = 
             <div className="btn-tollbar" style={{width: "100%", display: "flex", justifyContent: "flex-end"}}>
                 <div className="btn-group">
-                    <Button  variant="secondary" onClick={this.props.onClose}>{"Annuler"}</Button>
-                    <Button  variant="success"  onClick={this.onCopy}>{"Copier"}</Button>
+                    <Button  variant="secondary" onClick={this.props.onClose}>{i18n.get_string('cancel')}</Button>
+                    <Button  variant="success"  onClick={this.onCopy}>{i18n.get_string('copy')}</Button>
                 </div>
             </div>;
 
-        let main = <Modal title={`Créer le code d'intégration`} body={body} footer={footer} onClose={this.props.onClose} width={"400px"}/>;
+        let main = <Modal title={i18n.get_string('createintegrationcode')} body={body} footer={footer} onClose={this.props.onClose} width={"400px"}/>;
 
         return main;
     }
@@ -665,7 +666,7 @@ class GroupForm extends Component{
             <Form onSubmit={(event) => (event.preventDefault())}>
                 <Form.Row>
                     <Form.Group as={Col}>
-                        <Form.Label>{"Nom de la collection"}</Form.Label>
+                        <Form.Label>{i18n.get_string('groupname')}</Form.Label>
                         <Form.Control type="text" value={this.state.data.name} name="name" onChange={this.onDataChange}/>
                     </Form.Group>
                 </Form.Row>
@@ -674,12 +675,12 @@ class GroupForm extends Component{
         let footer = 
             <div className="btn-tollbar" style={{width: "100%", display: "flex", justifyContent: "flex-end"}}>
                 <div className="btn-group">
-                    <Button variant="secondary" onClick={() => this.props.onClose()}>{"Annuler"}</Button>
-                    <Button variant="success" onClick={this.onSave} disabled={(this.state.data.name.length === 0)}>{"Enregistrer"}</Button>
+                    <Button variant="secondary" onClick={() => this.props.onClose()}>{i18n.get_string('cancel')}</Button>
+                    <Button variant="success" onClick={this.onSave} disabled={(this.state.data.name.length === 0)}>{i18n.get_string('save')}</Button>
                 </div>
             </div>;
 
-        let main = <Modal title={`Collection de notes`} body={body} footer={footer} onClose={() => this.props.onClose()} width={"400px"}/>;
+        let main = <Modal title={i18n.get_string('notegroup')} body={body} footer={footer} onClose={() => this.props.onClose()} width={"400px"}/>;
 
         return main;
     }
@@ -725,7 +726,7 @@ class GroupOrderForm extends Component{
 
         let callback = function(result){
             if(!result.success){
-                FeedbackCtrl.instance.showError($glVars.i18n.appName, result.msg);
+                FeedbackCtrl.instance.showError(i18n.get_string('pluginname'), result.msg);
                 return;
             }
                 
@@ -744,8 +745,8 @@ class GroupOrderForm extends Component{
             <DataGrid>
                     <DataGrid.Header>
                         <DataGrid.Header.Row>
-                            <DataGrid.Header.Cell style={{width: 100}}>{"Ordre"}</DataGrid.Header.Cell>
-                            <DataGrid.Header.Cell >{"Collection"}</DataGrid.Header.Cell>
+                            <DataGrid.Header.Cell style={{width: 100}}>{i18n.get_string('order')}</DataGrid.Header.Cell>
+                            <DataGrid.Header.Cell >{i18n.get_string('group')}</DataGrid.Header.Cell>
                             <DataGrid.Header.Cell style={{width: 70}}></DataGrid.Header.Cell>
                         </DataGrid.Header.Row>
                     </DataGrid.Header>
@@ -756,8 +757,8 @@ class GroupOrderForm extends Component{
                                     <DataGrid.Body.Cell>{item.slot.toString()}</DataGrid.Body.Cell>
                                     <DataGrid.Body.Cell>{item.name}</DataGrid.Body.Cell>
                                     <DataGrid.Body.Cell style={{textAlign: 'center'}}>
-                                        {index > 0 && <FontAwesomeIcon style={{cursor:'pointer',marginRight:'1rem'}} icon={faArrowUp} title="Déplacer l'item" onClick={() => this.onMoveRow(index, -1)}/>}
-                                        {index < this.state.data.length-1 && <FontAwesomeIcon style={{cursor:'pointer'}} icon={faArrowDown} title="Déplacer l'item" onClick={() => this.onMoveRow(index, 1)}/>}
+                                        {index > 0 && <FontAwesomeIcon style={{cursor:'pointer',marginRight:'1rem'}} icon={faArrowUp} title={i18n.get_string('moveitem')} onClick={() => this.onMoveRow(index, -1)}/>}
+                                        {index < this.state.data.length-1 && <FontAwesomeIcon style={{cursor:'pointer'}} icon={faArrowDown} title={i18n.get_string('moveitem')} onClick={() => this.onMoveRow(index, 1)}/>}
                                     </DataGrid.Body.Cell>
                                 </DataGrid.Body.Row>;
 
@@ -770,11 +771,11 @@ class GroupOrderForm extends Component{
 
         let footer = 
             <div className="btn-tollbar" style={{width: "100%", display: "flex", justifyContent: "flex-end"}}>
-            <Button variant="secondary" onClick={() => this.reorderGroups()}>{"Réordonner"}</Button>
-            <Button variant="primary" onClick={() => this.props.onClose()}>{"Fermer"}</Button>
+            <Button variant="secondary" onClick={() => this.reorderGroups()}>{i18n.get_string('save')}</Button>
+            <Button variant="primary" onClick={() => this.props.onClose()}>{i18n.get_string('cancel')}</Button>
             </div>;
 
-        let main = <Modal title={`Ordonner les collections de notes`} body={body} footer={footer} onClose={() => this.props.onClose()} width={"500px"}/>;
+        let main = <Modal title={i18n.get_string('ordergroup')} body={body} footer={footer} onClose={() => this.props.onClose()} width={"500px"}/>;
 
         return main;
     }
@@ -786,7 +787,7 @@ class GroupOrderForm extends Component{
                 that.getData();
             }
             else{
-                $glVars.feedback.showError($glVars.i18n.tags.appName, result.msg);
+                $glVars.feedback.showError(i18n.get_string('pluginname'), result.msg);
             }
         }
 
@@ -823,7 +824,7 @@ class GroupOrderForm extends Component{
     onSave(items){
         let callback = function(result){
             if(!result.success){
-                $glVars.feedback.showError($glVars.i18n.tags.appName, result.msg);
+                $glVars.feedback.showError(i18n.get_string('pluginname'), result.msg);
             }
         }
 
@@ -870,24 +871,24 @@ class ImportForm extends Component{
             <Form >
                 <Form.Row>
                     <Form.Group as={Col}>
-                        <Form.Label>{"Nom du cahier"}</Form.Label>
-                        <ComboBox placeholder={"Sélectionnez votre option"} value={this.state.data.name} name="name" options={this.state.ccList} onChange={this.onDataChange} />
+                        <Form.Label>{i18n.get_string('name')}</Form.Label>
+                        <ComboBox placeholder={i18n.get_string('selectOption')} value={this.state.data.name} name="name" options={this.state.ccList} onChange={this.onDataChange} />
                     </Form.Group>
                 </Form.Row>
             </Form>;
         if (this.state.importing){
-            body = <h3>Importation en cours...</h3>;
+            body = <h3>{i18n.get_string('importing')}</h3>;
         }
 
         let footer = 
             <div className="btn-tollbar" style={{width: "100%", display: "flex", justifyContent: "flex-end"}}>
                 <div className="btn-group">
-                    <Button  variant="secondary" onClick={this.props.onClose}>{"Annuler"}</Button>
-                    <Button  variant="success" disabled={this.state.importing} onClick={this.onSave}>{"Importer"}</Button>
+                    <Button  variant="secondary" onClick={this.props.onClose}>{i18n.get_string('cancel')}</Button>
+                    <Button  variant="success" disabled={this.state.importing} onClick={this.onSave}>{i18n.get_string('importcc')}</Button>
                 </div>
             </div>;
 
-        let main = <Modal title={`Importer un cahier canada`} body={body} footer={footer} onClose={this.props.onClose} width={"400px"}/>;
+        let main = <Modal title={i18n.get_string('importcc')} body={body} footer={footer} onClose={this.props.onClose} width={"400px"}/>;
         return main;
     }
 
@@ -902,10 +903,10 @@ class ImportForm extends Component{
         this.setState({importing: true});
         let callback = function(result){
             if(result.success){
-                $glVars.feedback.showInfo($glVars.i18n.tags.appName, result.data.info);
+                $glVars.feedback.showInfo(i18n.get_string('pluginname'), result.data.info);
             }
             else{
-                $glVars.feedback.showError($glVars.i18n.appName, result.msg);
+                $glVars.feedback.showError(i18n.get_string('pluginname'), result.msg);
             }
 
             that.setState({importing: false});

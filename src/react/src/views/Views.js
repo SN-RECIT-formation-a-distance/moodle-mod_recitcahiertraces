@@ -22,6 +22,7 @@
 
 import React, { Component } from 'react';
 import {$glVars} from '../common/common';
+import { i18n } from '../common/i18n';
 import {BtnModeEdition, EditionMode} from './EditingMode';
 import {TeacherNotebook, StudentNotebook} from './Notebook';
 
@@ -40,14 +41,14 @@ export class TeacherView extends Component {
             <div>
                 {this.state.modeEdition ? 
                     <div>
-                        <BtnModeEdition variant="danger" onClick={this.onModeEditionClick} text={"Désactiver le mode d'édition"}>
+                        <BtnModeEdition variant="danger" onClick={this.onModeEditionClick} text={i18n.get_string('turnOffEditingMode')}>
                             
                         </BtnModeEdition>
                         <EditionMode/> 
                     </div>
                 : 
                     <div>
-                        <BtnModeEdition variant="warning" onClick={this.onModeEditionClick} text={"Activer le mode d'édition"}></BtnModeEdition>
+                        <BtnModeEdition variant="warning" onClick={this.onModeEditionClick} text={i18n.get_string('turnOnEditingMode')}></BtnModeEdition>
                         <br/>
                         <TeacherNotebook />
                     </div>

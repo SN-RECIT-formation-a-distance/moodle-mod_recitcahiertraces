@@ -22,7 +22,6 @@
 
 export * from './WebApi';
 export * from './Cookies';
-export * from './I18n';
 
 export class JsNx{
     /**

@@ -101,7 +101,7 @@ $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahie
         }
 
         if(empty($pNotes)){
-            echo "<h5>Aucune information disponible.</h5>";
+            echo "<h5>".get_string('nodata', 'mod_recitcahiertraces')."</h5>";
         }
     ?>
 

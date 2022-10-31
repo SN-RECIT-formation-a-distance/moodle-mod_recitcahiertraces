@@ -36,6 +36,7 @@ require_login();
 
 $view = new MainView($PAGE, $course, $cm, $OUTPUT, $USER, $DB, $CFG);
 
+recitcahiertraces_strings_for_js();
 $view->display();
 
 class MainView

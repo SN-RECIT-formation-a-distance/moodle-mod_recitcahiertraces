@@ -27,6 +27,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Modal} from '../libs/components/Components';
 import {UtilsMoodle, JsNx} from '../libs/utils/Utils';
 import {$glVars} from '../common/common';
+import { i18n } from '../common/i18n';
 
 class PersonalNoteForm extends Component{
     static defaultProps = {        
@@ -149,10 +150,10 @@ class PersonalNoteForm extends Component{
         
         let main =
             <div>
-                <h5 className="text-truncate">{`Note: ${this.state.remoteData.noteDef.title}`}</h5>
+                <h5 className="text-truncate">{i18n.get_string('note')+': '+this.state.remoteData.noteDef.title}</h5>
                 <Card>
                     <Card.Header style={styleHeader} onClick={() => this.onCollapse("note")}>
-                        {"Note de l'élève"}
+                        {i18n.get_string('studentNote')}
                     </Card.Header>
                     <Collapse in={this.state.collapse.note}>
                         <Card.Body>{student}</Card.Body>
@@ -163,7 +164,7 @@ class PersonalNoteForm extends Component{
                     <div>
                         <Card>
                             <Card.Header style={styleHeader} onClick={() => this.onCollapse("suggestedNote")}>
-                                {"Réponse suggérée"}
+                                {i18n.get_string('suggestedresponse')}
                             </Card.Header>
                             <Collapse in={this.state.collapse.suggestedNote}>
                                 <Card.Body>{suggestedNote}</Card.Body>
@@ -173,7 +174,7 @@ class PersonalNoteForm extends Component{
                     </div>
                 }
                 <Card>
-                    <Card.Header style={styleHeader} onClick={() => this.onCollapse("feedback")}>{"Rétroaction de l'enseignant"}</Card.Header>
+                    <Card.Header style={styleHeader} onClick={() => this.onCollapse("feedback")}>{i18n.get_string('teacherFeedback')}</Card.Header>
                     <Collapse in={this.state.collapse.feedback}>
                         <Card.Body>{teacher}</Card.Body>
                     </Collapse>
@@ -229,10 +230,10 @@ class PersonalNoteForm extends Component{
                 callback(result);
             });
 
-            $glVars.feedback.showInfo($glVars.i18n.tags.appName, $glVars.i18n.tags.msgSuccess, 3);
+            $glVars.feedback.showInfo(i18n.get_string('pluginname'), i18n.get_string('msgsuccess'), 3);
         }
         else{
-            $glVars.feedback.showError($glVars.i18n.tags.appName, result.msg);
+            $glVars.feedback.showError(i18n.get_string('pluginname'), result.msg);
         }
     }
 }
@@ -263,12 +264,12 @@ export class ModalPersonalNote extends Component{
             <div className="btn-tollbar" style={{width: "100%", display: "flex", justifyContent: "space-between", flexWrap: "wrap"}}>
                 <div className="btn-group" style={{flexWrap: "wrap"}}>
                     {this.props.onNextStudent && <Button variant="outline-primary" onClick={this.props.onPreviousStudent} disabled={!this.props.navStatus.previous}><FontAwesomeIcon icon={faArrowLeft}/>{" " + $glVars.i18n.tags.previousStudent}</Button>}
-                    {this.props.onPreviousStudent && <Button variant="outline-primary"  onClick={this.props.onNextStudent} disabled={!this.props.navStatus.next}>{$glVars.i18n.tags.nextStudent + " "}<FontAwesomeIcon icon={faArrowRight}/></Button>}
+                    {this.props.onPreviousStudent && <Button variant="outline-primary" onClick={this.props.onNextStudent} disabled={!this.props.navStatus.next}>{$glVars.i18n.tags.nextStudent + " "}<FontAwesomeIcon icon={faArrowRight}/></Button>}
                 </div>
                 <div className="btn-group" style={{flexWrap: "wrap"}}>
-                    <Button  variant="secondary" onClick={this.onClose}>{"Annuler"}</Button>
-                    {this.props.onNextStudent && <Button  variant="success"  onClick={() => this.onSave(false)}>{"Enregistrer"}</Button>}
-                    <Button  variant="success"  onClick={() => this.onSave(true)}>{"Enregistrer et fermer"}</Button>
+                    <Button  variant="secondary" onClick={this.onClose}>{i18n.get_string('cancel')}</Button>
+                    {this.props.onNextStudent && <Button  variant="success"  onClick={() => this.onSave(false)}>{i18n.get_string('save')}</Button>}
+                    <Button  variant="success"  onClick={() => this.onSave(true)}>{i18n.get_string('saveandclose')}</Button>
                 </div>
             </div>;
                 

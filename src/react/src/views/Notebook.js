@@ -28,6 +28,7 @@ import {FeedbackCtrl, DataGrid, ComboBox} from '../libs/components/Components';
 import {UtilsMoodle, JsNx, UtilsDateTime} from '../libs/utils/Utils';
 import {ModalPersonalNote} from './PersonalNote';
 import {$glVars} from '../common/common';
+import { i18n } from '../common/i18n';
 
 class ViewPrintingNotes extends Component{
     static defaultProps = {
@@ -101,7 +102,7 @@ class ViewNavGroupAndStudents extends Component{
                         <hr/>
                         <NavActivities userId={this.state.data.userId} onEdit={this.onEdit} isTeacher={true}/>                                
                         {this.state.data.nId > 0 && 
-                            <ModalPersonalNote modalTitle={`Élève: ${this.state.data.username}`} data={this.state.data} onClose={this.onClose} onNextStudent={this.onNextStudent} 
+                            <ModalPersonalNote modalTitle={i18n.get_string('student')+': '+this.state.data.username} data={this.state.data} onClose={this.onClose} onNextStudent={this.onNextStudent} 
                                 onPreviousStudent={this.onPreviousStudent} navStatus={this.getNavStatus()}/>
                         }  
                     </div>                    
@@ -208,7 +209,7 @@ class ViewRequiredNotes extends Component{
 
     getDataResult(result){
         if(!result.success){
-            FeedbackCtrl.instance.showError($glVars.i18n.appName, result.msg);
+            FeedbackCtrl.instance.showError(i18n.get_string('pluginname'), result.msg);
             return;
         }
 
@@ -226,10 +227,10 @@ class ViewRequiredNotes extends Component{
                     <DataGrid.Header>
                         <DataGrid.Header.Row>
                             <DataGrid.Header.Cell style={{width: 80}}>{"#"}</DataGrid.Header.Cell>
-                            <DataGrid.Header.Cell >{"Activité"}</DataGrid.Header.Cell>
-                            <DataGrid.Header.Cell >{"Élève"}</DataGrid.Header.Cell>
-                            <DataGrid.Header.Cell >{"Titre de la note"}</DataGrid.Header.Cell>
-                            <DataGrid.Header.Cell  style={{width: 80}}></DataGrid.Header.Cell>
+                            <DataGrid.Header.Cell >{i18n.get_string('activity')}</DataGrid.Header.Cell>
+                            <DataGrid.Header.Cell >{i18n.get_string('student')}</DataGrid.Header.Cell>
+                            <DataGrid.Header.Cell >{i18n.get_string('noteTitle')}</DataGrid.Header.Cell>
+                            <DataGrid.Header.Cell style={{width: 80}}></DataGrid.Header.Cell>
                         </DataGrid.Header.Row>
                     </DataGrid.Header>
                     <DataGrid.Body>
@@ -242,7 +243,7 @@ class ViewRequiredNotes extends Component{
                                         <DataGrid.Body.Cell>{item.noteDef.title}</DataGrid.Body.Cell>
                                         <DataGrid.Body.Cell style={{textAlign: 'center'}}>
                                             <ButtonGroup size="sm">
-                                                <Button onClick={() => that.onEdit(item)} title="Modifier" variant="primary"><FontAwesomeIcon icon={faPencilAlt}/></Button>
+                                                <Button onClick={() => that.onEdit(item)} title={i18n.get_string('edit')} variant="primary"><FontAwesomeIcon icon={faPencilAlt}/></Button>
                                             </ButtonGroup>
                                         </DataGrid.Body.Cell>
                                     </DataGrid.Body.Row>
@@ -253,7 +254,7 @@ class ViewRequiredNotes extends Component{
                 </DataGrid>
 
                 {this.state.data.nId > 0 && 
-                        <ModalPersonalNote modalTitle={`Élève: ${this.state.data.username}`} data={this.state.data} onClose={this.onClose} onNextStudent={this.onNextStudent} 
+                        <ModalPersonalNote modalTitle={i18n.get_string('student')+': '+this.state.data.username} data={this.state.data} onClose={this.onClose} onNextStudent={this.onNextStudent} 
                                 onPreviousStudent={this.onPreviousStudent} navStatus={this.getNavStatus()}/>
                 }
             </div>;
@@ -407,8 +408,8 @@ class ViewProgression extends Component{
             <DataGrid.Header>
                 <DataGrid.Header.Row>
                     <DataGrid.Header.Cell style={{width: 80}}>{"#"}</DataGrid.Header.Cell>
-                    <DataGrid.Header.Cell>{"Élève"}</DataGrid.Header.Cell>
-                    <DataGrid.Header.Cell  style={{width: 120}}>{"Progrès"}</DataGrid.Header.Cell>
+                    <DataGrid.Header.Cell>{i18n.get_string('student')}</DataGrid.Header.Cell>
+                    <DataGrid.Header.Cell style={{width: 120}}>{i18n.get_string('progress')}</DataGrid.Header.Cell>
                 </DataGrid.Header.Row>
             </DataGrid.Header>
             <DataGrid.Body>
@@ -482,10 +483,10 @@ class NavActivities extends Component{
         for(let items of result.data){
             for(let i = 0; i < items.length; i++){
                 if (items[i].nCmId === 0){
-                    items[i].cmName = "Cette note n'a pas été complétée.";
+                    items[i].cmName = i18n.get_string('notenotcompleted');
                 }
                 if (items[i].nCmId == -1){
-                    items[i].cmName = '(L\'activité dans laquelle la note a été prise ne peut pas être restaurée.)';
+                    items[i].cmName = i18n.get_string('notenotrestored');
                 }
             }
         }
@@ -523,9 +524,9 @@ class NavActivities extends Component{
 
                     return  <Nav.Item key={index} className="m-1 bg-light">
                                 <Nav.Link eventKey={index}>
-                                    <div  style={{display: "flex", width: '315px', justifyContent: "space-evenly"}} title={`${groupName} (${pctProgress.toFixed(0)}%)`}>
+                                    <div style={{display: "flex", width: '315px', justifyContent: "space-evenly"}} title={`${groupName} (${pctProgress.toFixed(0)}%)`}>
                                         <span className="text-truncate" >{`${groupName} `}</span>
-                                        <Badge pill  variant="light">{` ${pctProgress.toFixed(0)}%`}</Badge>
+                                        <Badge pill variant="light">{` ${pctProgress.toFixed(0)}%`}</Badge>
                                     </div>
                                 </Nav.Link>
                             </Nav.Item>;
@@ -559,12 +560,12 @@ class NavActivities extends Component{
                                                 }
 
                                                 let row = 
-                                                        <div className="balon2 p-2 m-0 position-relative" data-is={time+"Activité: "+(that.formatText(item.cmName))} key={index2}>
+                                                        <div className="balon2 p-2 m-0 position-relative" data-is={time+i18n.get_string('activity')+": "+(that.formatText(item.cmName))} key={index2}>
                                                             <div className="float-left w-100 balon2-content">                                                                    
                                                                 <p style={{fontWeight:'bold'}}>
                                                                     
                                                                     {that.props.isTeacher && item.noteDef.notifyTeacher === 1 ? 
-                                                                        <span title="Rétroaction requise" className="btn-link"><FontAwesomeIcon icon={faCommentDots}/></span> : null
+                                                                        <span title={i18n.get_string('feedbackrequired')} className="btn-link"><FontAwesomeIcon icon={faCommentDots}/></span> : null
                                                                     }
                                                                     {` ${index2 + 1}. `}
                                                                     {`${item.noteDef.title}`}
@@ -584,61 +585,6 @@ class NavActivities extends Component{
                     })}
                 </Tab.Content>
             </Row></>;
-
-        /*let teacherView = 
-            <div>
-                <Row>
-                    <Nav variant="pills" className="flex-row">
-                        {navItems}
-                    </Nav>    
-                </Row>
-                <Row>
-                    <Tab.Content style={{width: "100%"}}>
-                        {this.state.dataProvider.map(function(items, index){
-                            let result=
-                                <Tab.Pane key={index} eventKey={index}>
-                                   <DataGrid orderBy={true}>
-                                        <DataGrid.Header>
-                                            <DataGrid.Header.Row>
-                                                <DataGrid.Header.Cell style={{width: 62}}>{"#"}</DataGrid.Header.Cell>
-                                                <DataGrid.Header.Cell >{"Titre de la note"}</DataGrid.Header.Cell>
-                                                <DataGrid.Header.Cell style={{width: 300}}>{"Note"}</DataGrid.Header.Cell>
-                                                <DataGrid.Header.Cell style={{width: 300}}>{"Rétroaction"}</DataGrid.Header.Cell>
-                                                <DataGrid.Header.Cell style={{width: 250}}>{"Activité"}</DataGrid.Header.Cell>
-                                                <DataGrid.Header.Cell style={{width: 57}}></DataGrid.Header.Cell>
-                                                <DataGrid.Header.Cell style={{width: 57}}></DataGrid.Header.Cell>
-                                            </DataGrid.Header.Row>
-                                        </DataGrid.Header>
-                                        <DataGrid.Body>
-                                            {items.map((item, index2) => {
-                                                    let row = 
-                                                        <DataGrid.Body.Row key={index2} onDbClick={() => that.props.onEdit(item)}>
-                                                            <DataGrid.Body.Cell>{index2 + 1}</DataGrid.Body.Cell>
-                                                            <DataGrid.Body.Cell>{` ${item.noteDef.title}`}</DataGrid.Body.Cell>
-                                                            <DataGrid.Body.Cell>{that.formatText(item.noteContent.text)}</DataGrid.Body.Cell>
-                                                            <DataGrid.Body.Cell>{that.formatText(item.feedback)}</DataGrid.Body.Cell>
-                                                            <DataGrid.Body.Cell>{that.formatText(item.cmName, 35)}</DataGrid.Body.Cell>
-                                                            <DataGrid.Body.Cell style={{textAlign: "center"}}>{(item.noteDef.notifyTeacher === 1 ? 
-                                                                <Button disabled={true} title="Rétroaction requise" size="sm" variant="outline-warning"><FontAwesomeIcon icon={faCommentDots}/></Button> : null)}
-                                                            </DataGrid.Body.Cell>
-                                                            <DataGrid.Body.Cell style={{textAlign: 'center'}}>
-                                                                <ButtonGroup >
-                                                                    <Button  size="sm" onClick={() => that.props.onEdit(item)} title="Modifier" variant="outline-primary"><FontAwesomeIcon icon={faPencilAlt}/></Button>
-                                                                </ButtonGroup>
-                                                            </DataGrid.Body.Cell>
-                                                        </DataGrid.Body.Row>
-                                                    return (row);                                    
-                                                }
-                                            )}
-                                        </DataGrid.Body>
-                                    </DataGrid>
-                                </Tab.Pane>;
-                            return result;
-                        })}
-                    </Tab.Content>
-                </Row>
-            </div>;*/
-//
         let main = 
             <Tab.Container id="tabActivities" activeKey={this.state.activeTab} onSelect={this.onSelectTab}>
                 {view}
@@ -648,10 +594,10 @@ class NavActivities extends Component{
     }
 
     createFeedbackView(index, item){
-        let text = (item.feedback.length === 0 ? '<span style="opacity: .6">Donner une rétroaction</span>' : item.feedback);
+        let text = (item.feedback.length === 0 ? '<span style="opacity: .6">'+i18n.get_string('givefeedback')+'</span>' : item.feedback);
         let result = 
-            <div className="balon1 p-2 m-0 position-relative d-flex" data-is="Rétroaction de l'enseignant" key={"key"+index} style={{justifyContent: 'flex-end', alignItems: 'flex-start'}}>
-                {this.props.isTeacher && <Button className="" onClick={() => this.props.onEdit(item)} title="Modifier la rétroaction" variant="link"><FontAwesomeIcon icon={faPencilAlt}/></Button>}
+            <div className="balon1 p-2 m-0 position-relative d-flex" data-is={i18n.get_string('teacherFeedback')} key={"key"+index} style={{justifyContent: 'flex-end', alignItems: 'flex-start'}}>
+                {this.props.isTeacher && <Button className="" onClick={() => this.props.onEdit(item)} title={i18n.get_string('edit')} variant="link"><FontAwesomeIcon icon={faPencilAlt}/></Button>}
                 {this.props.isTeacher && item.noteDef.suggestedNote.length > 0 && <Button className="" onClick={() => this.onSendSuggestedNote(item)} title="Envoyer la réponse suggérée" variant="link"><FontAwesomeIcon icon={faCopy}/></Button>}
                 <div className="balon1-content"  style={{minWidth: "30%", minHeight: "3rem"}} dangerouslySetInnerHTML={{ __html: text }}></div>
             </div>
@@ -738,16 +684,16 @@ export class TeacherNotebook extends Component{
         let main = 
             <div>
                 <Tabs activeKey={this.state.tab} id="tabTeacherNotebook" onSelect={this.onSetTab}>
-                    <Tab eventKey={"0"} title={<span><FontAwesomeIcon icon={faCompass}/>{" Consulter les notes"}</span>}>
+                    <Tab eventKey={"0"} title={<span><FontAwesomeIcon icon={faCompass}/> {i18n.get_string('viewnotes')}</span>}>
                         <ViewNavGroupAndStudents style={{padding: "1rem"}} enrolledUserList={this.state.enrolledUserList}></ViewNavGroupAndStudents>
                     </Tab>
-                    <Tab eventKey={"1"} title={<span><FontAwesomeIcon icon={faCommentDots}/>{" Rétroaction manquante "}<Badge variant="light">{this.state.nbFeedback}</Badge></span>}>
+                    <Tab eventKey={"1"} title={<span><FontAwesomeIcon icon={faCommentDots}/> {i18n.get_string('feedbackmissing')} <Badge variant="light">{this.state.nbFeedback}</Badge></span>}>
                         <ViewRequiredNotes show={(this.state.tab === "1")} style={{padding: "1rem"}} onDataChange={this.onDataChange}/>
                     </Tab>
-                    <Tab eventKey={"2"} title={<span><FontAwesomeIcon icon={faTasks}/>{" Progression"}</span>}>
+                    <Tab eventKey={"2"} title={<span><FontAwesomeIcon icon={faTasks}/> {i18n.get_string('progress')}</span>}>
                         <ViewProgression show={(this.state.tab === "2")} style={{padding: "1rem"}} onDetail={this.onProgressionDetail} enrolledUserList={this.state.enrolledUserList}/>
                     </Tab>
-                    <Tab eventKey={"3"} title={<span><FontAwesomeIcon icon={faPrint}/>{" Imprimer"}</span>}>
+                    <Tab eventKey={"3"} title={<span><FontAwesomeIcon icon={faPrint}/> {i18n.get_string('printNotes')}</span>}>
                         <ViewPrintingNotes style={{padding: "1rem"}} enrolledUserList={this.state.enrolledUserList}/>
                     </Tab>
                 </Tabs>
@@ -802,7 +748,7 @@ export class StudentNotebook extends Component{
                         <hr/>
                         <NavActivities userId={this.state.data.userId} onEdit={this.onEdit}/>
                         {this.state.data.nId > 0 && 
-                                <ModalPersonalNote modalTitle={`Cahier de traces - Note personnelle`} data={this.state.data} onClose={this.onClose} />}
+                                <ModalPersonalNote modalTitle={i18n.get_string('pluginname')+' - '+i18n.get_string('mynotes')} data={this.state.data} onClose={this.onClose} />}
                     </div>
                 }
             </div>;
@@ -933,8 +879,8 @@ class GroupUserSelect extends Component{
                 <Row>
                     <Col sm={6}>
                         <Form.Group as={Col}>
-                            <Form.Label>Sélectionnez le groupe:</Form.Label>
-                            <ComboBox placeholder={"Sélectionnez votre option"} options={this.state.groupList} onChange={this.onSelectGroup} value={this.state.selectedGroupId}/>
+                            <Form.Label>{i18n.get_string('selectGroup')}:</Form.Label>
+                            <ComboBox placeholder={i18n.get_string('selectOption')} options={this.state.groupList} onChange={this.onSelectGroup} value={this.state.selectedGroupId}/>
                         </Form.Group>
                     </Col>
                     {this.props.onSelectUser !== null && 
@@ -942,8 +888,8 @@ class GroupUserSelect extends Component{
                             <Row>
                                 <Col sm={12}>
                                     <Form.Group  as={Col}>
-                                        <Form.Label>Sélectionnez l'utilisateur:</Form.Label>
-                                        <ComboBox placeholder={"Sélectionnez votre option"} options={this.state.userListFiltered} onChange={this.onSelectUser} value={value} style={{float: "left", width: "90%"}}/>
+                                        <Form.Label>{i18n.get_string('selectUser')}:</Form.Label>
+                                        <ComboBox placeholder={i18n.get_string('selectOption')} options={this.state.userListFiltered} onChange={this.onSelectUser} value={value} style={{float: "left", width: "90%"}}/>
                                         <ButtonGroup style={{display: "flex"}}>
                                             <Button variant="link" onClick={this.onPrevious} disabled={(this.state.selectedUserIndex <= -1)}><FontAwesomeIcon icon={faArrowLeft}/></Button>
                                             <Button variant="link" onClick={this.onNext} disabled={(this.state.userListFiltered.length <= (this.state.selectedUserIndex + 1))}><FontAwesomeIcon icon={faArrowRight}/></Button>

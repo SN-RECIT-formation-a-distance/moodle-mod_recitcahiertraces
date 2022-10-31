@@ -106,7 +106,7 @@ class PersistCtrl extends MoodlePersistCtrl
             $whereStmt = " t1.id = $nId";
         }
         else{
-            throw new Exception("Cette fonction requiert comme paramètre 'nId=$nId' ou '(userId=$userId et intCode=$intCode et courseId=$courseId)'.");
+            throw new Exception(get_string('invalidargument', 'mod_recitcahiertraces'));
         }
 
         //(case length(recit_strip_tags(coalesce(t2.note, ''))) when 0 then t1.templatenote else t2.note end) as note,
@@ -125,7 +125,7 @@ class PersistCtrl extends MoodlePersistCtrl
         $dbData = $this->mysqlConn->execSQLAndGetObject($query);
         
         if(empty($dbData)){
-            throw new Exception("La note n'a pas été trouvée. (nId: $nId, userId: $userId, intCode: $intCode)");
+            throw new Exception(get_string('nodata', 'mod_recitcahiertraces'));
         }
 
         $context = $this->getCtContext($dbData->mCmId);

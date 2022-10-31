@@ -21,14 +21,14 @@
  */
 
 import packageJson from "../../package.json";
-//import {$i18n} from "./i18n.js";
+import { i18n } from "./i18n";
 
 export class Options
 {
     static appVersion(){ return packageJson.version; }
 
     static appTitle(){
-        return "RÉCIT Cahier de traces | " + this.appVersion();
+        return i18n.get_string('pluginname') + " | " + this.appVersion();
     }
 
     static versionHistory = [

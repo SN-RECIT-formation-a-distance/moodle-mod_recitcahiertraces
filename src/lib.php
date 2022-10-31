@@ -30,6 +30,15 @@ use recitcahiertraces\Utils;
 use recitcahiertraces\PersistCtrl;
 
 /**
+ * Initialise the js strings required for this module.
+ */
+function recitcahiertraces_strings_for_js() {
+    global $PAGE; 
+
+    $PAGE->requires->strings_for_js(array(
+        'pluginname','turnOnEditingMode','turnOffEditingMode','selectGroup','print','selectUser','selectOption','previous','next','activity','noteTitle','templateNote','studentNote','teacherFeedback','edit','save','remove','cancel','copy','selectSectionActivity','integrationCode','addNewNote','msgActionCompleted','msgConfirmDeletion','msgDeletionExtraInfo','noData','recitcahiertraces:viewadmin','recitcahiertraces:view','recitcahiertraces:addinstance','printNotes','note','suggestednote','timestamp','printedOn','forbiddenAccess','msgCCSeqPos','course','module','report','full_name','email','tags','typeToSearch','messageprovider:note_updated','group','suggestedresponse','invalidargument','nodata','newupdateinnote','msgsuccess','saveandclose','student','progress','notenotcompleted','notenotrestored','feedbackrequired','givefeedback','feedbackmissing','viewnotes','mynotes','notegroup','title','notifyteacheruponupdate','position','yes','no','notetemplate','teachertips','selectnotegroup','addgroup','ordergroup','order','importcc','addnote','deletegroup','editgroup','groupname','moveitem','nblines','color','savebtn','savebtndesc','resetbtn','resetbtndesc','createintegrationcode',    ), 'mod_recitcahiertraces');
+}
+/**
  * List of features supported in recitcahiertraces module
  * @param string $feature FEATURE_xx constant for requested feature
  * @return mixed True if module supports feature, false if not, null if doesn't know

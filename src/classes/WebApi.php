@@ -91,12 +91,12 @@ class WebApi extends MoodleApi
 
             if(($flags->mode == "s") && ($result->noteDef->notifyTeacher == 1)){
                 $url = sprintf("%s/mod/recitcahiertraces/view.php?id=%ld&nId=%ld&gId=%ld&userId=%ld", $CFG->wwwroot, $result->noteDef->group->ct->mCmId, $result->noteDef->id, $result->noteDef->group->id, $result->userId);
-                $msg = sprintf("Nouvelle mise à jour dans la note: « <a href='%s' target='_blank'>%s</a> »", $url, $result->noteDef->title);
+                $msg = sprintf(get_string('newupdateinnote', 'mod_recitcahiertraces').": « <a href='%s' target='_blank'>%s</a> »", $url, $result->noteDef->title);
                 PersistCtrl::getInstance()->sendInstantMessagesToTeachers($result->noteDef->group->ct->courseId, $msg);
             }
             else if(($flags->mode == "t") && ($flags->teacherFeedbackUpdated == 1)){
                 $url = sprintf("%s/mod/recitcahiertraces/view.php?id=%ld&nId=%ld&gId=%ld&userId=%ld", $CFG->wwwroot, $result->noteDef->group->ct->mCmId, $result->noteDef->id, $result->noteDef->group->id, $result->userId);
-                $msg = sprintf("Nouvelle mise à jour dans la note: « <a href='%s' target='_blank'>%s</a> »", $url, $result->noteDef->title);
+                $msg = sprintf(get_string('newupdateinnote', 'mod_recitcahiertraces').": « <a href='%s' target='_blank'>%s</a> »", $url, $result->noteDef->title);
                 PersistCtrl::getInstance()->sendInstantMessagesToStudents(array($result->userId), $result->noteDef->group->ct->courseId, $msg);
             }
             
@@ -271,7 +271,7 @@ class WebApi extends MoodleApi
             $importcmId = intval($request['importcmid']);
 
             if(($mCmId == 0) || ($importcmId == 0)){
-                return new WebApiResult(true, null, "Aucune donnée n'a été importée.");
+                return new WebApiResult(true, null, get_string('nodata'));
             }
 
             $this->canUserAccess('a', $mCmId);
