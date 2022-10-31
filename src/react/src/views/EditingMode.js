@@ -28,6 +28,7 @@ import {ComboBox, FeedbackCtrl, DataGrid, InputNumber, ToggleButtons, Modal} fro
 import {JsNx, UtilsMoodle} from '../libs/utils/Utils';
 import {$glVars} from '../common/common';
 import { i18n } from '../common/i18n';
+import { EditorDecorator } from '../libs/components/TextEditor';
 
 export class BtnModeEdition extends Component{
     static defaultProps = {
@@ -80,9 +81,9 @@ class NoteForm extends Component
         this.editorTemplateNoteRef = React.createRef();
         this.editorSuggestedNoteRef = React.createRef();
         this.editorTeacherTipRef = React.createRef();
-        this.editorTemplateNote = new recit.components.EditorDecorator('recit_cahiertraces_editor_container_1');
-        this.editorSuggestedNote = new recit.components.EditorDecorator('recit_cahiertraces_editor_container_2');
-        this.editorTeacherTip = new recit.components.EditorDecorator('recit_cahiertraces_editor_container_3');
+        this.editorTemplateNote = new EditorDecorator('recit_cahiertraces_editor_container_1');
+        this.editorSuggestedNote = new EditorDecorator('recit_cahiertraces_editor_container_2');
+        this.editorTeacherTip = new EditorDecorator('recit_cahiertraces_editor_container_3');
     }
 
     componentDidMount(){
@@ -642,7 +643,7 @@ class ModalGenerateIntCode extends Component{
 		document.execCommand('copy');
         this.intCodeRef.current.type = "hidden";
         this.props.onCopy();
-        $glVars.feedback.showInfo($glVars.i18n.tags.appName, $glVars.i18n.tags.msgCopy, 3);
+        $glVars.feedback.showInfo(i18n.get_string('pluginname'), i18n.get_string('msgsuccess'), 3);
     }
 }
 
@@ -698,7 +699,7 @@ class GroupForm extends Component{
                 that.setState({selectedGroup: null, groupNoteList: []}, that.props.onClose);
             }
             else{
-                $glVars.feedback.showError($glVars.i18n.tags.appName, result.msg);
+                $glVars.feedback.showError(i18n.get_string('pluginname'), result.msg);
             }
         }
 

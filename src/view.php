@@ -25,7 +25,6 @@ require('../../config.php');
 require_once(dirname(__FILE__) . "/classes/recitcommon/Utils.php");
 require_once($CFG->libdir . '/portfoliolib.php');
 
-use recitcommon;
 use moodle_url;
 
 $id = required_param('id', PARAM_INT);
@@ -96,7 +95,7 @@ class MainView
             return "<div id='{$name}_container_{$index}' data-format='recit_rich_editor' style='display: none;'></div>";
         }
         else{*/
-            return recitcommon\Utils::createEditorHtml(false, "{$name}_container_{$index}", "{$name}_{$index}", "", 15, $context, 0, 0);
+            return Utils::createEditorHtml(false, "{$name}_container_{$index}", "{$name}_{$index}", "", 15, $context, 0, 0);
         //}
     }
 

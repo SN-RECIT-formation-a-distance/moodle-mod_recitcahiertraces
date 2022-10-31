@@ -28,6 +28,7 @@ import { Modal} from '../libs/components/Components';
 import {UtilsMoodle, JsNx} from '../libs/utils/Utils';
 import {$glVars} from '../common/common';
 import { i18n } from '../common/i18n';
+import { EditorDecorator } from '../libs/components/TextEditor';
 
 class PersonalNoteForm extends Component{
     static defaultProps = {        
@@ -59,7 +60,7 @@ class PersonalNoteForm extends Component{
         this.state = {data: null, remoteData: null, dropdownLists: null, mode: mode, collapse: {note: true, suggestedNote: false, feedback: true}};
 
         this.editorRef = React.createRef();
-        this.editorDec = new recit.components.EditorDecorator(`recit_cahiertraces_editor_container_1`);
+        this.editorDec = new EditorDecorator(`recit_cahiertraces_editor_container_1`);
 
         this.props.setOnSave(this.onSave);
     }
@@ -97,7 +98,7 @@ class PersonalNoteForm extends Component{
             this.setState(this.prepareNewState(result.data, null));
         }
         else{
-            $glVars.feedback.showError($glVars.i18n.tags.appname, result.msg);
+            $glVars.feedback.showError(i18n.get_string('pluginname'), result.msg);
         }
     }
 
@@ -263,8 +264,8 @@ export class ModalPersonalNote extends Component{
         let footer = 
             <div className="btn-tollbar" style={{width: "100%", display: "flex", justifyContent: "space-between", flexWrap: "wrap"}}>
                 <div className="btn-group" style={{flexWrap: "wrap"}}>
-                    {this.props.onNextStudent && <Button variant="outline-primary" onClick={this.props.onPreviousStudent} disabled={!this.props.navStatus.previous}><FontAwesomeIcon icon={faArrowLeft}/>{" " + $glVars.i18n.tags.previousStudent}</Button>}
-                    {this.props.onPreviousStudent && <Button variant="outline-primary" onClick={this.props.onNextStudent} disabled={!this.props.navStatus.next}>{$glVars.i18n.tags.nextStudent + " "}<FontAwesomeIcon icon={faArrowRight}/></Button>}
+                    {this.props.onNextStudent && <Button variant="outline-primary" onClick={this.props.onPreviousStudent} disabled={!this.props.navStatus.previous}><FontAwesomeIcon icon={faArrowLeft}/>{" " + i18n.get_string('previousstudent')}</Button>}
+                    {this.props.onPreviousStudent && <Button variant="outline-primary" onClick={this.props.onNextStudent} disabled={!this.props.navStatus.next}>{i18n.get_string('nextstudent') + " "}<FontAwesomeIcon icon={faArrowRight}/></Button>}
                 </div>
                 <div className="btn-group" style={{flexWrap: "wrap"}}>
                     <Button  variant="secondary" onClick={this.onClose}>{i18n.get_string('cancel')}</Button>
