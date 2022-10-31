@@ -1,14 +1,22 @@
 <?php
 $string['pluginname'] = 'Cahier de traces v2';
-$string['privacy:metadata'] = 'This plugin does not store any personal data.';
+$string['privacymetadata'] = 'This plugin stores user notes with userid.';
+$string['privacy:metadata:recitct_user_notes'] = 'Stores user notes';
+$string['privacy:metadata:recitct_user_notes:cmid'] = 'Course module ID';
+$string['privacy:metadata:recitct_user_notes:feedback'] = 'Teacher feedback';
+$string['privacy:metadata:recitct_user_notes:lastupdate'] = 'Last update time';
+$string['privacy:metadata:recitct_user_notes:nid'] = 'Note ID';
+$string['privacy:metadata:recitct_user_notes:note'] = 'User note';
+$string['privacy:metadata:recitct_user_notes:note_itemid'] = 'Atto item ID';
+$string['privacy:metadata:recitct_user_notes:userid'] = 'User ID';
 $string['userpreferences'] = 'User preferences';
 $string['modulename'] = 'Cahier de traces v2';
 $string['modulenameplural'] = "Cahier de traces";
-$string['modulename_help'] = "The activity \"Cahier de traces\" must be last.";
+$string['modulename_help'] = "";
 $string['pluginadministration'] = "Cahier de traces module administration";
 $string['sectionActivities'] = "Section Activities";
-$string['turnOnEditingMode'] = "Turn On Editing Mode";
-$string['turnOffEditingMode'] = "Turn Off Editing Mode";
+$string['turnOnEditingMode'] = "Turn on editing mode";
+$string['turnOffEditingMode'] = "Turn off editing mode";
 $string['selectGroup'] = "Select the group";
 $string['selectUser'] = "Select the user";
 $string['selectOption'] = "Select your option";

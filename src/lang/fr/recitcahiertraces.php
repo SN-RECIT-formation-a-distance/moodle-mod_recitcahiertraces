@@ -1,10 +1,18 @@
 <?php
 $string['pluginname'] = 'Cahier de traces v2';
-$string['privacy:metadata'] = 'Ce plugin ne conserve aucune donnée personelle.';
+$string['privacy:metadata'] = 'Ce plugin conserve les notes des élèves';
+$string['privacy:metadata:recitct_user_notes'] = 'Notes des élèves';
+$string['privacy:metadata:recitct_user_notes:cmid'] = 'ID du module lié';
+$string['privacy:metadata:recitct_user_notes:feedback'] = 'Rétroaction';
+$string['privacy:metadata:recitct_user_notes:lastupdate'] = 'Date de la dérnière mise à jour';
+$string['privacy:metadata:recitct_user_notes:nid'] = 'ID de la note';
+$string['privacy:metadata:recitct_user_notes:note'] = 'Note des élèves';
+$string['privacy:metadata:recitct_user_notes:note_itemid'] = 'Atto item ID';
+$string['privacy:metadata:recitct_user_notes:userid'] = 'ID de l\'utilisateur';
 $string['userpreferences'] = "Préférences de l'utilisateur";
 $string['modulename'] = 'Cahier de traces v2';
 $string['modulenameplural'] = "Cahiers de traces";
-$string['modulename_help'] = "L'activité \"Cahier de traces\" doit être la DERNIÈRE ACTIVITÉ DE LA LISTE dans chaque section du cours. Les paramètres de cette activité déterminent la présence ou non d'un espace de prise de note pour chaque activité de la section. Elle contient toutes les notes de l'élève relatives à cette section.";
+$string['modulename_help'] = "";
 $string['pluginadministration'] = "Cahier de traces module administration";
 $string['sectionActivities'] = "Section Activités";
 $string['turnOnEditingMode'] = "Activer le mode d'édition";
