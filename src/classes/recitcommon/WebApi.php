@@ -285,8 +285,8 @@ abstract class MoodleApi extends AWebApi
 
     public function getEnrolledUserList($request){   
         try{
-            $cmId = intval($request['cmId']);
-            $courseId = (isset($request['courseId']) ? intval($request['courseId']) : 0);
+            $cmId = clean_param($request['cmId'], PARAM_INT);
+            $courseId = (isset($request['courseId']) ? clean_param($request['courseId'], PARAM_INT) : 0);
 
             $this->canUserAccess('a', $cmId, 0, $courseId);
 

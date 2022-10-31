@@ -43,8 +43,8 @@ class WebApi extends MoodleApi
 
     public function getUserNotes($request){
         try{
-            $cmId = intval($request['cmId']);
-            $userId = intval($request['userId']);
+            $cmId = clean_param($request['cmId'], PARAM_INT);
+            $userId = clean_param($request['userId'], PARAM_INT);
             $flag = $request['flag'];
 
             $this->canUserAccess('s', $cmId, $userId);
@@ -60,9 +60,9 @@ class WebApi extends MoodleApi
 
     public function getUserNote($request){
         try{
-            $nId = intval($request['nId']);
-            $userId = intval($request['userId']);
-            $cmId = intval($request['cmId']);
+            $nId = clean_param($request['nId'], PARAM_INT);
+            $userId = clean_param($request['userId'], PARAM_INT);
+            $cmId = clean_param($request['cmId'], PARAM_INT);
 
             $this->canUserAccess('s', $cmId, $userId);
             
@@ -109,7 +109,7 @@ class WebApi extends MoodleApi
 
     public function getGroupNotes($request){
         try{
-            $gId = intval($request['gId']);
+            $gId = clean_param($request['gId'], PARAM_INT);
 
             $result = PersistCtrl::getInstance()->getGroupNotes($gId);
             $this->prepareJson($result);
@@ -122,7 +122,7 @@ class WebApi extends MoodleApi
 
     public function getGroupList($request){
         try{
-            $cmId = intval($request['cmId']);
+            $cmId = clean_param($request['cmId'], PARAM_INT);
 
             $result = PersistCtrl::getInstance()->getGroupList($cmId);
             $this->prepareJson($result);
@@ -135,8 +135,8 @@ class WebApi extends MoodleApi
 
     public function getNoteFormKit($request){
         try{
-            $nId = intval($request['nId']);
-            $cmId = intval($request['cmId']);
+            $nId = clean_param($request['nId'], PARAM_INT);
+            $cmId = clean_param($request['cmId'], PARAM_INT);
 
             $this->canUserAccess('a', $cmId);
 
@@ -161,8 +161,8 @@ class WebApi extends MoodleApi
     
     public function removeNote($request){
         try{
-            $nId = intval($request['nId']);
-            $cmId = intval($request['cmId']);
+            $nId = clean_param($request['nId'], PARAM_INT);
+            $cmId = clean_param($request['cmId'], PARAM_INT);
 
             $this->canUserAccess('a', $cmId);
             
@@ -176,8 +176,8 @@ class WebApi extends MoodleApi
     
     public function removeNoteGroup($request){
         try{
-            $gId = intval($request['gId']);
-            $cmId = intval($request['cmId']);
+            $gId = clean_param($request['gId'], PARAM_INT);
+            $cmId = clean_param($request['cmId'], PARAM_INT);
 
             $this->canUserAccess('a', $cmId);
             
@@ -191,7 +191,7 @@ class WebApi extends MoodleApi
     
     public function reorderNoteGroups($request){
         try{
-            $cmId = intval($request['cmId']);
+            $cmId = clean_param($request['cmId'], PARAM_INT);
 
             $this->canUserAccess('a', $cmId);
             
@@ -242,7 +242,7 @@ class WebApi extends MoodleApi
     
     public function getCCList($request){        
         try{            
-            $cmId = intval($request['cmId']);
+            $cmId = clean_param($request['cmId'], PARAM_INT);
 
             $this->canUserAccess('a', $cmId);
             
@@ -267,8 +267,8 @@ class WebApi extends MoodleApi
     public function importCC($request){
         global $DB, $USER;
         try{            
-            $mCmId = intval($request['cmId']);
-            $importcmId = intval($request['importcmid']);
+            $mCmId = clean_param($request['cmId'], PARAM_INT);
+            $importcmId = clean_param($request['importcmid'], PARAM_INT);
 
             if(($mCmId == 0) || ($importcmId == 0)){
                 return new WebApiResult(true, null, get_string('nodata'));
@@ -294,8 +294,8 @@ class WebApi extends MoodleApi
         try{
             $this->canUserAccess('a');
 
-            $from = intval($request['from']);
-            $to = intval($request['to']);
+            $from = clean_param($request['from'], PARAM_INT);
+            $to = clean_param($request['to'], PARAM_INT);
             PersistCtrl::getInstance()->switchNoteSlot($from, $to);
             return new WebApiResult(true);
         }
@@ -306,7 +306,7 @@ class WebApi extends MoodleApi
 
     public function getRequiredNotes($request){
         try{
-            $cmId = intval($request['cmId']);
+            $cmId = clean_param($request['cmId'], PARAM_INT);
 
             $this->canUserAccess('a', $cmId);
 
@@ -323,7 +323,7 @@ class WebApi extends MoodleApi
 
     public function getStudentsProgression($request){
         try{
-            $cmId = intval($request['cmId']);
+            $cmId = clean_param($request['cmId'], PARAM_INT);
 
             $this->canUserAccess('a', $cmId);
 
@@ -337,19 +337,6 @@ class WebApi extends MoodleApi
             return new WebApiResult(false, null, $ex->GetMessage());
         }     
     }
-
-    /*public function sendInstantMessagesToTeachers($request){   
-        try{
-            $this->canUserAccess('a');
-
-            $result = PersistCtrl::getInstance()->sendInstantMessagesToTeachers(7, 'test api');
-
-            return new WebApiResult(true, $result);
-        }
-        catch(Exception $ex){
-            return new WebApiResult(false, null, $ex->GetMessage());
-        }        
-    }*/
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
