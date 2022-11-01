@@ -725,6 +725,7 @@ class UserNote
     public $username = "";
     public $noteContent = null;    // student note ({text: '', itemid: 0})
     public $feedback = "";  // teacher feedback 
+    public $feedbackFiltered = "";  // teacher feedback 
     public $lastUpdate = 0;
     public $isTemplate = false;
 
@@ -755,7 +756,10 @@ class UserNote
         }
 
         if(isset($dbData->username)){ $result->username = $dbData->username; }
-        if(isset($dbData->feedback)){ $result->feedback = $dbData->feedback; }
+        if(isset($dbData->feedback)){ 
+            $result->feedback = $dbData->feedback;
+            $result->feedbackFiltered = format_text($dbData->feedback, FORMAT_MOODLE, array('filter' => true, 'context' => $context));
+        }
         if(isset($dbData->lastUpdate)){ $result->lastUpdate = $dbData->lastUpdate; }
         if(isset($dbData->isTemplate)){ $result->isTemplate = $dbData->isTemplate; }
         

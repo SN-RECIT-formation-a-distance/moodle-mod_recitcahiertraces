@@ -594,7 +594,7 @@ class NavActivities extends Component{
     }
 
     createFeedbackView(index, item){
-        let text = (item.feedback.length === 0 ? '<span style="opacity: .6">'+i18n.get_string('givefeedback')+'</span>' : item.feedback);
+        let text = (item.feedback.length === 0 ? '<span style="opacity: .6">'+i18n.get_string('givefeedback')+'</span>' : item.feedbackFiltered);
         let result = 
             <div className="balon1 p-2 m-0 position-relative d-flex" data-is={i18n.get_string('teacherFeedback')} key={"key"+index} style={{justifyContent: 'flex-end', alignItems: 'flex-start'}}>
                 {this.props.isTeacher && <Button className="" onClick={() => this.props.onEdit(item)} title={i18n.get_string('edit')} variant="link"><FontAwesomeIcon icon={faPencilAlt}/></Button>}
