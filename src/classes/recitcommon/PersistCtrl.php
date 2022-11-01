@@ -166,11 +166,12 @@ abstract class MoodlePersistCtrl extends APersistCtrl{
     }
 
     public function getCourseTeachers($courseId, $groupIds = array()){
-        $coursecontext = context_course::instance($courseId);
+        $coursecontext = \context_course::instance($courseId);
         $users = get_users_by_capability($coursecontext, 'mod/recitcahiertraces:viewadmin', '', '', '', '', null, null, false);
 
         foreach($users as $item){
             $item->groupIds = groups_get_user_groups($courseId, $item->id);
+            $item->groupIds = array_values(array_pop($item->groupIds));
         }
 
         return $users;
