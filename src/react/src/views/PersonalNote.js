@@ -49,12 +49,12 @@ class PersonalNoteForm extends Component{
         this.prepareNewState = this.prepareNewState.bind(this);
         this.onCollapse = this.onCollapse.bind(this);
         
-        let mode = "";// it is a student?
+        let mode = "";// is it a student?
         // it is a teacher
-        if(UtilsMoodle.checkRoles($glVars.signedUser.roles, UtilsMoodle.rolesL2)){
+        if($glVars.signedUser.roles.includes('t')){
             mode = "t";
         }
-        else if(UtilsMoodle.checkRoles($glVars.signedUser.roles, UtilsMoodle.rolesL3)){
+        else if($glVars.signedUser.roles.includes('s')){
              mode = "s";
         }
         this.state = {data: null, remoteData: null, dropdownLists: null, mode: mode, collapse: {note: true, suggestedNote: false, feedback: true}};

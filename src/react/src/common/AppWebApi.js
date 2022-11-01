@@ -83,16 +83,6 @@ export class AppWebApi extends WebApi
         this.post(this.gateway, data, onSuccess);
     }
 
-    getCCList(cmId, onSuccess){
-        let data = {cmId: cmId, service: "getCCList"};
-        this.post(this.gateway, data, onSuccess);
-    }
-
-    importCC(cmId, importcmid, onSuccess){
-        let data = {cmId: cmId, importcmid: importcmid, service: "importCC"};
-        this.post(this.gateway, data, onSuccess);
-    }
-
     getGroupNotes(gId, ctId, onSuccess){
         let data = {gId: gId, ctId: (ctId || 0), service: "getGroupNotes"};
         this.post(this.gateway, data, onSuccess);

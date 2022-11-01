@@ -331,13 +331,11 @@ export class EditionMode extends Component{
         
         this.onSelectGroup = this.onSelectGroup.bind(this);
         this.onClose = this.onClose.bind(this);
-        this.onCloseImport = this.onCloseImport.bind(this);
-        this.onImport = this.onImport.bind(this);
         this.onDragRow = this.onDragRow.bind(this);
         this.onDropRow = this.onDropRow.bind(this);
         this.onCopy = this.onCopy.bind(this);
 
-        this.state = {selectedGroup: null, nId: -1, groupList: [], groupNoteList: [], draggingItem: null, copyIC: "", showGroupForm: false, importForm: false, showGroupOrderForm: false, groupListRaw: []};
+        this.state = {selectedGroup: null, nId: -1, groupList: [], groupNoteList: [], draggingItem: null, copyIC: "", showGroupForm: false, showGroupOrderForm: false, groupListRaw: []};
 
         this.intCodeRef = React.createRef();
     }
@@ -416,7 +414,6 @@ export class EditionMode extends Component{
                     </ButtonGroup>
                     <ButtonGroup>
                         <a className="btn btn-primary" href={this.getSuggestedNotesPrintLink()} target="_blank" title={i18n.get_string('print')}><FontAwesomeIcon icon={faPrint}/> {i18n.get_string('print')}</a>
-                        <Button variant="primary" onClick={this.onImport} title={i18n.get_string('importcc')}><FontAwesomeIcon icon={faFileImport} /> {i18n.get_string('importcc')}</Button>
                     </ButtonGroup>
                 </ButtonToolbar>
                 <hr/><br/>
@@ -457,21 +454,10 @@ export class EditionMode extends Component{
                 {this.state.showGroupForm && <GroupForm onClose={this.onCloseGroupForm} data={this.state.selectedGroup}/>}
                 {this.state.showGroupOrderForm && <GroupOrderForm onClose={() => this.showGroupOrderForm(false)} ctId={$glVars.urlParams.id}/>}
 
-                {this.state.importForm && <ImportForm onClose={this.onCloseImport}/>}
-
                 {this.state.copyIC.length > 0 && <ModalGenerateIntCode onClose={this.onClose} onCopy={this.onClose} intCode={this.state.copyIC} />}
             </div> 
 
         return (main);
-    }
-
-    onImport(){
-        this.setState({importForm: true});
-    }
-
-    onCloseImport(){
-        this.setState({importForm: false, selectedGroup: null, groupNoteList: []});
-        this.getData();
     }
 
     removeNoteGroup(){
@@ -830,90 +816,5 @@ class GroupOrderForm extends Component{
         }
 
         $glVars.webApi.saveNoteGroup(items, callback);
-    }
-}
-
-class ImportForm extends Component{
-    static defaultProps = {        
-        onClose: null,
-    };
-
-    constructor(props){
-        super(props);
-
-        this.onSave = this.onSave.bind(this);
-        this.onDataChange = this.onDataChange.bind(this);
-
-        this.state = {data: {name: ''}, ccList: [], importing: false};
-        this.getList();
-    }
-
-    getList(){
-        let that = this;
-        let callback = function(result){
-            if(!result.success){
-                FeedbackCtrl.instance.showError($glVars.i18n.appName, result.msg);
-                return;
-            }
-            
-            let ccList = [];
-            for(let item of result.data){
-                ccList.push({value: item.id, text: item.name, data: item});
-            }
-
-            that.setState({ccList: ccList});
-        }
-
-        $glVars.webApi.getCCList($glVars.urlParams.id, callback);
-    }
-
-    render(){        
-        let body = 
-            <Form >
-                <Form.Row>
-                    <Form.Group as={Col}>
-                        <Form.Label>{i18n.get_string('name')}</Form.Label>
-                        <ComboBox placeholder={i18n.get_string('selectOption')} value={this.state.data.name} name="name" options={this.state.ccList} onChange={this.onDataChange} />
-                    </Form.Group>
-                </Form.Row>
-            </Form>;
-        if (this.state.importing){
-            body = <h3>{i18n.get_string('importing')}</h3>;
-        }
-
-        let footer = 
-            <div className="btn-tollbar" style={{width: "100%", display: "flex", justifyContent: "flex-end"}}>
-                <div className="btn-group">
-                    <Button  variant="secondary" onClick={this.props.onClose}>{i18n.get_string('cancel')}</Button>
-                    <Button  variant="success" disabled={this.state.importing} onClick={this.onSave}>{i18n.get_string('importcc')}</Button>
-                </div>
-            </div>;
-
-        let main = <Modal title={i18n.get_string('importcc')} body={body} footer={footer} onClose={this.props.onClose} width={"400px"}/>;
-        return main;
-    }
-
-    onDataChange(event){
-        let data = this.state.data;
-        data[event.target.name] = event.target.value;
-        this.setState({data: data});
-    }
-
-    onSave(){
-        let that = this;
-        this.setState({importing: true});
-        let callback = function(result){
-            if(result.success){
-                $glVars.feedback.showInfo(i18n.get_string('pluginname'), result.data.info);
-            }
-            else{
-                $glVars.feedback.showError(i18n.get_string('pluginname'), result.msg);
-            }
-
-            that.setState({importing: false});
-            that.props.onClose(that.state.data.name);
-        }
-
-        $glVars.webApi.importCC($glVars.urlParams.id, this.state.data.name, callback);
     }
 }

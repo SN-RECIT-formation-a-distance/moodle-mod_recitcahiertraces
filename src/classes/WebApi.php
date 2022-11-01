@@ -25,9 +25,6 @@ namespace recitcahiertraces;
 require_once(dirname(__FILE__).'../../../../config.php');
 require_once dirname(__FILE__)."/recitcommon/WebApi.php";
 require_once 'PersistCtrl.php';
-if (file_exists($CFG->dirroot . "/mod/recitcahiercanada/classes/PersistCtrl.php")){
-    require_once($CFG->dirroot . "/mod/recitcahiercanada/classes/PersistCtrl.php");
-}
 
 use recitcahiertraces\PersistCtrl;
 use recitcahiertraces\WebApiResult;
@@ -234,56 +231,6 @@ class WebApi extends MoodleApi
             //PersistCtrl::getInstance()->moodleTagItem($result, $tagMetadata);
             //$this->prepareJson($result);
             return new WebApiResult(true);
-        }
-        catch(Exception $ex){
-            return new WebApiResult(false, null, $ex->GetMessage());
-        } 
-    }
-    
-    public function getCCList($request){        
-        try{            
-            $cmId = clean_param($request['cmId'], PARAM_INT);
-
-            $this->canUserAccess('a', $cmId);
-            
-            list ($course, $cm) = get_course_and_cm_from_cmId($cmId);
-            $result = array();
-            $modinfo = get_fast_modinfo($course->id);
-
-            foreach ($modinfo->cms as $cm){
-                if ($cm->modname == 'recitcahiercanada' && $cm->deletioninprogress == 0){
-                    $result[] = array('id' => $cm->id, 'name' => $cm->name);
-                }
-            }
-            
-            $this->prepareJson($result);
-            return new WebApiResult(true, $result);
-        }
-        catch(Exception $ex){
-            return new WebApiResult(false, null, $ex->GetMessage());
-        } 
-    }
-    
-    public function importCC($request){
-        global $DB, $USER;
-        try{            
-            $mCmId = clean_param($request['cmId'], PARAM_INT);
-            $importcmId = clean_param($request['importcmid'], PARAM_INT);
-
-            if(($mCmId == 0) || ($importcmId == 0)){
-                return new WebApiResult(true, null, get_string('nodata'));
-            }
-
-            $this->canUserAccess('a', $mCmId);
-            $this->canUserAccess('a', $importcmId);
-            
-            $data = \recitcahiercanada\PersistCtrl::getInstance($DB, $USER)->getCmSuggestedNotes($importcmId);
-
-            $info = PersistCtrl::getInstance()->importCahierCanada($mCmId, $data);
-            $result = array('info' => $info['imported'] . " notes ont été importé, " . $info['group'] . " groupes de notes ont été créé, " . $info['skipped'] . " notes ont été ignoré, " . $info['error'] . " notes ont échoué l'importation", 'data' => $info);
-            $this->prepareJson($result);
-            
-            return new WebApiResult(true, $result);
         }
         catch(Exception $ex){
             return new WebApiResult(false, null, $ex->GetMessage());
