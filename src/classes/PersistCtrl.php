@@ -87,7 +87,7 @@ class PersistCtrl extends MoodlePersistCtrl
         if ($flag != 's'){
             $fields = "t4.suggestednote suggested_Note,";
         }
-        $query = "select t1.id m_Cm_Id, t2.id g_Id, t2.ct_id ct_Id, t4.title, t4.slot, t5.id un_Id, 
+        $query = "select ". $this->sql_uniqueid() ." uniqueid, t1.id m_Cm_Id, t2.id g_Id, t2.ct_id ct_Id, t4.title, t4.slot, t5.id un_Id, 
                 coalesce(t5.note, '') note, t2.name group_Name, t2.slot group_Slot, t4.id n_Id, t5.cmid n_Cm_Id,
                 coalesce(t5.userid, 0) user_Id, coalesce(t5.feedback, '') feedback, t4.templatenote template_Note, $fields
                 t5.lastupdate last_Update, ".$this->mysqlConn->sql_concat('t2.name', 't4.slot')." order_By_Custom, t3.name ct_Name,
@@ -98,7 +98,7 @@ class PersistCtrl extends MoodlePersistCtrl
                 inner join {recitct_notes} t4 on t2.id = t4.gid
                 left join {recitct_user_notes} t5 on t4.id = t5.nid and t5.userId = ?
                 where t1.id = ?
-                order by group_Slot, ".$this->mysqlConn->sql_concat('t2.name', 't4.slot')." asc";
+                order by group_Slot, t4.slot asc";
                 
         $tmp = $this->getRecordsSQL($query, [$userId, $cmId]);
 

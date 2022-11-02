@@ -510,7 +510,7 @@ export class EditionMode extends Component{
                 $glVars.feedback.showError(i18n.get_string('pluginname'), result.msg);
             }
         }
-        $glVars.webApi.switchNoteSlot(this.state.draggingItem.id, item.id, callback);
+        $glVars.webApi.switchNoteSlot(this.state.draggingItem.id, item.id, $glVars.urlParams.id, callback);
     }
 
     onAddNote(){

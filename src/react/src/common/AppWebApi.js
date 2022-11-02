@@ -93,10 +93,10 @@ export class AppWebApi extends WebApi
         this.post(this.gateway, data, onSuccess);
     }
 
-    switchNoteSlot(from, to, onSuccess){
+    switchNoteSlot(from, to, cmId, onSuccess){
         if(from === to){ return;}
 
-        let data = {from: from, to: to, service: "switchNoteSlot"};
+        let data = {from: from, to: to, cmId: cmId, service: "switchNoteSlot"};
         this.post(this.gateway, data, onSuccess);
     }
     

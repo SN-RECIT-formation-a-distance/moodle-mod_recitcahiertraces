@@ -239,7 +239,9 @@ class WebApi extends MoodleApi
 
     public function switchNoteSlot($request){
         try{
-            $this->canUserAccess('a');
+            $cmId = clean_param($request['cmId'], PARAM_INT);
+
+            $this->canUserAccess('a', $cmId);
 
             $from = clean_param($request['from'], PARAM_INT);
             $to = clean_param($request['to'], PARAM_INT);
