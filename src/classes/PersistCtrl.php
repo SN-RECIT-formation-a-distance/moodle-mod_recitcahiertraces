@@ -67,7 +67,7 @@ class PersistCtrl extends MoodlePersistCtrl
                 inner join {$this->prefix}recitct_notes as t4 on t2.id = t4.gid
                 left join {$this->prefix}recitct_user_notes as t5 on t4.id = t5.nid and t5.userId = $userId
                 where t1.id = $cmId
-                order by groupSlot, length(orderByCustom) asc, orderByCustom asc";
+                order by groupSlot, t4.slot asc";
                 
         $tmp = $this->mysqlConn->execSQLAndGetObjects($query);
 
