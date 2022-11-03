@@ -67,7 +67,7 @@ class PersistCtrl extends MoodlePersistCtrl
                 inner join {$this->prefix}recitct_notes as t4 on t2.id = t4.gid
                 left join {$this->prefix}recitct_user_notes as t5 on t4.id = t5.nid and t5.userId = $userId
                 where t1.id = $cmId
-                order by groupSlot, t4.slot asc";
+                order by groupSlot, length(orderByCustom) asc, orderByCustom asc";
                 
         $tmp = $this->mysqlConn->execSQLAndGetObjects($query);
 
@@ -343,7 +343,7 @@ class PersistCtrl extends MoodlePersistCtrl
                     inner join {$this->prefix}recitcahiertraces as t1_1 on t3.ctid = t1_1.id
                     where $cIdStmt and $cmStmt
                     group by t1.id
-                    order by t3.id, slot asc";
+                    order by groupSlot, slot asc";
 
         $tmp = $this->mysqlConn->execSQLAndGetObjects($query);
 
