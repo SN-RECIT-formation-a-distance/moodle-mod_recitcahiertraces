@@ -22,7 +22,7 @@
  */
 namespace recitcahiertraces;
 require('../../config.php');
-require_once($CFG->dirroot . "/local/recitcommon/php/Utils.php");
+require_once(dirname(__FILE__) . "/classes/recitcommon/Utils.php");
 require_once($CFG->libdir . '/portfoliolib.php');
 
 use recitcommon;
@@ -74,7 +74,7 @@ class MainView
         $this->page->set_heading($this->course->fullname);
         $this->page->requires->css(new moodle_url('./react_app_build/index.css'), true);
         $this->page->requires->js(new moodle_url('./react_app_build/index.js'), true);
-        $this->page->requires->js(new moodle_url("{$this->cfg->wwwroot}/local/recitcommon/js/Components.js"), true);
+        $this->page->requires->js(new moodle_url("./Components.js"), true);
 
        /* if($this->editorOption == "2"){
             $this->page->requires->css(new moodle_url("{$this->cfg->wwwroot}/local/recitcommon/js/recit_rich_editor/build/index.css"), true);
@@ -86,7 +86,7 @@ class MainView
         echo $this->output->header();
         echo $this->output->heading(format_string($this->cm->name), 2);
                         
-        $roles = recitcommon\Utils::getUserRoles($this->course->id, $this->user->id);
+        $roles = Utils::getUserRoles($this->course->id, $this->user->id);
         $studentId = (in_array('ad', $roles) ? 0 : $this->user->id);
         $portfolioUrl = $this->getPortfolioUrl();
         
@@ -106,7 +106,7 @@ class MainView
             return "<div id='{$name}_container_{$index}' data-format='recit_rich_editor' style='display: none;'></div>";
         }
         else{*/
-            return recitcommon\Utils::createEditorHtml(false, "{$name}_container_{$index}", "{$name}_{$index}", "", 15, $context, 0, 0);
+            return Utils::createEditorHtml(false, "{$name}_container_{$index}", "{$name}_{$index}", "", 15, $context, 0, 0);
         //}
     }
 
