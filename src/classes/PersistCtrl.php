@@ -364,7 +364,7 @@ class PersistCtrl extends MoodlePersistCtrl
                     inner join {recitcahiertraces} t1_1 on t3.ct_id = t1_1.id
                     where $cIdStmt and $cmStmt
                     group by t1.id, t1_1.id, t3.name, t3.slot, t3.id
-                    order by t3.id, slot asc";
+                    order by t3.id, group_slot asc";
 
         $tmp = $this->getRecordsSQL($query);
 
