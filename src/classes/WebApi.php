@@ -13,20 +13,18 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
- 
+
 /**
  *
- * @copyright  2019 RÉCIT
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_recitcahiertraces
+ * @copyright 2019 RÉCIT 
+ * @license   {@link http://www.gnu.org/licenses/gpl-3.0.html} GNU GPL v3 or later
  */
 namespace recitcahiertraces;
 
 require_once(dirname(__FILE__).'../../../../config.php');
 require_once dirname(__FILE__)."/recitcommon/WebApi.php";
 require_once 'PersistCtrl.php';
-if (file_exists($CFG->dirroot . "/mod/recitcahiercanada/classes/PersistCtrl.php")){
-    require_once($CFG->dirroot . "/mod/recitcahiercanada/classes/PersistCtrl.php");
-}
 
 use recitcahiertraces\PersistCtrl;
 use recitcahiertraces\WebApiResult;
@@ -42,8 +40,8 @@ class WebApi extends MoodleApi
 
     public function getUserNotes($request){
         try{
-            $cmId = intval($request['cmId']);
-            $userId = intval($request['userId']);
+            $cmId = clean_param($request['cmId'], PARAM_INT);
+            $userId = clean_param($request['userId'], PARAM_INT);
             $flag = $request['flag'];
 
             $this->canUserAccess('s', $cmId, $userId);
@@ -59,9 +57,9 @@ class WebApi extends MoodleApi
 
     public function getUserNote($request){
         try{
-            $nId = intval($request['nId']);
-            $userId = intval($request['userId']);
-            $cmId = intval($request['cmId']);
+            $nId = clean_param($request['nId'], PARAM_INT);
+            $userId = clean_param($request['userId'], PARAM_INT);
+            $cmId = clean_param($request['cmId'], PARAM_INT);
 
             $this->canUserAccess('s', $cmId, $userId);
             
@@ -90,12 +88,12 @@ class WebApi extends MoodleApi
 
             if(($flags->mode == "s") && ($result->noteDef->notifyTeacher == 1)){
                 $url = sprintf("%s/mod/recitcahiertraces/view.php?id=%ld&nId=%ld&gId=%ld&userId=%ld", $CFG->wwwroot, $result->noteDef->group->ct->mCmId, $result->noteDef->id, $result->noteDef->group->id, $result->userId);
-                $msg = sprintf("Nouvelle mise à jour dans la note: « <a href='%s' target='_blank'>%s</a> »", $url, $result->noteDef->title);
+                $msg = sprintf(get_string('newupdateinnote', 'mod_recitcahiertraces').": « <a href='%s' target='_blank'>%s</a> »", $url, $result->noteDef->title);
                 PersistCtrl::getInstance()->sendInstantMessagesToTeachers($result->noteDef->group->ct->courseId, $msg);
             }
             else if(($flags->mode == "t") && ($flags->teacherFeedbackUpdated == 1)){
                 $url = sprintf("%s/mod/recitcahiertraces/view.php?id=%ld&nId=%ld&gId=%ld&userId=%ld", $CFG->wwwroot, $result->noteDef->group->ct->mCmId, $result->noteDef->id, $result->noteDef->group->id, $result->userId);
-                $msg = sprintf("Nouvelle mise à jour dans la note: « <a href='%s' target='_blank'>%s</a> »", $url, $result->noteDef->title);
+                $msg = sprintf(get_string('newupdateinnote', 'mod_recitcahiertraces').": « <a href='%s' target='_blank'>%s</a> »", $url, $result->noteDef->title);
                 PersistCtrl::getInstance()->sendInstantMessagesToStudents(array($result->userId), $result->noteDef->group->ct->courseId, $msg);
             }
             
@@ -108,7 +106,7 @@ class WebApi extends MoodleApi
 
     public function getGroupNotes($request){
         try{
-            $gId = intval($request['gId']);
+            $gId = clean_param($request['gId'], PARAM_INT);
 
             $result = PersistCtrl::getInstance()->getGroupNotes($gId);
             $this->prepareJson($result);
@@ -121,7 +119,7 @@ class WebApi extends MoodleApi
 
     public function getGroupList($request){
         try{
-            $cmId = intval($request['cmId']);
+            $cmId = clean_param($request['cmId'], PARAM_INT);
 
             $result = PersistCtrl::getInstance()->getGroupList($cmId);
             $this->prepareJson($result);
@@ -134,8 +132,8 @@ class WebApi extends MoodleApi
 
     public function getNoteFormKit($request){
         try{
-            $nId = intval($request['nId']);
-            $cmId = intval($request['cmId']);
+            $nId = clean_param($request['nId'], PARAM_INT);
+            $cmId = clean_param($request['cmId'], PARAM_INT);
 
             $this->canUserAccess('a', $cmId);
 
@@ -160,8 +158,8 @@ class WebApi extends MoodleApi
     
     public function removeNote($request){
         try{
-            $nId = intval($request['nId']);
-            $cmId = intval($request['cmId']);
+            $nId = clean_param($request['nId'], PARAM_INT);
+            $cmId = clean_param($request['cmId'], PARAM_INT);
 
             $this->canUserAccess('a', $cmId);
             
@@ -175,8 +173,8 @@ class WebApi extends MoodleApi
     
     public function removeNoteGroup($request){
         try{
-            $gId = intval($request['gId']);
-            $cmId = intval($request['cmId']);
+            $gId = clean_param($request['gId'], PARAM_INT);
+            $cmId = clean_param($request['cmId'], PARAM_INT);
 
             $this->canUserAccess('a', $cmId);
             
@@ -190,7 +188,7 @@ class WebApi extends MoodleApi
     
     public function reorderNoteGroups($request){
         try{
-            $cmId = intval($request['cmId']);
+            $cmId = clean_param($request['cmId'], PARAM_INT);
 
             $this->canUserAccess('a', $cmId);
             
@@ -238,63 +236,15 @@ class WebApi extends MoodleApi
             return new WebApiResult(false, null, $ex->GetMessage());
         } 
     }
-    
-    public function getCCList($request){        
-        try{            
-            $cmId = intval($request['cmId']);
-
-            $this->canUserAccess('a', $cmId);
-            
-            list ($course, $cm) = get_course_and_cm_from_cmId($cmId);
-            $result = array();
-            $modinfo = get_fast_modinfo($course->id);
-
-            foreach ($modinfo->cms as $cm){
-                if ($cm->modname == 'recitcahiercanada' && $cm->deletioninprogress == 0){
-                    $result[] = array('id' => $cm->id, 'name' => $cm->name);
-                }
-            }
-            
-            $this->prepareJson($result);
-            return new WebApiResult(true, $result);
-        }
-        catch(Exception $ex){
-            return new WebApiResult(false, null, $ex->GetMessage());
-        } 
-    }
-    
-    public function importCC($request){
-        global $DB, $USER;
-        try{            
-            $mCmId = intval($request['cmId']);
-            $importcmId = intval($request['importcmid']);
-
-            if(($mCmId == 0) || ($importcmId == 0)){
-                return new WebApiResult(true, null, "Aucune donnée n'a été importée.");
-            }
-
-            $this->canUserAccess('a', $mCmId);
-            $this->canUserAccess('a', $importcmId);
-            
-            $data = \recitcahiercanada\PersistCtrl::getInstance($DB, $USER)->getCmSuggestedNotes($importcmId);
-
-            $info = PersistCtrl::getInstance()->importCahierCanada($mCmId, $data);
-            $result = array('info' => $info['imported'] . " notes ont été importé, " . $info['group'] . " groupes de notes ont été créé, " . $info['skipped'] . " notes ont été ignoré, " . $info['error'] . " notes ont échoué l'importation", 'data' => $info);
-            $this->prepareJson($result);
-            
-            return new WebApiResult(true, $result);
-        }
-        catch(Exception $ex){
-            return new WebApiResult(false, null, $ex->GetMessage());
-        } 
-    }
 
     public function switchNoteSlot($request){
         try{
-            $this->canUserAccess('a');
+            $cmId = clean_param($request['cmId'], PARAM_INT);
 
-            $from = intval($request['from']);
-            $to = intval($request['to']);
+            $this->canUserAccess('a', $cmId);
+
+            $from = clean_param($request['from'], PARAM_INT);
+            $to = clean_param($request['to'], PARAM_INT);
             PersistCtrl::getInstance()->switchNoteSlot($from, $to);
             return new WebApiResult(true);
         }
@@ -305,7 +255,7 @@ class WebApi extends MoodleApi
 
     public function getRequiredNotes($request){
         try{
-            $cmId = intval($request['cmId']);
+            $cmId = clean_param($request['cmId'], PARAM_INT);
 
             $this->canUserAccess('a', $cmId);
 
@@ -322,7 +272,7 @@ class WebApi extends MoodleApi
 
     public function getStudentsProgression($request){
         try{
-            $cmId = intval($request['cmId']);
+            $cmId = clean_param($request['cmId'], PARAM_INT);
 
             $this->canUserAccess('a', $cmId);
 
@@ -336,19 +286,6 @@ class WebApi extends MoodleApi
             return new WebApiResult(false, null, $ex->GetMessage());
         }     
     }
-
-    /*public function sendInstantMessagesToTeachers($request){   
-        try{
-            $this->canUserAccess('a');
-
-            $result = PersistCtrl::getInstance()->sendInstantMessagesToTeachers(7, 'test api');
-
-            return new WebApiResult(true, $result);
-        }
-        catch(Exception $ex){
-            return new WebApiResult(false, null, $ex->GetMessage());
-        }        
-    }*/
 }
 
 ///////////////////////////////////////////////////////////////////////////////////

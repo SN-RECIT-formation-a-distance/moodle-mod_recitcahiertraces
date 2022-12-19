@@ -13,11 +13,12 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
- 
+
 /**
  *
- * @copyright  2019 RÉCIT
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_recitcahiertraces
+ * @copyright 2019 RÉCIT 
+ * @license   {@link http://www.gnu.org/licenses/gpl-3.0.html} GNU GPL v3 or later
  */
 namespace recitcahiertraces;
 
@@ -51,25 +52,55 @@ class PersistCtrl extends MoodlePersistCtrl
         parent::__construct($mysqlConn, $signedUser);
     }
 
+    protected function isStudent($userId, $courseId){
+        $ccontext = \context_course::instance($courseId);
+        if (has_capability("mod/recitcahiertraces:view", $ccontext, $userId, false)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    protected function filterStudents(array &$dataProvider, $courseId){
+        $cacheStudents = array(); // Keep a cache so we dont check capabilities for the same user multiple times.
+
+        foreach($dataProvider as $i => $item){
+            if (!isset($cacheStudents[$item->userId])){
+                if ($this->isStudent($item->userId, $courseId)){
+                    $cacheStudents[$item->userId] = true;
+                }
+                else{
+                    $cacheStudents[$item->userId] = false;
+                    unset($dataProvider[$i]);
+                }
+            }
+            else if($cacheStudents[$item->userId] == false){
+                unset($dataProvider[$i]);
+            }
+        }
+
+        $dataProvider = array_values($dataProvider); // reindex array
+    }
+
     public function getUserNotes($cmId, $userId, $flag = 's'){
         $fields = "";
         if ($flag != 's'){
-            $fields = "t4.suggestednote as suggestedNote,";
+            $fields = "t4.suggestednote suggested_Note,";
         }
-        $query = "select t1.id as mCmId, t2.id as gId, t2.ctid as ctId, t4.title, t4.slot, t5.id as unId, 
-                coalesce(t5.note, '') as note, t2.name as groupName, t2.slot as groupSlot, t4.id as nId, t5.cmid as nCmId,
-                coalesce(t5.userid, 0) as userId, coalesce(t5.feedback, '') as feedback, t4.templatenote as templateNote, $fields
-                t5.lastupdate as lastUpdate, concat(find_in_set(t4.gid, t2.name), t4.slot) as orderByCustom, t3.name as ctName,
-                t3.course as courseId, coalesce(t5.note_itemid,0) as noteItemId, t4.notifyteacher as notifyTeacher, if(t5.id > 0 and length(t5.note) > 0, 0, 1) as isTemplate
-                from {$this->prefix}course_modules as t1 
-                inner join {$this->prefix}recitcahiertraces as t3 on t1.instance = t3.id 
-                inner join {$this->prefix}recitct_groups as t2 on t3.id = t2.ctid
-                inner join {$this->prefix}recitct_notes as t4 on t2.id = t4.gid
-                left join {$this->prefix}recitct_user_notes as t5 on t4.id = t5.nid and t5.userId = $userId
-                where t1.id = $cmId
-                order by groupSlot, length(orderByCustom) asc, orderByCustom asc";
+        $query = "select ". $this->sql_uniqueid() ." uniqueid, t1.id m_Cm_Id, t2.id g_Id, t2.ct_id ct_Id, t4.title, t4.slot, t5.id un_Id, 
+                coalesce(t5.note, '') note, t2.name group_Name, t2.slot group_Slot, t4.id n_Id, t5.cmid n_Cm_Id,
+                coalesce(t5.userid, 0) user_Id, coalesce(t5.feedback, '') feedback, t4.templatenote template_Note, $fields
+                t5.lastupdate last_Update, ".$this->mysqlConn->sql_concat('t2.name', 't4.slot')." order_By_Custom, t3.name ct_Name,
+                t3.course course_Id, coalesce(t5.note_itemid,'0') note_Item_Id, t4.notifyteacher notify_Teacher, (case when t5.id > 0 and length(t5.note) > 0 then 0 else 1 end) is_Template
+                from {course_modules} t1 
+                inner join {recitcahiertraces} t3 on t1.instance = t3.id 
+                inner join {recitct_groups} t2 on t3.id = t2.ct_id
+                inner join {recitct_notes} t4 on t2.id = t4.gid
+                left join {recitct_user_notes} t5 on t4.id = t5.nid and t5.userId = ?
+                where t1.id = ?
+                order by group_Slot, t4.slot asc";
                 
-        $tmp = $this->mysqlConn->execSQLAndGetObjects($query);
+        $tmp = $this->getRecordsSQL($query, [$userId, $cmId]);
 
         $result = array();
         if(count($tmp) > 0){
@@ -96,36 +127,41 @@ class PersistCtrl extends MoodlePersistCtrl
      * From filter plugin method: userId and intCode and courseId
      */
     public function getUserNote($nId, $userId, $intCode = null, $courseId = 0){
-        $whereStmt = "0";
+        $whereStmt = "true";
+        $args = array();
         
         if(($userId > 0) && ($intCode != null) && ($courseId > 0)){
-            $whereStmt = " (t1.intcode = '$intCode' and t1_1.course = $courseId) ";
+            $whereStmt = " (t1.intcode = :intcode and t1_1.course = :courseid) ";
+            $args['intcode'] = $intCode;
+            $args['courseid'] = $courseId;
         }
         else if($nId > 0){
-            $whereStmt = " t1.id = $nId";
+            $whereStmt = " t1.id = :nid";
+            $args['nid'] = $nId;
         }
         else{
-            throw new Exception("Cette fonction requiert comme paramètre 'nId=$nId' ou '(userId=$userId et intCode=$intCode et courseId=$courseId)'.");
+            throw new Exception(get_string('invalidargument', 'mod_recitcahiertraces'));
         }
 
-        //(case length(recit_strip_tags(coalesce(t2.note, ''))) when 0 then t1.templatenote else t2.note end) as note,
-        $query = "select t1.title as title, t1.gid as gId, t3.ctid as ctId, coalesce(t1.intcode, '') as intCode,
-        t2.id unId, t2.userid as userId, t1.id as nId,
-        if(t2.id > 0 and length(t2.note) > 0, t2.note, t1.templatenote) as note, coalesce(t2.note_itemid,0) as noteItemId, if(t2.id > 0 and length(t2.note) > 0, 0, 1) as isTemplate,
-        t1.teachertip as teacherTip, t1.suggestednote as suggestedNote, coalesce(t2.feedback, '') as feedback,  t2.lastupdate as lastUpdate, t2.cmid as nCmId,
-        t1_1.course as courseId, t1.notifyteacher as notifyTeacher,
-        (select id from {$this->prefix}course_modules where instance = t1_1.id and module = (select id from {$this->prefix}modules where name = 'recitcahiertraces')) as mCmId
-        from {$this->prefix}recitct_notes as t1 
-        inner join {$this->prefix}recitct_groups as t3 on t1.gid = t3.id
-        inner join {$this->prefix}recitcahiertraces as t1_1 on t3.ctid = t1_1.id
-        left join {$this->prefix}recitct_user_notes as t2 on t1.id = t2.nid and t2.userid = $userId
+        $query = "select ". $this->sql_uniqueid() ." uniqueid, t1.title title, t1.gid g_Id, t3.ct_id ct_Id, coalesce(t1.intcode, '') int_Code,
+        t2.id un_Id, t2.userid user_Id, t1.id n_Id,
+        (case when t2.id > 0 and length(t2.note) > 0 then t2.note else t1.templatenote end) note, coalesce(t2.note_itemid,'0') note_Item_Id, (case when t2.id > 0 and length(t2.note) > 0 then 0 else 1 end) is_Template,
+        t1.teachertip teacher_Tip, t1.suggestednote suggested_Note, coalesce(t2.feedback, '') feedback,  t2.lastupdate last_Update, t2.cmid n_Cm_Id,
+        t1_1.course course_Id, t1.notifyteacher notify_Teacher,
+        (select id from {course_modules} where instance = t1_1.id and module = (select id from {modules} where name = 'recitcahiertraces')) m_Cm_Id
+        from {recitct_notes} t1 
+        inner join {recitct_groups} t3 on t1.gid = t3.id
+        inner join {recitcahiertraces} t1_1 on t3.ct_id = t1_1.id
+        left join {recitct_user_notes} t2 on t1.id = t2.nid and t2.userid = :userid
         where $whereStmt";
         
-        $dbData = $this->mysqlConn->execSQLAndGetObject($query);
+        $args['userid'] = $userId;
+        $dbData = $this->getRecordsSQL($query, $args);
         
         if(empty($dbData)){
-            throw new Exception("La note n'a pas été trouvée. (nId: $nId, userId: $userId, intCode: $intCode)");
+            throw new Exception(get_string('nodata', 'mod_recitcahiertraces'));
         }
+        $dbData = current($dbData);
 
         $context = $this->getCtContext($dbData->mCmId);
         $result = UserNote::create($dbData, $context);
@@ -143,21 +179,18 @@ class PersistCtrl extends MoodlePersistCtrl
                 $data->note->text = file_rewrite_pluginfile_urls($data->note->text, 'pluginfile.php', $context->id, 'mod_recitcahiertraces', 'usernote', $data->note->itemid, ['reverse' => true]);
 
                 $data->lastUpdate = time();
-                $fields = array("nid", "userid", "note", "note_itemid", "lastupdate", "cmid");
-                $values = array($data->nId, $data->userId, $data->note->text, $data->note->itemid, $data->lastUpdate, $data->nCmId);
+                $values = array('nid' => $data->nId, 'userid' => $data->userId, 'note' => $data->note->text, 'note_itemid' => $data->note->itemid, 'lastupdate' => $data->lastUpdate, 'cmid' => $data->nCmId);
             }
             else{
-                $fields = array("nid", "userid", "feedback");
-                $values = array($data->nId, $data->userId, $data->feedback);
+                $values = array('nid' => $data->nId, 'userid' => $data->userId, 'feedback' => $data->feedback);
             }
 
             if($data->unId == 0){
-                $query = $this->mysqlConn->prepareStmt("insertorupdate", "{$this->prefix}recitct_user_notes", $fields, $values);
-                $this->mysqlConn->execSQL($query);
+                $this->mysqlConn->insert_record("recitct_user_notes", (object)$values);
             }
             else{
-                $query = $this->mysqlConn->prepareStmt("update", "{$this->prefix}recitct_user_notes", $fields, $values, array("id"), array($data->unId));
-                $this->mysqlConn->execSQL($query);
+                $values['id'] = $data->unId;
+                $this->mysqlConn->update_record("recitct_user_notes", (object)$values);
             }
             
             return $this->getUserNote($data->nId, $data->userId);
@@ -168,42 +201,35 @@ class PersistCtrl extends MoodlePersistCtrl
     }
 
     public function removeNote($nId){  
-        try{  
-            $this->mysqlConn->beginTransaction();
+        try{
+            $query = "delete from {recitct_user_notes} where id = ?";
+            $this->mysqlConn->execute($query, [$nId]);
 
-            $query = "delete from {$this->prefix}recitct_user_notes where id = $nId";
-            $this->mysqlConn->execSQL($query);
-
-            $query = "delete from {$this->prefix}recitct_notes where id = $nId";
-            $this->mysqlConn->execSQL($query);
-            
-            $this->mysqlConn->commitTransaction();
+            $query = "delete from {recitct_notes} where id = ?";
+            $this->mysqlConn->execute($query, [$nId]);
 
             return true;
         }
         catch(\Exception $ex){
-            $this->mysqlConn->rollbackTransaction();
             throw $ex;
         }
         return true;
     }
 
     public function getUserFromItemId($itemId){
-        
-        $query = "select userId FROM {$this->prefix}recitct_user_notes where note_itemid = $itemId";
-        
-        $result = $this->mysqlConn->execSQLAndGetObject($query);
-        if (!$result) return 0;
-        return $result->userId;
+        $result = $this->getRecordsSQL("select userId FROM {recitct_user_notes} where note_itemid = ?", [$itemId]);
+
+        if (count($result) == 0) return 0;
+        return current($result)->userId;
     }
 
     public function getGroupList($cmId){
         
-        $query = "select t1.id as gId, t1.name as groupName, t1.slot as groupSlot, t1.ctid as ctId, t2.id as mCmId FROM {$this->prefix}course_modules as t2
-        inner join {$this->prefix}recitct_groups as t1 on t2.instance = t1.ctid
-        where t2.id = $cmId order by t1.slot";
+        $query = "select t1.id g_Id, t1.name group_Name, t1.slot group_Slot, t1.ct_id ct_Id, t2.id m_Cm_Id FROM {course_modules} t2
+        inner join {recitct_groups} t1 on t2.instance = t1.ct_id
+        where t2.id = ? order by t1.slot";
         
-        $tmp = $this->mysqlConn->execSQLAndGetObjects($query);
+        $tmp = $this->getRecordsSQL($query, [$cmId]);
 
         $result = array();
         foreach($tmp as $item){
@@ -218,9 +244,8 @@ class PersistCtrl extends MoodlePersistCtrl
         $sql = "";
         $slot = 1;
         foreach($list as $g){
-            $sql = "UPDATE {$this->prefix}recitct_groups SET slot=$slot WHERE id={$g->id};";
             $slot++;
-            $this->mysqlConn->execSQL($sql);
+            $this->mysqlConn->execute("UPDATE {recitct_groups} SET slot=? WHERE id=?", [$slot, $g->id]);
         }
         
         return true;
@@ -232,31 +257,27 @@ class PersistCtrl extends MoodlePersistCtrl
                 $data->ct->id = $this->getCtIdFromCmId($data->ct->mCmId);
             }
 
-            $fields = array("name", "ctid");
-            $values = array($data->name, $data->ct->id);
+            $values = array('name' => $data->name, 'ct_id' => $data->ct->id);
 
             if($data->id == 0){
-                $query = "select MAX(t1.slot) as groupSlot FROM {$this->prefix}course_modules as t2
-                inner join {$this->prefix}recitct_groups as t1 on t2.instance = t1.ctid
-                where t2.id = {$data->ct->mCmId} order by t1.slot";
+                $query = "select MAX(t1.slot) group_Slot FROM {course_modules} t2
+                inner join {recitct_groups} t1 on t2.instance = t1.ct_id
+                where t2.id = ?";
                 
-                $result = $this->mysqlConn->execSQLAndGetObject($query);
-                if (!$result){
-                    $slot = 0;
+                $result = $this->getRecordsSQL($query, [$data->ct->mCmId]);
+                $slot = 0;
+                if (count($result) > 0){
+                    $slot = current($result)->groupSlot + 1;
                 } 
 
-                $slot = $result->groupSlot + 1;
-                $fields[] = "slot";
-                $values[] = $slot;
-                $query = $this->mysqlConn->prepareStmt("insert", "{$this->prefix}recitct_groups", $fields, $values);
-                $this->mysqlConn->execSQL($query);
-                $data->id = $this->mysqlConn->getLastInsertId("{$this->prefix}recitct_groups", "id");
+                $values['slot'] = $slot;
+                $id = $this->mysqlConn->insert_record("recitct_groups", (object)$values);
+                $data->id = $id;
             }
             else{
-                $fields[] = "slot";
-                $values[] = $data->slot;
-                $query = $this->mysqlConn->prepareStmt("update", "{$this->prefix}recitct_groups", $fields, $values, array("id"), array($data->id));
-                $this->mysqlConn->execSQL($query);
+                $values['slot'] = $data->slot;
+                $values['id'] = $data->id;
+                $this->mysqlConn->update_record("recitct_groups", (object)$values);
             }
 
             return $data;
@@ -267,25 +288,25 @@ class PersistCtrl extends MoodlePersistCtrl
     }
 
     public function getCtIdFromCmId($cmId){
-        $query = "select instance from {$this->prefix}course_modules as t2
-        inner join {$this->prefix}recitcahiertraces as t1_1 on t2.instance = t1_1.id
-        where t2.module = (select id from {$this->prefix}modules where name = 'recitcahiertraces') and t2.id = $cmId";
+        $query = "select instance from {course_modules} t2
+        inner join {recitcahiertraces} t1_1 on t2.instance = t1_1.id
+        where t2.module = (select id from {modules} where name = 'recitcahiertraces') and t2.id = ?";
         
-        $result = $this->mysqlConn->execSQLAndGetObject($query);
-        if (!$result) return 0;
-        return $result->instance;
+        $result = $this->getRecordsSQL($query, [$cmId]);
+        if (count($result) == 0) return 0;
+        return current($result)->instance;
     }
 
     public function getCmIdFromNoteId($nId){
-        $query = "select t2.id from {$this->prefix}course_modules as t2
-        inner join {$this->prefix}recitcahiertraces as t1_1 on t2.instance = t1_1.id
-        inner join {$this->prefix}recitct_groups as t3 on t1_1.id = t3.ctid
-        inner join {$this->prefix}recitct_notes as t4 on t4.gid = t3.id
-        where t2.module = (select id from {$this->prefix}modules where name = 'recitcahiertraces') and t4.id = $nId";
+        $query = "select t2.id from {course_modules} t2
+        inner join {recitcahiertraces} t1_1 on t2.instance = t1_1.id
+        inner join {recitct_groups} t3 on t1_1.id = t3.ct_id
+        inner join {recitct_notes} t4 on t4.gid = t3.id
+        where t2.module = (select id from {modules} where name = 'recitcahiertraces') and t4.id = ?";
         
-        $result = $this->mysqlConn->execSQLAndGetObject($query);
-        if (!$result) return 0;
-        return $result->id;
+        $result = $this->getRecordsSQL($query, [$nId]);
+        if (count($result) == 0) return 0;
+        return current($result)->id;
     }
 
     public function getCtContext($mCmId){
@@ -296,23 +317,23 @@ class PersistCtrl extends MoodlePersistCtrl
      * Fetch a groupNote (by unique ID = gid) or a set of cmNotes (ctId)
      */
     public function getGroupNotes($gId = 0, $ctId = 0){
-        $gidStmt = ($gId == 0 ? "1" : " t1.gid = $gId");
+        $gidStmt = ($gId == 0 ? "true" : " t1.gid = $gId");
 
-        $cmStmt = "1";
+        $cmStmt = "true";
         if($ctId > 0){
-            $cmStmt = " (t1.ctid = $ctId)";
+            $cmStmt = " (t1.ct_id = $ctId)";
         }
         
-        $query = "select t1.id as gId, coalesce(t1.intcode, '') as intCode, t3.ctid as ctId, t1.title, t1.slot, t1.templatenote as templateNote, t1.suggestednote as suggestedNote, 
-                    t1.teachertip as teacherTip, t1.lastupdate as lastUpdate, t1.notifyteacher as notifyTeacher, t1.id as nId
-                    from {$this->prefix}recitct_notes as t1
-                    inner join {$this->prefix}recitct_groups as t3 on t1.gid = t3.id
-                    inner join {$this->prefix}recitcahiertraces as t1_1 on t3.ctid = t1_1.id
+        $query = "select t1.id g_Id, coalesce(t1.intcode, '') int_Code, t3.ct_id ct_Id, t1.title, t1.slot, t1.templatenote template_Note, t1.suggestednote suggested_Note, 
+                    t1.teachertip teacher_Tip, t1.lastupdate last_Update, t1.notifyteacher notify_Teacher, t1.id n_Id
+                    from {recitct_notes} t1
+                    inner join {recitct_groups} t3 on t1.gid = t3.id
+                    inner join {recitcahiertraces} t1_1 on t3.ct_id = t1_1.id
                     where $gidStmt and $cmStmt
-                    group by t1.id                
+                    group by t1.id, t3.ct_id 
                     order by slot asc";
 
-        $tmp = $this->mysqlConn->execSQLAndGetObjects($query);
+        $tmp = $this->getRecordsSQL($query);
 
         $result = array();
         foreach($tmp as $item){
@@ -326,26 +347,26 @@ class PersistCtrl extends MoodlePersistCtrl
      * Fetch a cmNote (by unique ID = gid) or a set of cmNotes
      */
     public function getCmSuggestedNotes($cId = 0, $gId = 0, $ctId = 0){
-        $cIdStmt = ($cId == 0 ? "1" : " t1_1.course = $cId");
+        $cIdStmt = ($cId == 0 ? "true" : " t1_1.course = $cId");
 
-        $cmStmt = "1";
+        $cmStmt = "true";
         if($gId > 0){
             $cmStmt = " (t1.gid = $gId)";
         }
         if($ctId > 0){
-            $cmStmt = " (t3.ctid = $ctId)";
+            $cmStmt = " (t3.ct_id = $ctId)";
         }
         
-        $query = "select t1.id as nId, coalesce(t1.intcode, '') as intCode, t1_1.id as ctId, t1.gid as gId, t1.title as title, t1.slot, t1.templatenote as templateNote, t1.suggestednote as suggestedNote, 
-                    t1.teachertip as teacherTip, t1.lastupdate as lastUpdate,  t1.notifyteacher as notifyTeacher, t3.name as groupName, t3.slot as groupSlot
-                    from {$this->prefix}recitct_notes as t1
-                    inner join {$this->prefix}recitct_groups as t3 on t1.gid = t3.id
-                    inner join {$this->prefix}recitcahiertraces as t1_1 on t3.ctid = t1_1.id
+        $query = "select t1.id n_Id, coalesce(t1.intcode, '') int_Code, t1_1.id ct_Id, t1.gid g_Id, t1.title title, t1.slot, t1.templatenote template_Note, t1.suggestednote suggested_Note, 
+                    t1.teachertip teacher_Tip, t1.lastupdate last_Update, t1.notifyteacher notify_Teacher, t3.name group_Name, t3.slot group_Slot
+                    from {recitct_notes} t1
+                    inner join {recitct_groups} t3 on t1.gid = t3.id
+                    inner join {recitcahiertraces} t1_1 on t3.ct_id = t1_1.id
                     where $cIdStmt and $cmStmt
-                    group by t1.id
-                    order by groupSlot, slot asc";
+                    group by t1.id, t1_1.id, t3.name, t3.slot, t3.id
+                    order by t3.id, group_slot asc";
 
-        $tmp = $this->mysqlConn->execSQLAndGetObjects($query);
+        $tmp = $this->getRecordsSQL($query);
 
         $result = array();
         foreach($tmp as $item){
@@ -358,27 +379,27 @@ class PersistCtrl extends MoodlePersistCtrl
 
     public function removeNoteGroup($gId){  
         $query = "DELETE t2, t3, t4
-        FROM {$this->prefix}recitct_groups as t4
-        left JOIN {$this->prefix}recitct_notes as t2 ON t4.id = t2.gid
-        left JOIN {$this->prefix}recitct_user_notes as t3 ON t2.id = t3.nid
-        WHERE t4.id = $gId";
+        FROM {recitct_groups} t4
+        left JOIN {recitct_notes} t2 ON t4.id = t2.gid
+        left JOIN {recitct_user_notes} t3 ON t2.id = t3.nid
+        WHERE t4.id = ?";
 
-        $result = $this->mysqlConn->execSQL($query);
+        $result = $this->mysqlConn->execute($query, [$gId]);
 
         return (!$result ? false : true);
     }
 
     public function getNoteDef($nId){
-        $query = "select t1.title as title, t1.gid as gId, t3.ctid as ctId, coalesce(t1.intcode, '') as intCode, t1.templatenote as templateNote, t1.slot,
-        t1.id as nId, t1.teachertip as teacherTip, t1.suggestednote as suggestedNote, t1_1.course as courseId, t1.notifyteacher as notifyTeacher
-        from {$this->prefix}recitct_notes as t1 
-        inner join {$this->prefix}recitct_groups as t3 on t1.gid = t3.id
-        inner join {$this->prefix}recitcahiertraces as t1_1 on t3.ctid = t1_1.id
-        where t1.id = $nId";
+        $query = "select t1.title title, t1.gid g_Id, t3.ct_id ct_Id, coalesce(t1.intcode, '') int_Code, t1.templatenote template_Note, t1.slot,
+        t1.id n_Id, t1.teachertip teacher_Tip, t1.suggestednote suggested_Note, t1_1.course course_Id, t1.notifyteacher notify_Teacher
+        from {recitct_notes} t1 
+        inner join {recitct_groups} t3 on t1.gid = t3.id
+        inner join {recitcahiertraces} t1_1 on t3.ct_id = t1_1.id
+        where t1.id = ?";
         
-        $dbData = $this->mysqlConn->execSQLAndGetObject($query);
+        $dbData = $this->getRecordsSQL($query, [$nId]);
         
-        $result = NoteDef::create($dbData);
+        $result = NoteDef::create(current($dbData));
         
         return $result;
     }
@@ -391,24 +412,20 @@ class PersistCtrl extends MoodlePersistCtrl
                 $data->intCode = hash("md5", $data->title . $data->lastUpdate );
             }
             
-            $fields = array("gid", "title", "templatenote", "suggestednote", "teachertip",  "intcode", 'notifyteacher');
-            $values = array($data->group->id, $data->title, $data->templateNote, $data->suggestedNote, $data->teacherTip, $data->intCode, $data->notifyTeacher);
+            $values = array('gid' => $data->group->id, 'title' => $data->title, 'templatenote' => $data->templateNote, 'suggestednote' => $data->suggestedNote, 'teachertip' => $data->teacherTip, 'intcode' => $data->intCode, 'notifyteacher' => $data->notifyTeacher);
 
             if($data->id == 0){
-                $curSlot = $this->mysqlConn->execSQLAndGetObject("select slot from {$this->prefix}recitct_notes where gId = {$data->group->id} order by slot desc limit 1");
-                $fields[] = "slot";
-                $values[] = (empty($curSlot) ? 1 : $curSlot->slot + 1);
+                $curSlot = $this->getRecordsSQL("select slot from {recitct_notes} where gId = ? order by slot desc limit 1", [$data->group->id]);
+                $values['slot'] = (empty($curSlot) ? 1 : current($curSlot)->slot + 1);
 
-                $query = $this->mysqlConn->prepareStmt("insert", "{$this->prefix}recitct_notes", $fields, $values);
-                $this->mysqlConn->execSQL($query);
-                $data->id = $this->mysqlConn->getLastInsertId("{$this->prefix}recitct_notes", "id");
+                $id = $this->mysqlConn->insert_record("recitct_notes", (object)$values);
+                $data->id = $id;
             }
             else{
-                $fields[] = "slot";
-                $values[] = $data->slot;
+                $values['slot'] = $data->slot;
+                $values['id'] = $data->id;
 
-                $query = $this->mysqlConn->prepareStmt("update", "{$this->prefix}recitct_notes", $fields, $values, array("id"), array($data->id));
-                $this->mysqlConn->execSQL($query);
+                $this->mysqlConn->update_record("recitct_notes", (object)$values);
             }
             
             return $data;
@@ -420,8 +437,7 @@ class PersistCtrl extends MoodlePersistCtrl
 
     public function switchNoteSlot($from, $to){
         try{
-            $this->mysqlConn->beginTransaction();
-            $tmp = $this->mysqlConn->execSQLAndGetObjects("select slot from {$this->prefix}recitct_notes where id in ($from, $to) order by FIELD(id, $from, $to)");
+            $tmp = $this->getRecordsSQL("select slot from {recitct_notes} where id in ($from, $to) order by FIELD(id, $from, $to)");
 
             // $tmp[0] = from
             // $tmp[1] = to
@@ -429,44 +445,40 @@ class PersistCtrl extends MoodlePersistCtrl
                 throw new \Exception("Unknown slots");
             }
 
-            $query = sprintf("update {$this->prefix}recitct_notes set slot = %d where id = %d", $tmp[1]->slot, $from);
-            $this->mysqlConn->execSQL($query);
+            $this->mysqlConn->execute("update {recitct_notes} set slot = ? where id = ?", [$tmp[1]->slot, $from]);
 
-            $query = sprintf("update {$this->prefix}recitct_notes set slot = %d where id = %d", $tmp[0]->slot, $to);
-            $this->mysqlConn->execSQL($query);
+            $this->mysqlConn->execute("update {recitct_notes} set slot = ? where id = ?", [$tmp[0]->slot, $to]);
 
-            $this->mysqlConn->commitTransaction();
 
             return true;
         }
         catch(\Exception $ex){
-            $this->mysqlConn->rollbackTransaction();
             throw $ex;
         }
     }
     
     public function removeCcInstance($id){
         $query = "DELETE t1, t2, t3, t4
-        FROM {$this->prefix}recitcahiertraces as t1
-        left join {$this->prefix}recitct_groups as t4 on t1.id = t4.ctid
-        left JOIN {$this->prefix}recitct_notes as t2 ON t4.id = t2.gid
-        left JOIN {$this->prefix}recitct_user_notes as t3 ON t2.id = t3.nid
-        WHERE t1.id = $id";
+        FROM {recitcahiertraces} t1
+        left join {recitct_groups} t4 on t1.id = t4.ct_id
+        left JOIN {recitct_notes} t2 ON t4.id = t2.gid
+        left JOIN {recitct_user_notes} t3 ON t2.id = t3.nid
+        WHERE t1.id = ?";
 
-        $result = $this->mysqlConn->execSQL($query);
+        $result = $this->mysqlConn->execute($query, [$id]);
 
         return (!$result ? false : true);
     }
     
     public function removeCCUserdata($id){
         $query = "DELETE t3
-        FROM {$this->prefix}recitcahiertraces as t1
-        left join {$this->prefix}recitct_groups as t4 on t1.id = t4.ctid
-        left JOIN {$this->prefix}recitct_notes as t2 ON t4.id = t2.gid
-        left JOIN {$this->prefix}recitct_user_notes as t3 ON t2.id = t3.nid
-        WHERE t1.id = $id";
+        FROM {recitcahiertraces} t1
+        left join {recitct_groups} t4 on t1.id = t4.ct_id
+        left JOIN {recitct_notes} t2 ON t4.id = t2.gid
+        left JOIN {recitct_user_notes} t3 ON t2.id = t3.nid
+        WHERE t1.id = ?";
 
-        $result = $this->mysqlConn->execSQL($query);
+        $result = $this->mysqlConn->execute($query, [$id]);
 
         return (!$result ? false : true);
     }
@@ -518,8 +530,8 @@ class PersistCtrl extends MoodlePersistCtrl
 
         /*
             * Si le prof est dans un groupe il est notifié par les élèves qui font parti de son groupe.
-            * Si le groupe n'a pas de prof, on notifie tous les prof du cours
-            * Si l'élève n'a pas de groupe, on notifie tous les prof du cours
+            * Si le groupe n'a pde prof, on notifie tous les prof du cours
+            * Si l'élève n'a pde groupe, on notifie tous les prof du cours
             */
         $recipients = array();
         foreach($allCourseTeachers as $teacher){
@@ -555,30 +567,28 @@ class PersistCtrl extends MoodlePersistCtrl
     }
 
     public function getRequiredNotes($cmId){
-        $query = "select t4.id as nId, t2.ctid as ctId, t4.gId as gId, t4.title, t4.slot, t5.id as unId, 
-        coalesce(t5.userid, 0) as userId, concat(find_in_set(t4.gId, t2.name), t4.slot) as orderByCustom, 
-        t3.course as courseId, concat(t6.firstname, ' ', t6.lastname) as username, t2.name as groupName, t2.slot as groupSlot,
-        coalesce(t5.note_itemid,0) as noteItemId, coalesce(t5.note, '') as note, t4.notifyteacher as notifyTeacher, t5.cmid as nCmId, t1.id as mCmId
-        from {$this->prefix}course_modules as t1 
-        inner join {$this->prefix}recitcahiertraces as t3 on t1.instance = t3.id    
-        inner join {$this->prefix}recitct_groups as t2 on t3.id = t2.ctid            
-        inner join {$this->prefix}recitct_notes as t4 on t2.id = t4.gid
-        inner join {$this->prefix}recitct_user_notes as t5 on t4.id = t5.nid
-        inner join {$this->prefix}user as t6 on t6.id = t5.userid
-        where t1.id = $cmId and t4.notifyTeacher = 1 and 
-        if(t5.id > 0 and length(t5.note) > 0 and length(REGEXP_REPLACE(trim(coalesce(t5.feedback, '')), '<[^>]*>+', '')) = 0, 1, 0) = 1 and
-        %s
-        order by length(orderByCustom) asc, orderByCustom asc
+        $query = "select t4.id nId, t2.ct_id ct_Id, t4.gId g_Id, t4.title, t4.slot, t5.id un_Id, 
+        coalesce(t5.userid, 0) user_Id, ".$this->mysqlConn->sql_concat('find_in_set(t4.gId, t2.name)', 't4.slot')." order_By_Custom, 
+        t3.course course_Id, ".$this->mysqlConn->sql_concat('t6.firstname', "' '", 't6.lastname')." username, t2.name group_Name, t2.slot group_Slot,
+        coalesce(t5.note_itemid,0) note_Item_Id, coalesce(t5.note, '') note, t4.notifyteacher notify_Teacher, t5.cmid n_Cm_Id, t1.id m_Cm_Id
+        from {course_modules} t1 
+        inner join {recitcahiertraces} t3 on t1.instance = t3.id    
+        inner join {recitct_groups} t2 on t3.id = t2.ct_id            
+        inner join {recitct_notes} t4 on t2.id = t4.gid
+        inner join {recitct_user_notes} t5 on t4.id = t5.nid
+        inner join {user} t6 on t6.id = t5.userid
+        where t1.id = ? and t4.notifyTeacher = 1 and 
+        if(t5.id > 0 and length(t5.note) > 0 and length(REGEXP_REPLACE(trim(coalesce(t5.feedback, '')), '<[^>]*>+', '')) = 0, 1, 0) = 1 
+        order by length(order_By_Custom) asc, order_By_Custom asc
         limit 50";
-        
-        $query = sprintf($query, $this->getStmtStudentRole('t6.id', 't1.course'));
 
-        $tmp = $this->mysqlConn->execSQLAndGetObjects($query);
+        $tmp = $this->getRecordsSQL($query, [$cmId]);
 
         $result = array();
         if(count($tmp) > 0){
             $context = $this->getCtContext(current($tmp)->mCmId);
             $modinfo = get_fast_modinfo(current($tmp)->courseId);
+            $this->filterStudents($tmp, current($tmp)->courseId);
         
             foreach($tmp as $dbData){
                 //activity name
@@ -596,104 +606,27 @@ class PersistCtrl extends MoodlePersistCtrl
     }
 
     public function getStudentsProgression($cmId){
-        $query = "select coalesce(t6.id, 0) as userId, concat(t6.firstname, ' ', t6.lastname) as username, if(t5.id > 0 and length(t5.note) > 0, 1, 0) as done,
-        group_concat(DISTINCT t9.groupid) as groupIds
-        from {$this->prefix}course_modules as t1 
-        inner join {$this->prefix}recitcahiertraces as t3 on t1.instance = t3.id 
-        inner join {$this->prefix}recitct_groups as t2 on t3.id = t2.ctid
-        inner join {$this->prefix}recitct_notes as t4 on t2.id = t4.gid
-        inner join {$this->prefix}enrol as t7 on t7.courseid = t1.course
-        inner join {$this->prefix}user_enrolments as t8 on t7.id = t8.enrolid
-        inner join {$this->prefix}user as t6 on t6.id = t8.userid
-        left join {$this->prefix}recitct_user_notes as t5 on t4.id = t5.nid and t5.userid = t6.id
-        left join {$this->prefix}groups_members as t9 on t9.userid = t6.id
-        where t1.id = $cmId and %s
+        $query = "select coalesce(t6.id, 0) user_id, concat(t6.firstname, ' ', t6.lastname) username, if(t5.id > 0 and length(t5.note) > 0, 1, 0) done,
+        group_concat(DISTINCT t9.groupid) group_ids
+        from {course_modules} t1 
+        inner join {recitcahiertraces} t3 on t1.instance = t3.id 
+        inner join {recitct_groups} t2 on t3.id = t2.ct_id
+        inner join {recitct_notes} t4 on t2.id = t4.gid
+        inner join {enrol} t7 on t7.courseid = t1.course
+        inner join {user_enrolments} t8 on t7.id = t8.enrolid
+        inner join {user} t6 on t6.id = t8.userid
+        left join {recitct_user_notes} t5 on t4.id = t5.nid and t5.userid = t6.id
+        left join {groups_members} t9 on t9.userid = t6.id
+        where t1.id = ?
         group by t4.id, t5.id, t6.id
         order by username";
-
-        $query = sprintf($query, $this->getStmtStudentRole('t6.id', 't1.course'));
         
-        $result = $this->mysqlConn->execSQLAndGetObjects($query);
+        $result = $this->getRecordsSQL($query, [$cmId]);
         foreach($result as $item){
             $item->groupIds = array_map('intval', explode(",", $item->groupIds));
         }
 
         return $result;
-    }
-
-    public function importCahierCanada($mCmId, $data){
-        try{
-            $this->mysqlConn->beginTransaction();
-            $numImported = 0;
-            $numSkipped = 0;
-            $numError = 0;
-            $groupCreated = 0;
-
-            foreach ($data as $collection){
-                foreach ($collection as $note){
-                    if($note->garbage == 1){ 
-                        $numSkipped++;
-                        continue; 
-                    }
-
-                    // check if the integration code already exists
-                    $query = "select t1.id, t3.course FROM {$this->prefix}recitct_notes as t1 
-                    inner join {$this->prefix}recitct_groups as t2 on t1.gid = t2.id
-                    inner join {$this->prefix}recitcahiertraces as t3 on t2.ctid = t3.id
-                    where t1.intcode = \"{$note->intCode}\" and t3.course = (select course from {$this->prefix}course_modules where id = $mCmId)
-                    order by id desc limit 1";
-
-                    $intCode = $this->mysqlConn->execSQLAndGetObject($query);
-
-                    if(!empty($intCode)){ 
-                        $numSkipped++;
-                        continue;
-                    }
-                    
-                    $obj = new NoteDef();
-    
-                    $obj->group->name = $note->activityName . " (importé)";
-                    $obj->group->ct->mCmId = $mCmId;
-                    $obj->group->ct->id = $this->getCtIdFromCmId($mCmId);
-
-                    // check if the collection already exists
-                    $name = mysqli_real_escape_string($this->mysqlConn->getMySQLi(), $obj->group->name);
-                    $query = "select t1.id as gId, t1.name as groupName, t1.slot as groupSlot, t1.ctid as ctId FROM {$this->prefix}recitct_groups as t1
-                        where t1.name = \"$name\" and t1.ctid = {$obj->group->ct->id} order by name asc limit 1";
-                    $result = $this->mysqlConn->execSQLAndGetObject($query);
-                    $group = (empty($result) ? null : NoteGroup::create($result));
-                    
-                    if($group == null){
-                        $obj->group = PersistCtrl::getInstance()->saveNoteGroup($obj->group);
-                        $groupCreated++;
-                    }
-                    else{
-                        $obj->group = $group;
-                    }
-                   
-                    $obj->intCode = $note->intCode;
-                    $obj->title = $note->noteTitle;
-                    $obj->templateNote = $note->templateNote;
-                    $obj->suggestedNote = $note->suggestedNote;
-                    $obj->teacherTip = $note->teacherTip;
-                    $obj->slot = $note->slot;
-                    $obj->notifyTeacher = $note->notifyTeacher;
-                    $note = PersistCtrl::getInstance()->saveNote($obj);
-                    if ($note){
-                        $numImported++;
-                    }else{
-                        $numError++;
-                    }
-                }
-            }
-
-            $this->mysqlConn->commitTransaction();
-            return array('imported' => $numImported, 'skipped' => $numSkipped, 'error' => $numError, 'group' => $groupCreated);
-        }
-        catch(Exception $ex){
-            $this->mysqlConn->rollbackTransaction();
-            throw $ex;
-        }
     }
 }
 
@@ -786,12 +719,13 @@ class UserNote
     public $id = 0;       // user note id
     //@ NoteDef
     public $noteDef = null;
-    public $nCmId = 0;      // course module id in which the note has been integrated
+    public $nCmId = 0;      // course module id in which the note hbeen integrated
     public $cmName = "";    // course module name
     public $userId = 0;
     public $username = "";
     public $noteContent = null;    // student note ({text: '', itemid: 0})
     public $feedback = "";  // teacher feedback 
+    public $feedbackFiltered = "";  // teacher feedback 
     public $lastUpdate = 0;
     public $isTemplate = false;
 
@@ -822,7 +756,10 @@ class UserNote
         }
 
         if(isset($dbData->username)){ $result->username = $dbData->username; }
-        if(isset($dbData->feedback)){ $result->feedback = $dbData->feedback; }
+        if(isset($dbData->feedback)){ 
+            $result->feedback = $dbData->feedback;
+            $result->feedbackFiltered = format_text($dbData->feedback, FORMAT_MOODLE, array('filter' => true, 'context' => $context));
+        }
         if(isset($dbData->lastUpdate)){ $result->lastUpdate = $dbData->lastUpdate; }
         if(isset($dbData->isTemplate)){ $result->isTemplate = $dbData->isTemplate; }
         

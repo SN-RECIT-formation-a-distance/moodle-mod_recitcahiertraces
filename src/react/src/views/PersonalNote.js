@@ -1,3 +1,25 @@
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ *
+ * @package   mod_recitcahiertraces
+ * @copyright 2019 RÉCIT 
+ * @license   {@link http://www.gnu.org/licenses/gpl-3.0.html} GNU GPL v3 or later
+ */
+
 import React, { Component } from 'react';
 import { Button, Collapse, Card} from 'react-bootstrap';
 import {faArrowLeft, faArrowRight} from '@fortawesome/free-solid-svg-icons';
@@ -5,6 +27,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { Modal} from '../libs/components/Components';
 import {UtilsMoodle, JsNx} from '../libs/utils/Utils';
 import {$glVars} from '../common/common';
+import { i18n } from '../common/i18n';
+import { EditorDecorator } from '../libs/components/TextEditor';
 
 class PersonalNoteForm extends Component{
     static defaultProps = {        
@@ -25,18 +49,18 @@ class PersonalNoteForm extends Component{
         this.prepareNewState = this.prepareNewState.bind(this);
         this.onCollapse = this.onCollapse.bind(this);
         
-        let mode = "";// it is a student?
+        let mode = "";// is it a student?
         // it is a teacher
-        if(UtilsMoodle.checkRoles($glVars.signedUser.roles, UtilsMoodle.rolesL2)){
+        if($glVars.signedUser.roles.includes('t')){
             mode = "t";
         }
-        else if(UtilsMoodle.checkRoles($glVars.signedUser.roles, UtilsMoodle.rolesL3)){
+        else if($glVars.signedUser.roles.includes('s')){
              mode = "s";
         }
         this.state = {data: null, remoteData: null, dropdownLists: null, mode: mode, collapse: {note: true, suggestedNote: false, feedback: true}};
 
         this.editorRef = React.createRef();
-        this.editorDec = new recit.components.EditorDecorator(`recit_cahiertraces_editor_container_1`);
+        this.editorDec = new EditorDecorator(`recit_cahiertraces_editor_container_1`);
 
         this.props.setOnSave(this.onSave);
     }
@@ -74,7 +98,7 @@ class PersonalNoteForm extends Component{
             this.setState(this.prepareNewState(result.data, null));
         }
         else{
-            $glVars.feedback.showError($glVars.i18n.tags.appname, result.msg);
+            $glVars.feedback.showError(i18n.get_string('pluginname'), result.msg);
         }
     }
 
@@ -127,10 +151,10 @@ class PersonalNoteForm extends Component{
         
         let main =
             <div>
-                <h5 className="text-truncate">{`Note: ${this.state.remoteData.noteDef.title}`}</h5>
+                <h5 className="text-truncate">{i18n.get_string('note')+': '+this.state.remoteData.noteDef.title}</h5>
                 <Card>
                     <Card.Header style={styleHeader} onClick={() => this.onCollapse("note")}>
-                        {"Note de l'élève"}
+                        {i18n.get_string('studentNote')}
                     </Card.Header>
                     <Collapse in={this.state.collapse.note}>
                         <Card.Body>{student}</Card.Body>
@@ -141,7 +165,7 @@ class PersonalNoteForm extends Component{
                     <div>
                         <Card>
                             <Card.Header style={styleHeader} onClick={() => this.onCollapse("suggestedNote")}>
-                                {"Réponse suggérée"}
+                                {i18n.get_string('suggestedresponse')}
                             </Card.Header>
                             <Collapse in={this.state.collapse.suggestedNote}>
                                 <Card.Body>{suggestedNote}</Card.Body>
@@ -151,7 +175,7 @@ class PersonalNoteForm extends Component{
                     </div>
                 }
                 <Card>
-                    <Card.Header style={styleHeader} onClick={() => this.onCollapse("feedback")}>{"Rétroaction de l'enseignant"}</Card.Header>
+                    <Card.Header style={styleHeader} onClick={() => this.onCollapse("feedback")}>{i18n.get_string('teacherFeedback')}</Card.Header>
                     <Collapse in={this.state.collapse.feedback}>
                         <Card.Body>{teacher}</Card.Body>
                     </Collapse>
@@ -207,10 +231,10 @@ class PersonalNoteForm extends Component{
                 callback(result);
             });
 
-            $glVars.feedback.showInfo($glVars.i18n.tags.appName, $glVars.i18n.tags.msgSuccess, 3);
+            $glVars.feedback.showInfo(i18n.get_string('pluginname'), i18n.get_string('msgsuccess'), 3);
         }
         else{
-            $glVars.feedback.showError($glVars.i18n.tags.appName, result.msg);
+            $glVars.feedback.showError(i18n.get_string('pluginname'), result.msg);
         }
     }
 }
@@ -240,13 +264,13 @@ export class ModalPersonalNote extends Component{
         let footer = 
             <div className="btn-tollbar" style={{width: "100%", display: "flex", justifyContent: "space-between", flexWrap: "wrap"}}>
                 <div className="btn-group" style={{flexWrap: "wrap"}}>
-                    {this.props.onNextStudent && <Button variant="outline-primary" onClick={this.props.onPreviousStudent} disabled={!this.props.navStatus.previous}><FontAwesomeIcon icon={faArrowLeft}/>{" " + $glVars.i18n.tags.previousStudent}</Button>}
-                    {this.props.onPreviousStudent && <Button variant="outline-primary"  onClick={this.props.onNextStudent} disabled={!this.props.navStatus.next}>{$glVars.i18n.tags.nextStudent + " "}<FontAwesomeIcon icon={faArrowRight}/></Button>}
+                    {this.props.onNextStudent && <Button variant="outline-primary" onClick={this.props.onPreviousStudent} disabled={!this.props.navStatus.previous}><FontAwesomeIcon icon={faArrowLeft}/>{" " + i18n.get_string('previousstudent')}</Button>}
+                    {this.props.onPreviousStudent && <Button variant="outline-primary" onClick={this.props.onNextStudent} disabled={!this.props.navStatus.next}>{i18n.get_string('nextstudent') + " "}<FontAwesomeIcon icon={faArrowRight}/></Button>}
                 </div>
                 <div className="btn-group" style={{flexWrap: "wrap"}}>
-                    <Button  variant="secondary" onClick={this.onClose}>{"Annuler"}</Button>
-                    {this.props.onNextStudent && <Button  variant="success"  onClick={() => this.onSave(false)}>{"Enregistrer"}</Button>}
-                    <Button  variant="success"  onClick={() => this.onSave(true)}>{"Enregistrer et fermer"}</Button>
+                    <Button  variant="secondary" onClick={this.onClose}>{i18n.get_string('cancel')}</Button>
+                    {this.props.onNextStudent && <Button  variant="success"  onClick={() => this.onSave(false)}>{i18n.get_string('save')}</Button>}
+                    <Button  variant="success"  onClick={() => this.onSave(true)}>{i18n.get_string('saveandclose')}</Button>
                 </div>
             </div>;
                 

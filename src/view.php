@@ -17,15 +17,14 @@
 /**
  *
  * @package   mod_recitcahiertraces
- * @copyright 2019 RÉCIT FAD
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @copyright 2019 RÉCIT 
+ * @license   {@link http://www.gnu.org/licenses/gpl-3.0.html} GNU GPL v3 or later
  */
 namespace recitcahiertraces;
 require('../../config.php');
 require_once(dirname(__FILE__) . "/classes/recitcommon/Utils.php");
 require_once($CFG->libdir . '/portfoliolib.php');
 
-use recitcommon;
 use moodle_url;
 
 $id = required_param('id', PARAM_INT);
@@ -34,11 +33,9 @@ list ($course, $cm) = get_course_and_cm_from_cmId($id, 'recitcahiertraces');
 //require_course_login($course, true, $cm);
 require_login();
 
-//$context = context_module::instance($cm->id);
-//require_capability('mod/recitcahiertraces:view', $context);
 $view = new MainView($PAGE, $course, $cm, $OUTPUT, $USER, $DB, $CFG);
 
-//$modeAdmin = intval(has_capability('mod/recitcahiertraces:viewadmin', context_system::instance()));
+recitcahiertraces_strings_for_js();
 $view->display();
 
 class MainView
@@ -72,22 +69,14 @@ class MainView
         $this->page->set_pagelayout('incourse');
         $this->page->set_title($this->course->shortname.': '.$this->cm->name);
         $this->page->set_heading($this->course->fullname);
-        $this->page->requires->css(new moodle_url('./react_app_build/index.css'), true);
-        $this->page->requires->js(new moodle_url('./react_app_build/index.js'), true);
-        $this->page->requires->js(new moodle_url("./Components.js"), true);
-
-       /* if($this->editorOption == "2"){
-            $this->page->requires->css(new moodle_url("{$this->cfg->wwwroot}/local/recitcommon/js/recit_rich_editor/build/index.css"), true);
-            $this->page->requires->js(new moodle_url("{$this->cfg->wwwroot}/local/recitcommon/js/recit_rich_editor/build/index.js"), true);
-        }*/
-
-        //$this->page->requires->js(new moodle_url('/lib/editor/atto/yui/build/moodle-editor_atto-editor/moodle-editor_atto-editor-min.js'), true);
+        $this->page->requires->css(new moodle_url('./react/build/index.css'), true);
+        $this->page->requires->js(new moodle_url('./react/build/index.js'), true);
 
         echo $this->output->header();
         echo $this->output->heading(format_string($this->cm->name), 2);
                         
         $roles = Utils::getUserRoles($this->course->id, $this->user->id);
-        $studentId = (in_array('ad', $roles) ? 0 : $this->user->id);
+        $studentId = (in_array('t', $roles) ? 0 : $this->user->id);
         $portfolioUrl = $this->getPortfolioUrl();
         
         echo $this->getEditorOption("recit_cahiertraces_editor", 1);        

@@ -1,4 +1,25 @@
 <?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ *
+ * @package   mod_recitcahiertraces
+ * @copyright 2019 RÉCIT 
+ * @license   {@link http://www.gnu.org/licenses/gpl-3.0.html} GNU GPL v3 or later
+ */
 
 namespace recitcahiertraces;
 
@@ -249,30 +270,23 @@ abstract class MoodleApi extends AWebApi
             $userRoles = Utils::getUserRoles($this->course->id, $this->signedUser->id);
         }
 
-        //$desc = print_r($userRoles, true);
-        //throw new Exception($desc);
-
-        // if the user is admin then it has access to all
-        if(Utils::isAdminRole($userRoles)){
-            return true;
-        }
          // if the level is admin then the user must have a admin role to have access
-        else if(($level == 'a') && Utils::isAdminRole($userRoles)){
+        if(($level == 'a') && in_array('t', $userRoles)){
             return true;
         }
         // if the user is student then it has access only if it is accessing its own stuff
-        else if(($level == 's') && ($userId == $this->signedUser->id)){
+        else if(($level == 's') && in_array('s', $userRoles)){
             return true;
         }
         else{
-            throw new Exception(get_string('accessdenied'));
+            throw new Exception(get_string('accessdenied', 'admin'));
         }
     }
 
     public function getEnrolledUserList($request){   
         try{
-            $cmId = intval($request['cmId']);
-            $courseId = (isset($request['courseId']) ? intval($request['courseId']) : 0);
+            $cmId = clean_param($request['cmId'], PARAM_INT);
+            $courseId = (isset($request['courseId']) ? clean_param($request['courseId'], PARAM_INT) : 0);
 
             $this->canUserAccess('a', $cmId, 0, $courseId);
 

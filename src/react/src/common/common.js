@@ -1,4 +1,3 @@
-<?php
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -17,14 +16,19 @@
 /**
  *
  * @package   mod_recitcahiertraces
- * @copyright 2019 RÉCIT FAD
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @copyright 2019 RÉCIT 
+ * @license   {@link http://www.gnu.org/licenses/gpl-3.0.html} GNU GPL v3 or later
  */
-defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2022100103;        // The current module version (Date: YYYYMMDDXX)
-$plugin->requires  = 2020061500.00; // Moodle 3.9.0
-$plugin->component = 'mod_recitcahiertraces';        // Full name of the plugin (used for diagnostics)
-$plugin->release = 'v2.2.0-beta'; 
-$plugin->supported = [39, 400];      //  Moodle 3.9.x, 3.10.x and 3.11.x are supported.
-$plugin->maturity = MATURITY_BETA; // MATURITY_ALPHA, MATURITY_BETA, MATURITY_RC or MATURITY_STABLE
+import {FeedbackCtrl} from "../libs/components/Feedback";
+import {AppWebApi} from "./AppWebApi";
+
+export * from "./Options";
+
+
+export const $glVars = {
+    signedUser: {userId: 0, roles: []},
+    feedback: new FeedbackCtrl(),
+    webApi: new AppWebApi(),
+    urlParams: {}
+}

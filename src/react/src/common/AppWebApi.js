@@ -1,3 +1,25 @@
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ *
+ * @package   mod_recitcahiertraces
+ * @copyright 2019 RÉCIT 
+ * @license   {@link http://www.gnu.org/licenses/gpl-3.0.html} GNU GPL v3 or later
+ */
+
 import {WebApi, JsNx} from '../libs/utils/Utils';
 import { Options } from './Options';
 
@@ -61,16 +83,6 @@ export class AppWebApi extends WebApi
         this.post(this.gateway, data, onSuccess);
     }
 
-    getCCList(cmId, onSuccess){
-        let data = {cmId: cmId, service: "getCCList"};
-        this.post(this.gateway, data, onSuccess);
-    }
-
-    importCC(cmId, importcmid, onSuccess){
-        let data = {cmId: cmId, importcmid: importcmid, service: "importCC"};
-        this.post(this.gateway, data, onSuccess);
-    }
-
     getGroupNotes(gId, ctId, onSuccess){
         let data = {gId: gId, ctId: (ctId || 0), service: "getGroupNotes"};
         this.post(this.gateway, data, onSuccess);
@@ -81,10 +93,10 @@ export class AppWebApi extends WebApi
         this.post(this.gateway, data, onSuccess);
     }
 
-    switchNoteSlot(from, to, onSuccess){
+    switchNoteSlot(from, to, cmId, onSuccess){
         if(from === to){ return;}
 
-        let data = {from: from, to: to, service: "switchNoteSlot"};
+        let data = {from: from, to: to, cmId: cmId, service: "switchNoteSlot"};
         this.post(this.gateway, data, onSuccess);
     }
     
