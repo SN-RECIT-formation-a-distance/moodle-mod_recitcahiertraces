@@ -834,12 +834,12 @@ class GroupUserSelect extends Component{
 
              // groupId = 0 means no group
             if(group[0].groupId > 0){ 
-                groupList.push({text: group[0].groupName, value: group[0].groupId, data: group});
+                groupList.push({text: group[0].groupName, value: parseInt(group[0].groupId), data: group});
             }
             
             for(let user of group){
-                if(JsNx.getItem(userList, "value", user.userId, null) === null){
-                    userList.push({text: user.userName, value: user.userId, data: user});
+                if(JsNx.getItem(userList, "value", parseInt(user.userId), null) === null){
+                    userList.push({text: user.userName, value: parseInt(user.userId), data: user});
                 }
             }
         }
@@ -916,7 +916,7 @@ class GroupUserSelect extends Component{
 
         if(selectedGroupId > 0){            
             userListFiltered = this.state.userList.filter(function(item){
-                return (item.data.groupId === selectedGroupId);
+                return (parseInt(item.data.groupId) === selectedGroupId);
             })
         }
 

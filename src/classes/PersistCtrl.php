@@ -364,7 +364,7 @@ class PersistCtrl extends MoodlePersistCtrl
                     inner join {recitcahiertraces} t1_1 on t3.ct_id = t1_1.id
                     where $cIdStmt and $cmStmt
                     group by t1.id, t1_1.id, t3.name, t3.slot, t3.id
-                    order by t3.id, group_slot asc";
+                    order by group_slot, t1.slot asc";
 
         $tmp = $this->getRecordsSQL($query);
 
@@ -529,10 +529,8 @@ class PersistCtrl extends MoodlePersistCtrl
         $allCourseTeachers = $this->getCourseTeachers($courseId);
 
         /*
-            * Si le prof est dans un groupe il est notifié par les élèves qui font parti de son groupe.
-            * Si le groupe n'a pde prof, on notifie tous les prof du cours
-            * Si l'élève n'a pde groupe, on notifie tous les prof du cours
-            */
+            * If teacher is in a group, we notify all students of that group, otherwise we notify everyone
+        */
         $recipients = array();
         foreach($allCourseTeachers as $teacher){
             $teacherBelongingToStudentGroup = array_intersect($teacher->groupIds, $groupIds);
@@ -568,9 +566,9 @@ class PersistCtrl extends MoodlePersistCtrl
 
     public function getRequiredNotes($cmId){
         $query = "select t4.id nId, t2.ct_id ct_Id, t4.gId g_Id, t4.title, t4.slot, t5.id un_Id, 
-        coalesce(t5.userid, 0) user_Id, ".$this->mysqlConn->sql_concat('find_in_set(t4.gId, t2.name)', 't4.slot')." order_By_Custom, 
+        coalesce(t5.userid, 0) user_Id, 
         t3.course course_Id, ".$this->mysqlConn->sql_concat('t6.firstname', "' '", 't6.lastname')." username, t2.name group_Name, t2.slot group_Slot,
-        coalesce(t5.note_itemid,0) note_Item_Id, coalesce(t5.note, '') note, t4.notifyteacher notify_Teacher, t5.cmid n_Cm_Id, t1.id m_Cm_Id
+        coalesce(t5.note_itemid,'') note_Item_Id, coalesce(t5.note, '') note, t4.notifyteacher notify_Teacher, t5.cmid n_Cm_Id, t1.id m_Cm_Id
         from {course_modules} t1 
         inner join {recitcahiertraces} t3 on t1.instance = t3.id    
         inner join {recitct_groups} t2 on t3.id = t2.ct_id            
@@ -578,9 +576,9 @@ class PersistCtrl extends MoodlePersistCtrl
         inner join {recitct_user_notes} t5 on t4.id = t5.nid
         inner join {user} t6 on t6.id = t5.userid
         where t1.id = ? and t4.notifyTeacher = 1 and 
-        if(t5.id > 0 and length(t5.note) > 0 and length(REGEXP_REPLACE(trim(coalesce(t5.feedback, '')), '<[^>]*>+', '')) = 0, 1, 0) = 1 
-        order by length(order_By_Custom) asc, order_By_Custom asc
-        limit 50";
+        (case when t5.id > 0 and length(t5.note) > 0 and length(REGEXP_REPLACE(trim(coalesce(t5.feedback, '')), '<[^>]*>+', '')) = 0 then 1 else 0 end) = 1 
+        order by group_Slot, t4.slot asc
+        limit 100";
 
         $tmp = $this->getRecordsSQL($query, [$cmId]);
 
@@ -606,8 +604,8 @@ class PersistCtrl extends MoodlePersistCtrl
     }
 
     public function getStudentsProgression($cmId){
-        $query = "select coalesce(t6.id, 0) user_id, concat(t6.firstname, ' ', t6.lastname) username, if(t5.id > 0 and length(t5.note) > 0, 1, 0) done,
-        group_concat(DISTINCT t9.groupid) group_ids
+        $query = "select coalesce(t6.id, 0) user_id, ".$this->mysqlConn->sql_concat('t6.firstname', "' '", 't6.lastname')." username, (case when t5.id > 0 and length(t5.note) > 0 then 1 else 0 end) done,
+        ".$this->sql_group_concat('t9.groupid')." group_ids
         from {course_modules} t1 
         inner join {recitcahiertraces} t3 on t1.instance = t3.id 
         inner join {recitct_groups} t2 on t3.id = t2.ct_id
@@ -639,13 +637,13 @@ class CahierTrace{
     public static function create($dbData){
         $result = new CahierTrace();
         
-        if(isset($dbData->ctId)){ $result->id = $dbData->ctId; } 
+        if(isset($dbData->ctId)){ $result->id = intval($dbData->ctId); } 
 
         if(isset($dbData->ctName)){ $result->name = $dbData->groupName; } 
 
-        if(isset($dbData->courseId)){ $result->courseId = $dbData->courseId; } 
+        if(isset($dbData->courseId)){ $result->courseId = intval($dbData->courseId); } 
 
-        if(isset($dbData->mCmId)){ $result->mCmId = $dbData->mCmId; } 
+        if(isset($dbData->mCmId)){ $result->mCmId = intval($dbData->mCmId); } 
 
         return $result;
     }
@@ -664,11 +662,11 @@ class NoteGroup{
 
     public static function create($dbData){
         $result = new NoteGroup();
-        $result->id = $dbData->gId;
+        $result->id = intval($dbData->gId);
         $result->ct = CahierTrace::create($dbData);
 
         if(isset($dbData->groupName)){ $result->name = $dbData->groupName; } 
-        if(isset($dbData->groupSlot)){ $result->slot = $dbData->groupSlot; } 
+        if(isset($dbData->groupSlot)){ $result->slot = intval($dbData->groupSlot); } 
 
         return $result;
     }
@@ -693,7 +691,7 @@ class NoteDef
 
     public static function create($dbData){
         $result = new NoteDef();
-        $result->id = $dbData->nId;
+        $result->id = intval($dbData->nId);
         $result->group = NoteGroup::create($dbData);
 
         if(isset($dbData->intCode)){
@@ -701,7 +699,7 @@ class NoteDef
         }
 
         $result->title = $dbData->title;
-        if(isset($dbData->slot)){ $result->slot = $dbData->slot; } 
+        if(isset($dbData->slot)){ $result->slot = intval($dbData->slot); } 
 
         if(isset($dbData->templateNote)){ $result->templateNote = $dbData->templateNote; }
 
@@ -709,7 +707,7 @@ class NoteDef
 
         if(isset($dbData->teacherTip)){ $result->teacherTip = $dbData->teacherTip; }
         
-        $result->notifyTeacher = $dbData->notifyTeacher;
+        $result->notifyTeacher = intval($dbData->notifyTeacher);
         return $result;
     }
 }
@@ -741,10 +739,10 @@ class UserNote
             $result->cmName = $dbData->cmName;
         }
         if(isset($dbData->nCmId)){ 
-            $result->nCmId = $dbData->nCmId;
+            $result->nCmId = intval($dbData->nCmId);
         }
 
-        $result->userId = $dbData->userId;
+        $result->userId = intval($dbData->userId);
         
         $result->noteContent = new stdClass();
         $result->noteContent->text = "";
