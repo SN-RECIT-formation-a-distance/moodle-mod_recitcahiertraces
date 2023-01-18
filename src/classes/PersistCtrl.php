@@ -590,7 +590,7 @@ class PersistCtrl extends MoodlePersistCtrl
     }
 
     public function getStudentsProgression($cmId){
-        $query = "select coalesce(t6.id, 0) user_id, ".$this->mysqlConn->sql_concat('t6.firstname', "' '", 't6.lastname')." username, (case when t5.id > 0 and length(t5.note) > 0 then 1 else 0 end) done,
+        $query = "select ". $this->sql_uniqueid() ." uniqueid, coalesce(t6.id, 0) user_id, ".$this->mysqlConn->sql_concat('t6.firstname', "' '", 't6.lastname')." username, (case when t5.id > 0 and length(t5.note) > 0 then 1 else 0 end) done,
         ".$this->sql_group_concat('t9.groupid')." group_ids
         from {course_modules} t1 
         inner join {recitcahiertraces} t3 on t1.instance = t3.id 

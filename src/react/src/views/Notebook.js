@@ -378,13 +378,13 @@ class ViewProgression extends Component{
         let data = {};
         
         for(let item of this.state.dataProvider){
-            if((this.state.groupId > 0) && (!item.groupIds.includes(this.state.groupId))){continue;}
+            if(!item.groupIds.includes(this.state.groupId)) continue;
 
             if(!data.hasOwnProperty(`user${item.userId}`)){
                 data[`user${item.userId}`] = {username: item.username, userId: item.userId, nbDone: 0, nbTotal: 0};
             }
 
-            data[`user${item.userId}`].nbDone += item.done;
+            data[`user${item.userId}`].nbDone += parseInt(item.done);
             data[`user${item.userId}`].nbTotal += 1;
         }
 
@@ -396,7 +396,7 @@ class ViewProgression extends Component{
                     <DataGrid.Body.Cell>{rows.length + 1}</DataGrid.Body.Cell>
                     <DataGrid.Body.Cell>{data[attr].username}</DataGrid.Body.Cell>
                     <DataGrid.Body.Cell sortValue={pct}>
-                        <Button onClick={() => this.onDetail(data[attr].userId)} variant="link">{`${pct.toFixed(0)}%`}</Button>
+                        <Button onClick={() => this.onDetail(parseInt(data[attr].userId))} variant="link">{`${pct.toFixed(0)}%`}</Button>
                     </DataGrid.Body.Cell>
                 </DataGrid.Body.Row>;
 
@@ -625,7 +625,7 @@ class NavActivities extends Component{
 
         let done = 0;
         for(let item of items){
-            if(item.isTemplate === 0){
+            if(parseInt(item.isTemplate) == 0){
                 done++;
             }
         }
