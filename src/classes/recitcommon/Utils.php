@@ -29,8 +29,10 @@
  */
 namespace recitcahiertraces;
 
-require_once("$CFG->libdir/form/editor.php");
-require_once("$CFG->libdir/editorlib.php");
+if (isset($CFG->libdir)){
+    require_once("$CFG->libdir/form/editor.php");
+    require_once("$CFG->libdir/editorlib.php");
+}
 
 class Utils
 {

@@ -377,14 +377,10 @@ class PersistCtrl extends MoodlePersistCtrl
         return array_values($result); // reset the array indexes
     }
 
-    public function removeNoteGroup($gId){  
-        $query = "DELETE t2, t3, t4
-        FROM {recitct_groups} t4
-        left JOIN {recitct_notes} t2 ON t4.id = t2.gid
-        left JOIN {recitct_user_notes} t3 ON t2.id = t3.nid
-        WHERE t4.id = ?";
-
-        $result = $this->mysqlConn->execute($query, [$gId]);
+    public function removeNoteGroup($gId){
+        $result = $this->mysqlConn->execute('DELETE FROM {recitct_user_notes} WHERE id IN (SELECT nid FROM {recitct_notes} WHERE gid = ?)', [$gId]);
+        $result = $this->mysqlConn->execute('DELETE FROM {recitct_notes} WHERE gid = ?', [$gId]);
+        $result = $this->mysqlConn->execute('DELETE FROM {recitct_groups} WHERE id = ?', [$gId]);
 
         return (!$result ? false : true);
     }
@@ -458,27 +454,17 @@ class PersistCtrl extends MoodlePersistCtrl
     }
     
     public function removeCcInstance($id){
-        $query = "DELETE t1, t2, t3, t4
-        FROM {recitcahiertraces} t1
-        left join {recitct_groups} t4 on t1.id = t4.ct_id
-        left JOIN {recitct_notes} t2 ON t4.id = t2.gid
-        left JOIN {recitct_user_notes} t3 ON t2.id = t3.nid
-        WHERE t1.id = ?";
 
-        $result = $this->mysqlConn->execute($query, [$id]);
+        $result = $this->mysqlConn->execute('DELETE FROM {recitct_user_notes} WHERE id IN (SELECT nid FROM {recitct_notes} WHERE gid in (SELECT id FROM {recitct_groups} WHERE ct_id = ?))', [$id]);
+        $result = $this->mysqlConn->execute('DELETE FROM {recitct_notes} WHERE gid in (SELECT id FROM {recitct_groups} WHERE ct_id = ?)', [$id]);
+        $result = $this->mysqlConn->execute('DELETE FROM {recitct_groups} WHERE ct_id = ?', [$id]);
+        $result = $this->mysqlConn->execute('DELETE FROM {recitcahiertraces} WHERE id = ?', [$id]);
 
         return (!$result ? false : true);
     }
     
     public function removeCCUserdata($id){
-        $query = "DELETE t3
-        FROM {recitcahiertraces} t1
-        left join {recitct_groups} t4 on t1.id = t4.ct_id
-        left JOIN {recitct_notes} t2 ON t4.id = t2.gid
-        left JOIN {recitct_user_notes} t3 ON t2.id = t3.nid
-        WHERE t1.id = ?";
-
-        $result = $this->mysqlConn->execute($query, [$id]);
+        $result = $this->mysqlConn->execute('DELETE FROM {recitct_user_notes} WHERE id IN (SELECT nid FROM {recitct_notes} WHERE gid in (SELECT id FROM {recitct_groups} WHERE ct_id = ?))', [$id]);
 
         return (!$result ? false : true);
     }

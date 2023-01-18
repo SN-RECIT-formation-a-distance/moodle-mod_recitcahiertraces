@@ -93,4 +93,21 @@ class mod_recitcahiertraces_lib_testcase extends advanced_testcase {
         $list = $this->ctrl->getStudentsProgression($this->cc->cmid);
         $this->assertTrue(empty($list));
     }
+
+    public function test_removeCcInstance() {
+        $this->data->id = 0;
+        $this->data->name = 'test';
+        $this->ctrl->saveNoteGroup($this->data);
+        $del = $this->ctrl->removeCcInstance($this->cc->cmid);
+        $this->assertTrue($del);
+    }
+
+    public function test_removeNoteGroup() {
+        $this->data->id = 0;
+        $this->data->name = 'test';
+        $gr = $this->ctrl->saveNoteGroup($this->data);
+        $list = $this->ctrl->removeNoteGroup($gr->id);
+        $list = $this->ctrl->getGroupList($this->cc->cmid);
+        $this->assertTrue(empty($list));
+    }
 }
