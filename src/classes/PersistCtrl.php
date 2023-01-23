@@ -216,13 +216,6 @@ class PersistCtrl extends MoodlePersistCtrl
         return true;
     }
 
-    public function getUserFromItemId($itemId){
-        $result = $this->getRecordsSQL("select userId FROM {recitct_user_notes} where note_itemid = ?", [$itemId]);
-
-        if (count($result) == 0) return 0;
-        return current($result)->userId;
-    }
-
     public function getGroupList($cmId){
         
         $query = "select t1.id g_Id, t1.name group_Name, t1.slot group_Slot, t1.ct_id ct_Id, t2.id m_Cm_Id FROM {course_modules} t2
@@ -551,7 +544,7 @@ class PersistCtrl extends MoodlePersistCtrl
     }
 
     public function getRequiredNotes($cmId){
-        $query = "select t4.id nId, t2.ct_id ct_Id, t4.gId g_Id, t4.title, t4.slot, t5.id un_Id, 
+        $query = "select ". $this->sql_uniqueid() ." uniqueid, t4.id n_Id, t2.ct_id ct_Id, t4.gId g_Id, t4.title, t4.slot, t5.id un_Id, 
         coalesce(t5.userid, 0) user_Id, 
         t3.course course_Id, ".$this->mysqlConn->sql_concat('t6.firstname', "' '", 't6.lastname')." username, t2.name group_Name, t2.slot group_Slot,
         coalesce(t5.note_itemid,'') note_Item_Id, coalesce(t5.note, '') note, t4.notifyteacher notify_Teacher, t5.cmid n_Cm_Id, t1.id m_Cm_Id

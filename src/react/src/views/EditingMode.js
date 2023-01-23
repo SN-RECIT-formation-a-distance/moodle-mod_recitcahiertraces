@@ -757,9 +757,9 @@ class GroupOrderForm extends Component{
         </div>;
 
         let footer = 
-            <div className="btn-tollbar" style={{width: "100%", display: "flex", justifyContent: "flex-end"}}>
-            <Button variant="secondary" onClick={() => this.reorderGroups()}>{i18n.get_string('save')}</Button>
-            <Button variant="primary" onClick={() => this.props.onClose()}>{i18n.get_string('cancel')}</Button>
+            <div className="btn-group">
+                <Button variant="secondary" onClick={() => this.props.onClose()}>{i18n.get_string('cancel')}</Button>
+                <Button variant="success" onClick={() => this.reorderGroups()}>{i18n.get_string('save')}</Button>
             </div>;
 
         let main = <Modal title={i18n.get_string('ordergroup')} body={body} footer={footer} onClose={() => this.props.onClose()} width={"500px"}/>;

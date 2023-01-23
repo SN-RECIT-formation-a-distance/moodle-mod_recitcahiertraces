@@ -174,31 +174,25 @@ function mod_recitcahiertraces_pluginfile($course, $cm, $context, $filearea, $ar
     }*/
     require_login();
     
-    //require_once($CFG->dirroot . "/mod/wiki/locallib.php");
 
     if ($filearea == 'usernote') {
         $itemId = (int) array_shift($args);
-        $ownerId = PersistCtrl::getInstance($DB, $USER)->getUserFromItemId($itemId);
         
-        $roles = Utils::getUserRoles($course->id, $USER->id);
-        if((Utils::isAdminRole($roles) == false) && ($USER->id != $ownerId)){
-            return false;
-        }
         
-        //if (!$subwiki = wiki_get_subwiki($swid)) {
-        //    return false;
-        //}
-
-        //require_capability('mod/wiki:viewpage', $context);
 
         $relativepath = implode('/', $args);
 
         $fullpath = "/$context->id/mod_recitcahiertraces/usernote/$itemId/$relativepath";
 
         $fs = get_file_storage();
-		$file = $fs->get_file_by_hash(sha1($fullpath));		
+		$file = $fs->get_file_by_hash(sha1($fullpath));
         
         if($file == false){
+            return false;
+        }
+
+        $roles = Utils::getUserRoles($course->id, $USER->id);
+        if((Utils::isAdminRole($roles) == false) && ($USER->id != $file->userid)){
             return false;
         }
         
