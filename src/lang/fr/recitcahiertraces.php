@@ -28,6 +28,7 @@ $string['templateNote'] = "Modèle de note";
 $string['studentNote'] = "Note de l'élève";
 $string['teacherFeedback'] = "Rétroaction de l'enseignant";
 $string['edit'] = "Modifier";
+$string['close'] = "Fermer";
 $string['save'] = "Enregistrer";
 $string['remove'] = "Supprimer";
 $string['cancel'] = "Annuler";

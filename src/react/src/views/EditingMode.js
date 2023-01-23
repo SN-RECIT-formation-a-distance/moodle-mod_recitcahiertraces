@@ -758,8 +758,7 @@ class GroupOrderForm extends Component{
 
         let footer = 
             <div className="btn-group">
-                <Button variant="secondary" onClick={() => this.props.onClose()}>{i18n.get_string('cancel')}</Button>
-                <Button variant="success" onClick={() => this.reorderGroups()}>{i18n.get_string('save')}</Button>
+                <Button variant="primary" onClick={() => this.reorderGroups()}>{i18n.get_string('close')}</Button>
             </div>;
 
         let main = <Modal title={i18n.get_string('ordergroup')} body={body} footer={footer} onClose={() => this.props.onClose()} width={"500px"}/>;
@@ -779,7 +778,7 @@ class GroupOrderForm extends Component{
         }
 
         $glVars.webApi.reorderNoteGroups($glVars.urlParams.id, callback);
-
+        this.props.onClose();
     }
 
     onMoveRow(index, offset){
