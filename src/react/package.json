@@ -1,6 +1,6 @@
 {
   "name": "recit_cahiertraces",
-  "version": "1.0.0",
+  "version": "v2.3.0-beta",
   "description": "RÉCIT Cahier de traces",
   "main": "index.js",
   "scripts": {

@@ -68,12 +68,25 @@ class restore_recitcahiertraces_activity_structure_step extends restore_activity
         $data = (object)$data;
         $oldid = $data->id;
         
-        $ctid = 0;
-        if (isset($data->ctid)){ $ctid = $data->ctid; unset($data->ct_id); } //Backwards compatibility with old backups
-        if (isset($data->ct_id)) $ctid = $data->ct_id;
+        $ctid = $this->getCtIdBackwardsCompatibility($data);
+        
         $data->ct_id = $this->get_mappingid('recitcahiertraces', $ctid);
         $newitemid = $DB->insert_record('recitct_groups', $data); // insert the recitct_notes record
         $this->set_mapping('recitct_groups', $oldid, $newitemid, true); 
+    }
+
+    protected function getCtIdBackwardsCompatibility($data){
+        $ctid = 0;
+        if (isset($data->ctid)){ 
+            $ctid = $data->ctid; 
+            unset($data->ct_id);
+        } 
+
+        if (isset($data->ct_id)){
+            $ctid = $data->ct_id;
+        } 
+
+        return $ctid;
     }
 
     protected function process_recitct_notes($data) {

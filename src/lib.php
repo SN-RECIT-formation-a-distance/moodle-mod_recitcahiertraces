@@ -192,7 +192,16 @@ function mod_recitcahiertraces_pluginfile($course, $cm, $context, $filearea, $ar
         }
 
         $roles = Utils::getUserRoles($course->id, $USER->id);
-        if((Utils::isAdminRole($roles) == false) && ($USER->id != $file->userid)){
+
+        /*
+            // DEBUG
+            ob_start();
+            var_dump($file);
+            $debug_dump = ob_get_clean();
+            file_put_contents('/var/log/moodle-debug.log', $debug_dump); // Write the contents back to the file
+        */
+        
+        if((Utils::isAdminRole($roles) == false) && ($USER->id != $file->get_userid())){
             return false;
         }
         
