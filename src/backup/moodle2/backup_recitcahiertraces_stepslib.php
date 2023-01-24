@@ -38,7 +38,7 @@ class backup_recitcahiertraces_activity_structure_step extends backup_activity_s
         $recitcahiertraces = new backup_nested_element('recitcahiertraces', array('id'), array(
             'course', 'name', 'intro', 'introformat', 'display', 'timemodified'));
 
-        $recitct_groups = new backup_nested_element('recitct_groups', array('id'), array('ctid', 'name', 'slot'));
+        $recitct_groups = new backup_nested_element('recitct_groups', array('id'), array('ct_id', 'name', 'slot'));
 
         $recitct_notes = new backup_nested_element('recitct_notes', array('id'), array(
             'intcode', 'gid', 'title', 'slot', 'templatenote', 'suggestednote', 'teachertip', 'notifyteacher', 'lastupdate'));
@@ -52,7 +52,7 @@ class backup_recitcahiertraces_activity_structure_step extends backup_activity_s
 
         // Define sources
         $recitcahiertraces->set_source_table('recitcahiertraces', array('id' => backup::VAR_ACTIVITYID));
-        $recitct_groups->set_source_table('recitct_groups', array('ctid' => backup::VAR_PARENTID));
+        $recitct_groups->set_source_table('recitct_groups', array('ct_id' => backup::VAR_PARENTID));
         $recitct_notes->set_source_table('recitct_notes', array('gid' => backup::VAR_PARENTID));
 
         if ($userinfo){
