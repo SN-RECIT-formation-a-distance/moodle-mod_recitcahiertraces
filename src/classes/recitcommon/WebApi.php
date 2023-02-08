@@ -82,6 +82,9 @@ abstract class AWebApi
         return $result;
     }
 
+    /**
+     * WARNING: Clean param is called everytime we have to read a $_REQUEST or input variable
+     */
     public function getRequest(){
         if(empty($_REQUEST)){
             $this->request = json_decode(file_get_contents('php://input'), true);
@@ -95,11 +98,18 @@ abstract class AWebApi
     }
 
     public function preProcessRequest(){
+        $sesskey = (isset($this->request['sesskey']) ? clean_param($this->request['sesskey'], PARAM_TEXT) : 'nosesskey'); 
+
+        if(!confirm_sesskey($sesskey)){
+            $this->lastResult = new WebApiResult(false, null, get_string('invalidsesskey'));
+            return false;
+        }
+
         if(!isset($this->request['service'])){
-            $msg =  "Service web non spécifié.";
+            $msg = get_string('servicenotfound', 'mod_recitcahiertraces');
             $success = false;
 
-            if($_SERVER['REQUEST_METHOD'] == "OPTIONS"){
+            if(isset($_SERVER['REQUEST_METHOD']) && $_SERVER['REQUEST_METHOD'] == "OPTIONS"){
                 $msg = "Replying OPTIONS request";
                 $success = true;
             }
@@ -108,11 +118,6 @@ abstract class AWebApi
 			return false;
         }
 		
-        if(!PersistCtrl::getInstance()->checkSession()){
-            $this->lastResult = new WebApiResult(false, null, "Utilisateur non connecté.");
-            return false;
-        }
-
         return true;
     }
 
@@ -121,8 +126,8 @@ abstract class AWebApi
             return;
         }
 
-        $serviceWanted = $this->request['service'];
-		$result = $this->$serviceWanted($this->request);	
+        $serviceWanted = clean_param($this->request['service'], PARAM_TEXT);
+		$result = $this->$serviceWanted($this->request);
 
         $this->lastResult = $result;
     }
@@ -303,11 +308,7 @@ abstract class MoodleApi extends AWebApi
             return new WebApiResult(false, null, $ex->GetMessage());
         }        
     }
-        
-        
 
 }
-
-date_default_timezone_set("America/New_York");
 
 register_shutdown_function(function(){ return AWebApi::onPhpError(); });

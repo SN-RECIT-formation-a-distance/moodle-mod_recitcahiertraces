@@ -356,7 +356,7 @@ class ViewProgression extends Component{
 
     getDataResult(result){
         if(!result.success){
-            FeedbackCtrl.instance.showError($glVars.i18n.appName, result.msg);
+            FeedbackCtrl.instance.showError(i18n.get_string('pluginname'), result.msg);
             return;
         }
 
@@ -476,7 +476,7 @@ class NavActivities extends Component{
 
     getDataResult(result){
         if(!result.success){
-            FeedbackCtrl.instance.showError($glVars.i18n.appName, result.msg);
+            FeedbackCtrl.instance.showError(i18n.get_string('pluginname'), result.msg);
             return;
         }
 
@@ -673,7 +673,7 @@ export class TeacherNotebook extends Component{
 
     getDataResult(result){
         if(!result.success){
-            FeedbackCtrl.instance.showError($glVars.i18n.appName, result.msg);
+            FeedbackCtrl.instance.showError(i18n.get_string('pluginname'), result.msg);
             return;
         }
         

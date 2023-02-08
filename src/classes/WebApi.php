@@ -42,7 +42,7 @@ class WebApi extends MoodleApi
         try{
             $cmId = clean_param($request['cmId'], PARAM_INT);
             $userId = clean_param($request['userId'], PARAM_INT);
-            $flag = $request['flag'];
+            $flag = clean_param($request['flag'], PARAM_TEXT);
 
             $this->canUserAccess('s', $cmId, $userId);
 
@@ -77,9 +77,19 @@ class WebApi extends MoodleApi
         global $CFG;
 
         try{			
-            $data = json_decode(json_encode($request['data']), FALSE);
-            
-            $flags = json_decode(json_encode($request['flags']), FALSE);
+            $data = (object)$request['data'];
+            $data->nId = clean_param($data->nId, PARAM_INT);
+            $data->unId = clean_param(isset($data->unId) ? $data->unId : 0, PARAM_INT);
+            $data->nCmId = clean_param(isset($data->nCmId) ? $data->nCmId : 0, PARAM_INT);
+            $data->feedback = clean_param(isset($data->feedback) ? $data->feedback : '', PARAM_RAW);
+            if (isset($data->note)){
+                $data->note = (object)$data->note;
+                $data->note->itemid = clean_param($data->note->itemid, PARAM_INT);
+                $data->note->text = clean_param($data->note->text, PARAM_RAW);
+            }
+
+            $flags = (object)$request['flags'];
+            $flags->mode = clean_param($flags->mode, PARAM_TEXT);
 
             $this->canUserAccess('s', 0, $data->userId, $data->courseId);
 
@@ -202,15 +212,23 @@ class WebApi extends MoodleApi
     
     public function saveNoteGroup($request){
         try{
-            $data = json_decode(json_encode($request['data']), FALSE);
+            $data = $request['data'];
+            if (!is_array($data)){
+                throw new Exception('Data is not an array');
+            }
 
             foreach($data as $item){
+                $item = (object)$item;
+                $item->ct = (object)$item->ct;
+                $item->ct->id = clean_param($item->ct->id, PARAM_INT);
+                $item->id = clean_param($item->id, PARAM_INT);
+                $item->slot = clean_param($item->slot, PARAM_INT);
+                $item->name = clean_param($item->name, PARAM_TEXT);
+                $item->ct->mCmId = clean_param($item->ct->mCmId, PARAM_INT);
                 $this->canUserAccess('a', $item->ct->mCmId);
             
                 PersistCtrl::getInstance()->saveNoteGroup($item);
             }
-            
-            //$this->prepareJson($result);
             
             return new WebApiResult(true);
         }
@@ -220,16 +238,14 @@ class WebApi extends MoodleApi
     }
 
     public function saveNote($request){        
-        try{            
-            $data = json_decode(json_encode($request['data']), FALSE);
-            //$tagMetadata = json_decode(json_encode($request['tagMetadata']), FALSE);
+        try{
+            $data = (object)$request['data'];
+            $data->cmId = clean_param($data->cmId, PARAM_INT);
 
             $this->canUserAccess('a', $data->cmId);
 
             $data = NoteDef::create($data);
             PersistCtrl::getInstance()->saveNote($data);
-            //PersistCtrl::getInstance()->moodleTagItem($result, $tagMetadata);
-            //$this->prepareJson($result);
             return new WebApiResult(true);
         }
         catch(Exception $ex){

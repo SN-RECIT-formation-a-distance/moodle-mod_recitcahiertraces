@@ -30,6 +30,7 @@ $string['teacherFeedback'] = "Teacher Feedback";
 $string['edit'] = "Edit";
 $string['save'] = "Save";
 $string['remove'] = "Remove";
+$string['invalidsesskey'] = "Invalid session key";
 $string['close'] = "Close";
 $string['cancel'] = "Cancel";
 $string['copy'] = "Copy";

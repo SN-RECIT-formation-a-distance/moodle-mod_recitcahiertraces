@@ -58,97 +58,6 @@ abstract class APersistCtrl
         return array_values($result);
     }
 
-    /**
-     * Return SQL for performing group concatenation on given field/expression
-     *
-     * @param string $field
-     * @param string $separator
-     * @param string $sort
-     * @return string
-     */
-    public function sql_group_concat(string $field, string $separator = ',', string $sort = ''): string {
-        global $CFG;
-        if ($CFG->dbtype == 'pgsql'){
-            $fieldsort = $sort ? "ORDER BY {$sort}" : '';
-            return "STRING_AGG(CAST({$field} AS VARCHAR), '{$separator}' {$fieldsort})";
-        }else{
-            $fieldsort = $sort ? "ORDER BY {$sort}" : '';
-            return "GROUP_CONCAT({$field} {$fieldsort} SEPARATOR '{$separator}')";
-        }
-    }
-    
-    public function sql_uniqueid(): string {
-        global $CFG;
-        if ($CFG->dbtype == 'pgsql'){
-            return "gen_random_uuid()";
-        }else{
-            return "uuid()";
-        }
-    }
-    
-    public function sql_from_unixtime($field): string {
-        global $CFG;
-        if ($CFG->dbtype == 'pgsql'){
-            return "to_char(to_timestamp($field), 'yyyy-mm-dd HH24:MI:SS')";
-        }else{
-            return "FROM_UNIXTIME($field)";
-        }
-    }
-    
-    public function sql_to_time($field): string {
-        global $CFG;
-        if ($CFG->dbtype == 'pgsql'){
-            return "to_timestamp($field)";
-        }else{
-            return "FROM_UNIXTIME($field)";
-        }
-    }
-    
-    public function sql_datediff($field, $field2): string {
-        global $CFG;
-        if ($CFG->dbtype == 'pgsql'){
-            return "EXTRACT(DAY FROM $field - $field2)";
-        }else{
-            return "DATEDIFF($field, $field2)";
-        }
-    }
-    
-    public function sql_caststring($field): string {
-        global $CFG;
-        if ($CFG->dbtype == 'pgsql'){
-            return "CAST($field AS TEXT)";
-        }else{
-            return "$field";
-        }
-    }
-    
-    public function sql_castutf8($field): string {
-        global $CFG;
-        if ($CFG->dbtype == 'pgsql'){
-            return "CAST($field AS TEXT)";
-        }else{
-            return "CONVERT($field USING utf8)";
-        }
-    }
-    
-    public function sql_tojson(): string {
-        global $CFG;
-        if ($CFG->dbtype == 'pgsql'){
-            return "jsonb_build_object";
-        }else{
-            return "JSON_OBJECT";
-        }
-    }
-    
-    public function sql_sectotime($field): string {
-        global $CFG;
-        if ($CFG->dbtype == 'pgsql'){
-            return "to_char( ($field ||' seconds')::interval, 'HH24:MM:SS' )";
-        }else{
-            return "SEC_TO_TIME($field)";
-        }
-    }
-
 	public function checkSession(){
         return (isset($this->signedUser) && $this->signedUser->id > 0);
     }
@@ -180,19 +89,31 @@ abstract class MoodlePersistCtrl extends APersistCtrl{
 
     public function getEnrolledUserList($cmId = 0, $userId = 0, $courseId = 0){
         $cmStmt = " true ";
+        $cmStmt2 = " true ";
         $vars = array();
         if($cmId > 0){
-            $cmStmt = "(t1.courseid = (select course from {course_modules} where id = $cmId))";
+            $cmStmt = "(t1.courseid = (select course from {course_modules} where id = :cmid))";
+            $vars['cmid'] = $cmId;
+            $cmStmt2 = "(t1.courseid = (select course from {course_modules} where id = :cmid2))";
+            $vars['cmid2'] = $cmId;
         }
 
         $userStmt =  " true ";
+        $userStmt2 =  " true ";
         if($userId > 0){
-            $userStmt = " (t3.id = $userId)";
+            $userStmt = " (t3.id = :user)";
+            $vars['user'] = $userId;
+            $userStmt2 = " (t3.id = :user2)";
+            $vars['user2'] = $userId;
         }
 
         $courseStmt = " true ";
+        $courseStmt2 = " true ";
         if($courseId > 0){
-            $courseStmt = "(t1.courseid = $courseId)";
+            $courseStmt = "(t1.courseid = :courseid)";
+            $vars['courseid'] = $courseId;
+            $courseStmt2 = "(t1.courseid = :courseid2)";
+            $vars['courseid2'] = $courseId;
         }
 
         // This query fetch all students with their groups. The groups belong to the course according to the parameter.
@@ -201,7 +122,7 @@ abstract class MoodlePersistCtrl extends APersistCtrl{
 
         $vars['str'] = get_string("nogroup", 'mod_recitcahiertraces');
         $vars['str2'] = get_string("nogroup", 'mod_recitcahiertraces');
-        $query = "(select ". $this->sql_uniqueid() ." uniqueId, t1.id, t1.enrol, t1.courseid course_id, t3.id user_id, concat(t3.firstname, ' ', t3.lastname) user_name, coalesce(t5.id,-1) group_id, 
+        $query = "(select ".$this->mysqlConn->sql_concat('t3.id', "' '", 't5.id')." uniqueId, t1.id, t1.enrol, t1.courseid course_id, t3.id user_id,".$this->mysqlConn->sql_concat("t3.firstname", "' '", "t3.lastname")." user_name, coalesce(t5.id,-1) group_id, 
             coalesce(t5.name, :str) group_name 
             from {enrol} t1
         inner join {user_enrolments} t2 on t1.id = t2.enrolid
@@ -211,11 +132,11 @@ abstract class MoodlePersistCtrl extends APersistCtrl{
         where (t1.courseid = t5.courseid) and $cmStmt and $userStmt and $courseStmt
         order by group_name asc, user_name asc)
         union
-        (select ". $this->sql_uniqueid() ." uniqueId, t1.id, t1.enrol, t1.courseid course_id, t3.id user_id, concat(t3.firstname, ' ', t3.lastname) user_name, -1 group_id, :str2 group_name 
+        (select ".$this->mysqlConn->sql_concat('t2.id', "' '", 't3.id')." uniqueId, t1.id, t1.enrol, t1.courseid course_id, t3.id user_id, ".$this->mysqlConn->sql_concat("t3.firstname", "' '", "t3.lastname")." user_name, -1 group_id, :str2 group_name 
         from {enrol} t1
         inner join {user_enrolments} t2 on t1.id = t2.enrolid
         inner join {user} t3 on t2.userid = t3.id and t3.suspended = 0 and t3.deleted = 0
-        where $cmStmt and $userStmt and $courseStmt
+        where $cmStmt2 and $userStmt2 and $courseStmt2
         order by user_name asc)";
         
         $tmp = $this->getRecordsSQL($query, $vars);
