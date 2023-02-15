@@ -461,7 +461,7 @@ class PersistCtrl extends MoodlePersistCtrl
             $this->mysqlConn->delete_records_select('recitct_notes', 'gid in (SELECT id FROM {recitct_groups} WHERE ct_id = ?)', [$id]);
             $this->mysqlConn->delete_records('recitct_groups', ['ct_id', $id]);
             $this->mysqlConn->delete_records('recitcahiertraces', ['id' => $id]);
-        } catch(\Exception $ex){}
+        } catch(\dml_exception $ex){ }
 
         return true;
     }
