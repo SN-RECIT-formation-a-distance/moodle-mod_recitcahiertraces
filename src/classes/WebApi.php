@@ -86,7 +86,7 @@ class WebApi extends MoodleApi
                 $data->note = (object)$data->note;
                 $data->note->itemid = clean_param($data->note->itemid, PARAM_INT);
                 $data->note->text = clean_param($data->note->text, PARAM_RAW);
-            }
+            }                
 
             $flags = (object)$request['flags'];
             $flags->mode = clean_param($flags->mode, PARAM_TEXT);
@@ -99,7 +99,7 @@ class WebApi extends MoodleApi
             if(($flags->mode == "s") && ($result->noteDef->notifyTeacher == 1)){
                 $url = sprintf("%s/mod/recitcahiertraces/view.php?id=%ld&nId=%ld&gId=%ld&userId=%ld", $CFG->wwwroot, $result->noteDef->group->ct->mCmId, $result->noteDef->id, $result->noteDef->group->id, $result->userId);
                 $msg = sprintf(get_string('newupdateinnote', 'mod_recitcahiertraces').": « <a href='%s' target='_blank'>%s</a> »", $url, $result->noteDef->title);
-                PersistCtrl::getInstance()->sendInstantMessagesToTeachers($result->noteDef->group->ct->courseId, $msg);
+                PersistCtrl::getInstance()->sendInstantMessagesToTeachers($data->courseId, $msg);
             }
             else if(($flags->mode == "t") && ($flags->teacherFeedbackUpdated == 1)){
                 $url = sprintf("%s/mod/recitcahiertraces/view.php?id=%ld&nId=%ld&gId=%ld&userId=%ld", $CFG->wwwroot, $result->noteDef->group->ct->mCmId, $result->noteDef->id, $result->noteDef->group->id, $result->userId);

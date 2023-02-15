@@ -456,13 +456,14 @@ class PersistCtrl extends MoodlePersistCtrl
     }
     
     public function removeCcInstance($id){
+        try {
+            $this->mysqlConn->delete_records_select('recitct_user_notes', 'id IN (SELECT nid FROM {recitct_notes} WHERE gid in (SELECT id FROM {recitct_groups} WHERE ct_id = ?))', [$id]);
+            $this->mysqlConn->delete_records_select('recitct_notes', 'gid in (SELECT id FROM {recitct_groups} WHERE ct_id = ?)', [$id]);
+            $this->mysqlConn->delete_records('recitct_groups', ['ct_id', $id]);
+            $this->mysqlConn->delete_records('recitcahiertraces', ['id' => $id]);
+        } catch(\Exception $ex){}
 
-        $result = $this->mysqlConn->delete_records_select('recitct_user_notes', 'id IN (SELECT nid FROM {recitct_notes} WHERE gid in (SELECT id FROM {recitct_groups} WHERE ct_id = ?))', [$id]);
-        $result = $this->mysqlConn->delete_records_select('recitct_notes', 'gid in (SELECT id FROM {recitct_groups} WHERE ct_id = ?)', [$id]);
-        $result = $this->mysqlConn->delete_records('recitct_groups', ['ct_id', $id]);
-        $result = $this->mysqlConn->delete_records('recitcahiertraces', ['id' => $id]);
-
-        return (!$result ? false : true);
+        return true;
     }
     
     public function removeCCUserdata($id){
@@ -471,7 +472,10 @@ class PersistCtrl extends MoodlePersistCtrl
         return (!$result ? false : true);
     }
 
-    public function createInstantMessage($userFrom, $userTo, $courseId, $msg, $component = 'mod_recitcahiertraces', $name = 'note_updated', $subject = 'Notifications', $notification = '1'){
+    public function createInstantMessage($userFrom, $userTo, $courseId, $msg, $component = 'mod_recitcahiertraces', $name = 'note_updated', $subject = null, $notification = '1'){
+        if (!$subject){
+            $subject = get_string('pluginname', 'mod_recitcahiertraces');
+        }
         $message = new \core\message\message();
         $message->component = $component;
         $message->name = $name;
