@@ -81,6 +81,7 @@ abstract class MoodlePersistCtrl extends APersistCtrl{
         foreach($users as $item){
             $item->groupIds = groups_get_user_groups($courseId, $item->id);
             $item->groupIds = array_values(array_pop($item->groupIds));
+            unset($item->password);
         }
 
         return $users;
