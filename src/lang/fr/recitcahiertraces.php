@@ -43,6 +43,7 @@ $string['noData'] = "Pas de données";
 $string['recitcahiertraces:viewadmin'] = "Vue Admin";
 $string['recitcahiertraces:view'] = "Vue";
 $string['recitcahiertraces:addinstance'] = "Ajouter instance";
+$string['recitcahiertraces:accessallgroups'] = 'L\'utilisateur a accès à tous les données des groupes même s\'ils ne sont pas dans le groupe';
 $string['printNotes'] = "Imprimer des notes";
 $string['note'] = "Note";
 $string['suggestednote'] = "Réponses suggérées";

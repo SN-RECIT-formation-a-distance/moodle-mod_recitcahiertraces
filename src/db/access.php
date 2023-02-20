@@ -34,18 +34,31 @@ $capabilities = array(
         )
     ),  
 
- 'mod/recitcahiertraces:viewadmin' => array(
-        'riskbitmask' => RISK_XSS,
+    'mod/recitcahiertraces:viewadmin' => array(
+           'riskbitmask' => RISK_XSS,
+   
+           'captype' => 'write',
+           'contextlevel' => CONTEXT_COURSE,
+           'archetypes' => array(
+               'editingteacher' => CAP_ALLOW,
+               'teacher' => CAP_ALLOW,
+               'manager' => CAP_ALLOW
+           ),
+           'clonepermissionsfrom' => 'moodle/course:manageactivities'
+       ),
 
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_COURSE,
-        'archetypes' => array(
-            'editingteacher' => CAP_ALLOW,
-            'teacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
-        ),
-        'clonepermissionsfrom' => 'moodle/course:manageactivities'
-    ),
+       'mod/recitcahiertraces:accessallgroups' => array(
+              'riskbitmask' => RISK_XSS,
+      
+              'captype' => 'write',
+              'contextlevel' => CONTEXT_COURSE,
+              'archetypes' => array(
+                  'editingteacher' => CAP_ALLOW,
+                  'teacher' => CAP_PREVENT,
+                  'manager' => CAP_ALLOW
+              ),
+              'clonepermissionsfrom' => 'moodle/course:manageactivities'
+          ),
     
     'mod/recitcahiertraces:addinstance' => array(
         'riskbitmask' => RISK_XSS,

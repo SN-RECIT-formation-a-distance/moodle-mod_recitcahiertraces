@@ -43,6 +43,7 @@ $string['msgDeletionExtraInfo'] = "This action will delete all the students note
 $string['noData'] = "No data";
 $string['recitcahiertraces:viewadmin'] = "View Admin";
 $string['recitcahiertraces:view'] = "View";
+$string['recitcahiertraces:accessallgroups'] = 'Whether or not the user can see all group data even if they are not in that group';
 $string['recitcahiertraces:addinstance'] = "Add instance";
 $string['printNotes'] = "Print Notes";
 $string['note'] = "Note";

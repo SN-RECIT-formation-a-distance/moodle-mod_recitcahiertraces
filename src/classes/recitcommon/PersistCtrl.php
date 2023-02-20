@@ -88,7 +88,7 @@ abstract class MoodlePersistCtrl extends APersistCtrl{
     }
 
 
-    public function getEnrolledUserList($cmId = 0, $userId = 0, $courseId = 0){
+    public function getEnrolledUserList($cmId = 0, $userId = 0, $courseId = 0, $ownGroup = false){
         $cmStmt = " true ";
         $cmStmt2 = " true ";
         $vars = array();
@@ -101,12 +101,12 @@ abstract class MoodlePersistCtrl extends APersistCtrl{
 
         $userStmt =  " true ";
         $userStmt2 =  " true ";
-        if($userId > 0){
+        /*if($userId > 0){
             $userStmt = " (t3.id = :user)";
             $vars['user'] = $userId;
             $userStmt2 = " (t3.id = :user2)";
             $vars['user2'] = $userId;
-        }
+        }*/
 
         $courseStmt = " true ";
         $courseStmt2 = " true ";
@@ -115,6 +115,12 @@ abstract class MoodlePersistCtrl extends APersistCtrl{
             $vars['courseid'] = $courseId;
             $courseStmt2 = "(t1.courseid = :courseid2)";
             $vars['courseid2'] = $courseId;
+        }
+        
+        $groupStmt = " true ";
+        if($ownGroup){
+            $groupStmt = "t4.groupid in (select groupid from {groups_members} where userid = :user3)";
+            $vars['user3'] = $userId;
         }
 
         // This query fetch all students with their groups. The groups belong to the course according to the parameter.
@@ -129,7 +135,7 @@ abstract class MoodlePersistCtrl extends APersistCtrl{
         inner join {user_enrolments} t2 on t1.id = t2.enrolid
         inner join {user} t3 on t2.userid = t3.id and t3.suspended = 0 and t3.deleted = 0
         left join {groups_members} t4 on t3.id = t4.userid
-        left join {groups} t5 on t4.groupid = t5.id
+        left join {groups} t5 on t4.groupid = t5.id and $groupStmt
         where (t1.courseid = t5.courseid) and $cmStmt and $userStmt and $courseStmt
         order by group_name asc, user_name asc)
         union
