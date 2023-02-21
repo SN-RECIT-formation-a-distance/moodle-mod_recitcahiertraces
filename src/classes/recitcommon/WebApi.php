@@ -301,7 +301,7 @@ abstract class MoodleApi extends AWebApi
                 $ownGroup = false;
                 $userId = 0;
             }
-            $this->canUserAccess('a', $courseId);
+            $this->canUserAccess('a', 0, 0, $courseId);
             $tmp = PersistCtrl::getInstance()->getEnrolledUserList($cmId, $userId, $courseId, $ownGroup);
             $result = array();
             foreach($tmp as $item){
