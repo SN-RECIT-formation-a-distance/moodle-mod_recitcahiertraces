@@ -73,7 +73,6 @@ class MainView
         $this->page->requires->js(new moodle_url('./react/build/index.js'), true);
 
         echo $this->output->header();
-        echo $this->output->heading(format_string($this->cm->name), 2);
                         
         $roles = Utils::getUserRoles($this->course->id, $this->user->id);
         $studentId = (in_array('t', $roles) ? 0 : $this->user->id);
