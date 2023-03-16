@@ -33,6 +33,7 @@ list ($course, $cm) = get_course_and_cm_from_cmId($id, 'recitcahiertraces');
 //require_course_login($course, true, $cm);
 require_login();
 
+$USER->preference['htmleditor'] = 'atto';//Force atto
 $view = new MainView($PAGE, $course, $cm, $OUTPUT, $USER, $DB, $CFG);
 
 recitcahiertraces_strings_for_js();

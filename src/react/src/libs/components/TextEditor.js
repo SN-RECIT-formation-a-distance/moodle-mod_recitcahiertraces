@@ -19,6 +19,8 @@ export class EditorDecorator {
         if(!this.checkDom()){ return; }
 
         switch(this.format){
+            case 'editor_tiny\\editor':
+                break;
             case 'atto_texteditor':
                 break;
             case 'recit_rich_editor': // created manually
@@ -48,6 +50,7 @@ export class EditorDecorator {
                     attoContent.onblur = this.onFocusOut;
                 }
                 break;
+            case 'editor_tiny\\editor':
         }
 
         this.dom.style.display = 'block';
@@ -66,10 +69,9 @@ export class EditorDecorator {
                 this.dom.querySelector(`[name="${this.id}[text]"]`).value = value;
                 //this.atto.editor.setHTML(value);
                 break;
-            case 'tinymce_texteditor':
-                // the tinymce does not work on the popup
-                //this.dom.getElementsByTagName("textarea")[0].value = value;
-                //tinymce.activeEditor.setContent(value);
+            case 'editor_tiny\\editor':
+                this.dom.getElementsByTagName("textarea")[0].value = value;
+                this.dom.querySelector('iframe').contentDocument.body.innerHTML = value;
                 break;
             case 'textarea_texteditor':
                 this.dom.getElementsByTagName("textarea")[0].value = value;
@@ -98,15 +100,15 @@ export class EditorDecorator {
                     }
                 }
                 break;
-            case 'tinymce_texteditor':
-                result.text = tinymce.activeEditor.getContent();
-                break;
             case 'textarea_texteditor':
                 result.text = this.dom.getElementsByTagName("textarea")[0].value;
                 break;
             case 'recit_rich_editor':
             case 'recit_texteditor':
                 result.text = this.dom.querySelector(`[data-recit-rich-editor="content"]`).innerHTML;
+                break;
+            case 'editor_tiny\\editor':
+                result.text = this.dom.querySelector('iframe').contentDocument.body.innerHTML
                 break;
             default: 
                 alert("Editor: unknown format");
