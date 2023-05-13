@@ -44,7 +44,6 @@ $capabilities = array(
                'teacher' => CAP_ALLOW,
                'manager' => CAP_ALLOW
            ),
-           'clonepermissionsfrom' => 'moodle/course:manageactivities'
        ),
 
        'mod/recitcahiertraces:accessallgroups' => array(
@@ -57,7 +56,6 @@ $capabilities = array(
                   'teacher' => CAP_PREVENT,
                   'manager' => CAP_ALLOW
               ),
-              'clonepermissionsfrom' => 'moodle/course:manageactivities'
           ),
     
     'mod/recitcahiertraces:addinstance' => array(
