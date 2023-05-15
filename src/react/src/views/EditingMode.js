@@ -21,8 +21,8 @@
  */
 
 import React, { Component } from 'react';
-import {ButtonGroup, Button, Form, Col, Tabs, Tab, ButtonToolbar} from 'react-bootstrap';
-import {faPencilAlt, faPlusCircle, faWrench, faTrashAlt, faCopy, faPrint,  faFileImport, faArrowsAlt, faSortAmountDownAlt, faArrowDown, faArrowUp} from '@fortawesome/free-solid-svg-icons';
+import {ButtonGroup, Button, Form, Col, Tabs, Tab, ButtonToolbar, OverlayTrigger, Popover} from 'react-bootstrap';
+import {faPencilAlt, faPlusCircle, faWrench, faTrashAlt, faCopy, faPrint, faQuestionCircle, faArrowsAlt, faSortAmountDownAlt, faArrowDown, faArrowUp} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {ComboBox, FeedbackCtrl, DataGrid, InputNumber, ToggleButtons, Modal} from '../libs/components/Components';
 import {JsNx, UtilsMoodle} from '../libs/utils/Utils';
@@ -562,7 +562,7 @@ class ModalGenerateIntCode extends Component{
         this.onCopy = this.onCopy.bind(this);
         this.onDataChange = this.onDataChange.bind(this);
 
-        this.state = {data: {nbLines: 15, color: '#000000', btnSaveVariant: '', btnResetVariant: ''}};
+        this.state = {data: {nbLines: 15, color: '#000000', btnSaveVariant: 'btn btn-success', btnResetVariant: 'btn btn-secondary'}};
 
         this.intCodeRef = React.createRef();
     }
@@ -584,16 +584,38 @@ class ModalGenerateIntCode extends Component{
                 </Form.Row>
                 <Form.Row>
                     <Form.Group as={Col}>
-                        <Form.Label>{i18n.get_string('savebtn')}</Form.Label>
+                        <Form.Label>{i18n.get_string('savebtn')} <HelpButton helpText={<>
+                <span>{i18n.get_string('infobs')}</span>
+                <br/>
+                <a href="https://getbootstrap.com/docs/4.6/utilities/borders/#border-radius" target="_blank">{M.util.get_string('btnshape', 'atto_recitautolink')} <i className='p-1 fa fa-info-circle'></i> </a><br/>
+                <a href="https://getbootstrap.com/docs/4.6/components/buttons/" target="_blank">{M.util.get_string('btnlook', 'atto_recitautolink')} <i className='p-1 fa fa-info-circle'></i> </a>
+                </>}/></Form.Label>
                         <Form.Control type="text" value={this.state.data.btnSaveVariant} name="btnSaveVariant" onChange={this.onDataChange}/>
                         <Form.Text className="text-muted">{i18n.get_string('savebtndesc')}</Form.Text>
                     </Form.Group>
                 </Form.Row>
                 <Form.Row>
                     <Form.Group as={Col}>
-                        <Form.Label>{i18n.get_string('resetbtn')}</Form.Label>
+                        <Form.Label>{i18n.get_string('preview')}</Form.Label><br/>
+                        <a className={this.state.data.btnSaveVariant}>{i18n.get_string('save')}</a>
+                    </Form.Group>
+                </Form.Row>
+                <Form.Row>
+                    <Form.Group as={Col}>
+                        <Form.Label>{i18n.get_string('resetbtn')} <HelpButton helpText={<>
+                <span>{i18n.get_string('infobs')}</span>
+                <br/>
+                <a href="https://getbootstrap.com/docs/4.6/utilities/borders/#border-radius" target="_blank">{M.util.get_string('btnshape', 'atto_recitautolink')} <i className='p-1 fa fa-info-circle'></i> </a><br/>
+                <a href="https://getbootstrap.com/docs/4.6/components/buttons/" target="_blank">{M.util.get_string('btnlook', 'atto_recitautolink')} <i className='p-1 fa fa-info-circle'></i> </a>
+                </>}/></Form.Label>
                         <Form.Control type="text" value={this.state.data.btnResetVariant} name="btnResetVariant" onChange={this.onDataChange}/>
                         <Form.Text className="text-muted">{i18n.get_string('resetbtndesc')}</Form.Text>
+                    </Form.Group>
+                </Form.Row>
+                <Form.Row>
+                    <Form.Group as={Col}>
+                        <Form.Label>{i18n.get_string('preview')}</Form.Label><br/>
+                        <a className={this.state.data.btnResetVariant}>{i18n.get_string('reset')}</a>
                     </Form.Group>
                 </Form.Row>
                 <Form.Control type="hidden" ref={this.intCodeRef}/>
@@ -630,6 +652,35 @@ class ModalGenerateIntCode extends Component{
         this.intCodeRef.current.type = "hidden";
         this.props.onCopy();
         $glVars.feedback.showInfo(i18n.get_string('pluginname'), i18n.get_string('msgsuccess'), 3);
+    }
+}
+
+export class HelpButton extends Component {
+    static defaultProps = {
+        helpText: '',
+        icon: faQuestionCircle
+    }
+
+    constructor(props) {
+        super(props);
+    }
+
+    render(){
+        const popover = (
+            <Popover id="popover-help">
+              <Popover.Content>
+                {this.props.helpText}
+              </Popover.Content>
+            </Popover>
+          );
+
+         
+        let main =
+            <OverlayTrigger trigger="focus" placement="right" overlay={popover}>
+                 <Button variant="link" className='p-0'><FontAwesomeIcon icon={this.props.icon}/></Button>
+            </OverlayTrigger>;
+
+        return main;
     }
 }
 
