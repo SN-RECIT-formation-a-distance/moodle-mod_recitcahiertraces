@@ -457,7 +457,7 @@ class PersistCtrl extends MoodlePersistCtrl
     
     public function removeCcInstance($id){
         try {
-            $this->mysqlConn->delete_records_select('recitct_user_notes', 'id IN (SELECT nid FROM {recitct_notes} WHERE gid in (SELECT id FROM {recitct_groups} WHERE ct_id = ?))', [$id]);
+            $this->mysqlConn->delete_records_select('recitct_user_notes', 'nid IN (SELECT id FROM {recitct_notes} WHERE gid in (SELECT id FROM {recitct_groups} WHERE ct_id = ?))', [$id]);
             $this->mysqlConn->delete_records_select('recitct_notes', 'gid in (SELECT id FROM {recitct_groups} WHERE ct_id = ?)', [$id]);
             $this->mysqlConn->delete_records('recitct_groups', ['ct_id', $id]);
             $this->mysqlConn->delete_records('recitcahiertraces', ['id' => $id]);
@@ -467,7 +467,7 @@ class PersistCtrl extends MoodlePersistCtrl
     }
     
     public function removeCCUserdata($id){
-        $result = $this->mysqlConn->delete_records_select('recitct_user_notes', 'id IN (SELECT nid FROM {recitct_notes} WHERE gid in (SELECT id FROM {recitct_groups} WHERE ct_id = ?))', [$id]);
+        $result = $this->mysqlConn->delete_records_select('recitct_user_notes', 'nid IN (SELECT id FROM {recitct_notes} WHERE gid in (SELECT id FROM {recitct_groups} WHERE ct_id = ?))', [$id]);
 
         return (!$result ? false : true);
     }

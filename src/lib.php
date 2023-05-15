@@ -127,7 +127,7 @@ function recitcahiertraces_delete_instance($id) {
 
 function recitcahiertraces_reset_userdata($data) {
     global $DB, $USER;
-    if (!empty($data->reset_userdata)) {
+    if (!empty($data->reset_userrecitctdata)) {
         $recitcahiertraces = $DB->get_records('recitcahiertraces', array('course'=>$data->courseid));
         foreach ($recitcahiertraces as $v){
             $id = $v->id;
@@ -142,13 +142,13 @@ function recitcahiertraces_reset_userdata($data) {
 }
 
 function recitcahiertraces_reset_course_form_defaults($course) {
-    return array('reset_userdata' => 1);
+    return array('reset_userrecitctdata' => 1);
 }
 
 function recitcahiertraces_reset_course_form_definition(&$mform) {
     $mform->addElement('header', 'recitcahiertracesheader', get_string('modulenameplural', 'recitcahiertraces'));
 
-    $mform->addElement('checkbox', 'reset_userdata', get_string('reset'));
+    $mform->addElement('checkbox', 'reset_userrecitctdata', get_string('reset'));
 
 }
 
