@@ -380,11 +380,25 @@ class PersistCtrl extends MoodlePersistCtrl
     }
 
     public function removeNoteGroup($gId){
-        $result = $this->mysqlConn->delete_records_select('recitct_user_notes', 'id IN (SELECT nid FROM {recitct_notes} WHERE gid = ?)', [$gId]);
+        $notes = $this->getRecordsSQL('SELECT * FROM {recitct_user_notes} where nid IN (SELECT id FROM {recitct_notes} WHERE gid = ?)', [$gId]);
+        $this->deleteNoteFiles($notes);
+        
+        $result = $this->mysqlConn->delete_records_select('recitct_user_notes', 'nid IN (SELECT id FROM {recitct_notes} WHERE gid = ?)', [$gId]);
         $result = $this->mysqlConn->delete_records('recitct_notes', ['gid' => $gId]);
         $result = $this->mysqlConn->delete_records('recitct_groups', ['id' => $gId]);
 
         return (!$result ? false : true);
+    }
+
+    public function deleteNoteFiles($notes){
+        global $DB;
+        if (empty($notes)) return;
+        $fs = get_file_storage();
+        foreach ($notes as $n){
+            $cmId = $this->getCmIdFromNoteId($n->nid);
+            $context = $this->getCtContext($cmId);
+            $fs->delete_area_files($context->id, 'mod_recitcahiertraces');
+        }
     }
 
     public function getNoteDef($nId){
@@ -457,6 +471,9 @@ class PersistCtrl extends MoodlePersistCtrl
     
     public function removeCcInstance($id){
         try {
+            $notes = $this->getRecordsSQL('SELECT * FROM {recitct_user_notes} where nid IN (SELECT id FROM {recitct_notes} WHERE gid in (SELECT id FROM {recitct_groups} WHERE ct_id = ?))', [$id]);
+            $this->deleteNoteFiles($notes);
+
             $this->mysqlConn->delete_records_select('recitct_user_notes', 'nid IN (SELECT id FROM {recitct_notes} WHERE gid in (SELECT id FROM {recitct_groups} WHERE ct_id = ?))', [$id]);
             $this->mysqlConn->delete_records_select('recitct_notes', 'gid in (SELECT id FROM {recitct_groups} WHERE ct_id = ?)', [$id]);
             $this->mysqlConn->delete_records('recitct_groups', ['ct_id', $id]);
@@ -467,6 +484,8 @@ class PersistCtrl extends MoodlePersistCtrl
     }
     
     public function removeCCUserdata($id){
+        $notes = $this->getRecordsSQL('SELECT * FROM {recitct_user_notes} where nid IN (SELECT id FROM {recitct_notes} WHERE gid in (SELECT id FROM {recitct_groups} WHERE ct_id = ?))', [$id]);
+        $this->deleteNoteFiles($notes);
         $result = $this->mysqlConn->delete_records_select('recitct_user_notes', 'nid IN (SELECT id FROM {recitct_notes} WHERE gid in (SELECT id FROM {recitct_groups} WHERE ct_id = ?))', [$id]);
 
         return (!$result ? false : true);
