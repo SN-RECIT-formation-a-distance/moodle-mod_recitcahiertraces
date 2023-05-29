@@ -22,7 +22,7 @@
 
 import React, { Component } from 'react';
 import {ButtonGroup, Button, Form, Col, Tabs, Tab, ButtonToolbar, OverlayTrigger, Popover} from 'react-bootstrap';
-import {faPencilAlt, faPlusCircle, faWrench, faTrashAlt, faCopy, faPrint, faQuestionCircle, faArrowsAlt, faSortAmountDownAlt, faArrowDown, faArrowUp} from '@fortawesome/free-solid-svg-icons';
+import {faPencilAlt, faPlusCircle, faWrench, faTrashAlt, faCopy, faPrint, faQuestionCircle, faArrowsAlt, faSortAmountDownAlt, faArrowDown, faArrowUp, faClone} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {ComboBox, FeedbackCtrl, DataGrid, InputNumber, ToggleButtons, Modal} from '../libs/components/Components';
 import {JsNx, UtilsMoodle} from '../libs/utils/Utils';
@@ -242,7 +242,7 @@ class NoteForm extends Component
             data: {
                 nId: 0, 
                 gId: 0, 
-                cmId: $glVars.urlParams.id, 
+                cmId: $glVars.urlParams.id,
                 title: "", 
                 templateNote: "", 
                 suggestedNote: "", 
@@ -411,6 +411,7 @@ export class EditionMode extends Component{
                         <Button variant="warning" disabled={this.state.selectedGroup === null} onClick={this.removeNoteGroup}><FontAwesomeIcon icon={faTrashAlt}/> {i18n.get_string('deletegroup')}</Button>
                         <Button variant="primary" onClick={() => this.showGroupOrderForm(true)}><FontAwesomeIcon icon={faSortAmountDownAlt}/> {i18n.get_string('ordergroup')}</Button>
                         <Button variant="primary" disabled={this.state.selectedGroup === null} onClick={this.onEditCollection}><FontAwesomeIcon icon={faPencilAlt}/> {i18n.get_string('editgroup')}</Button>
+                        <Button variant="primary" disabled={this.state.selectedGroup === null} onClick={() => this.onCloneCollection()}><FontAwesomeIcon icon={faClone}/> {i18n.get_string('clonegroup')}</Button>
                     </ButtonGroup>
                     <ButtonGroup>
                         <a className="btn btn-primary" href={this.getSuggestedNotesPrintLink()} target="_blank" title={i18n.get_string('print')}><FontAwesomeIcon icon={faPrint}/> {i18n.get_string('print')}</a>
@@ -476,7 +477,25 @@ export class EditionMode extends Component{
     }
 
     onAddCollection(){
-        this.setState({showGroupForm: true, selectedGroup: null});
+        this.setState({showGroupForm: true, selectedGroup: null, groupNoteList: []});
+    }
+
+    onCloneCollection(){
+        let group = this.state.selectedGroup;
+        let that = this;
+        let callback = function(result){
+            if(result.success){
+                that.setState({groupNoteList: []});
+                that.getData();
+            }
+            else{
+                $glVars.feedback.showError(i18n.get_string('pluginname'), result.msg);
+            }
+        }
+
+        $glVars.webApi.cloneNoteGroup([group], callback);
+
+        this.setState({selectedGroup: null});
     }
 
     onEditCollection(){

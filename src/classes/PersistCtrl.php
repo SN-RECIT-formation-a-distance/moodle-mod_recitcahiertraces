@@ -238,7 +238,20 @@ class PersistCtrl extends MoodlePersistCtrl
         }
         
         return true;
-    }  
+    }
+
+    public function cloneNoteGroup($data){
+        $data->name = $data->name . ' ('.get_string('cloned', 'mod_recitcahiertraces').')';
+        $notes = $this->getGroupNotes($data->id);
+        $data->id = 0;
+        $group = $this->saveNoteGroup($data);
+        foreach($notes as $n){
+            $n->id = 0;
+            $n->group = $group;
+            $n->intCode = "";
+            $this->saveNote($n);      
+        }
+    }
 
     public function saveNoteGroup($data){
         try{

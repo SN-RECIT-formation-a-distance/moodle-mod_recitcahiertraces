@@ -212,6 +212,7 @@ class WebApi extends MoodleApi
     
     public function saveNoteGroup($request){
         try{
+            $result = array();
             $data = $request['data'];
             if (!is_array($data)){
                 throw new Exception('Data is not an array');
@@ -227,10 +228,38 @@ class WebApi extends MoodleApi
                 $item->ct->mCmId = clean_param($item->ct->mCmId, PARAM_INT);
                 $this->canUserAccess('a', $item->ct->mCmId);
             
-                PersistCtrl::getInstance()->saveNoteGroup($item);
+                $result[] = PersistCtrl::getInstance()->saveNoteGroup($item);
             }
             
-            return new WebApiResult(true);
+            return new WebApiResult(true, $result);
+        }
+        catch(Exception $ex){
+            return new WebApiResult(false, null, $ex->GetMessage());
+        }     
+    }
+    
+    public function cloneNoteGroup($request){
+        try{
+            $result = array();
+            $data = $request['data'];
+            if (!is_array($data)){
+                throw new Exception('Data is not an array');
+            }
+
+            foreach($data as $item){
+                $item = (object)$item;
+                $item->ct = (object)$item->ct;
+                $item->ct->id = clean_param($item->ct->id, PARAM_INT);
+                $item->id = clean_param($item->id, PARAM_INT);
+                $item->slot = clean_param($item->slot, PARAM_INT);
+                $item->name = clean_param($item->name, PARAM_TEXT);
+                $item->ct->mCmId = clean_param($item->ct->mCmId, PARAM_INT);
+                $this->canUserAccess('a', $item->ct->mCmId);
+            
+                $result[] = PersistCtrl::getInstance()->cloneNoteGroup($item);
+            }
+            
+            return new WebApiResult(true, $result);
         }
         catch(Exception $ex){
             return new WebApiResult(false, null, $ex->GetMessage());

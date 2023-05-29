@@ -157,6 +157,19 @@ export class AppWebApi extends WebApi
         this.post(this.gateway, options, onSuccessTmp);
     }
 
+    cloneNoteGroup(data, onSuccess){
+        let that = this;
+        let onSuccessTmp = function(result){     
+            onSuccess(result);
+            if(result.success){
+                that.notifyObservers('cloneNoteGroup');
+            }
+        };
+
+        let options = {data: data, service: "cloneNoteGroup"};
+        this.post(this.gateway, options, onSuccessTmp);
+    }
+
     getRequiredNotes(cmId, onSuccess){
         let data = {cmId: cmId, service: "getRequiredNotes"};
         this.post(this.gateway, data, onSuccess);
