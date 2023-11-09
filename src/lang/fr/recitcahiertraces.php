@@ -67,7 +67,6 @@ $string['group'] = 'Collection';
 
 $string['suggestedresponse'] = 'Réponse suggérée';
 $string['invalidargument'] = 'Argument invalide';
-$string['nodata'] = 'Pas de données';
 $string['newupdateinnote'] = 'Nouvelle mise à jour dans la note';
 $string['msgsuccess'] = 'Opération complété avec succès';
 $string['saveandclose'] = 'Enregistrer et fermer';

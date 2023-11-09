@@ -157,7 +157,7 @@ class PersistCtrl extends MoodlePersistCtrl
         $dbData = $this->getRecordsSQL($query, $args);
         
         if(empty($dbData)){
-            throw new Exception(get_string('nodata', 'mod_recitcahiertraces'));
+            throw new Exception(get_string('noData', 'mod_recitcahiertraces'));
         }
         $dbData = current($dbData);
 

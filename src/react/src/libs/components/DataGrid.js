@@ -107,7 +107,7 @@ class Body extends Component {
     
     render() {
         if(this.state.nbRows === 0){
-            return (<caption style={{captionSide: "bottom"}}>{i18n.get_string('nodata')}</caption>);
+            return (<caption style={{captionSide: "bottom"}}>{i18n.get_string('noData')}</caption>);
         }
         else{
             //return (<tbody>{this.renderChildren()}</tbody>);
