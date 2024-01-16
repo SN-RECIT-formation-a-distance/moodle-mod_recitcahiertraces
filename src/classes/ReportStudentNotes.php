@@ -60,7 +60,7 @@ $userNotes = PersistCtrl::getInstance($DB, $USER)->getUserNotes($cmId, $userId);
 $student = current(current(PersistCtrl::getInstance()->getEnrolledUserList($cmId, $userId)));
 
 if(empty($userNotes)){
-    echo "<h5>".get_string('noData', 'mod_recitcahiertraces')."</h5>";
+    echo "<h5>".get_string('nodata', 'mod_recitcahiertraces')."</h5>";
     die();
 }
 
