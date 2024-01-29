@@ -41,14 +41,14 @@ export class TeacherView extends Component {
             <div>
                 {this.state.modeEdition ? 
                     <div>
-                        <BtnModeEdition variant="danger" onClick={this.onModeEditionClick} text={i18n.get_string('turnOffEditingMode')}>
+                        <BtnModeEdition variant="danger" onClick={this.onModeEditionClick} text={i18n.get_string('turnoffeditingmode')}>
                             
                         </BtnModeEdition>
                         <EditionMode/> 
                     </div>
                 : 
                     <div>
-                        <BtnModeEdition variant="warning" onClick={this.onModeEditionClick} text={i18n.get_string('turnOnEditingMode')}></BtnModeEdition>
+                        <BtnModeEdition variant="warning" onClick={this.onModeEditionClick} text={i18n.get_string('turnoneditingmode')}></BtnModeEdition>
                         <br/>
                         <TeacherNotebook />
                     </div>

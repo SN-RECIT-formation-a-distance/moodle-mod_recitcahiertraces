@@ -49,14 +49,14 @@ $roles = Utils::getUserRoles($course->id, $USER->id);
 if(!Utils::isAdminRole($roles)){
     // if not admin then the user has the right to see its own notes
     if($userId != $USER->id){
-        die(get_string('forbiddenAccess', 'mod_recitcahiertraces'));
+        die(get_string('forbiddenaccess', 'mod_recitcahiertraces'));
     }
 }
 
 $ctId = PersistCtrl::getInstance($DB, $USER)->getCtIdFromCmId($cId);
 $pNotes = PersistCtrl::getInstance($DB, $USER)->getCmSuggestedNotes($course->id, $gId, $ctId);
 
-$pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahiertraces'), get_string('suggestednote', 'mod_recitcahiertraces'), get_string('printedOn', 'mod_recitcahiertraces'), date('Y-m-d H:i:s'));
+$pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahiertraces'), get_string('suggestednote', 'mod_recitcahiertraces'), get_string('printedon', 'mod_recitcahiertraces'), date('Y-m-d H:i:s'));
 ?>
 
 <!DOCTYPE html>
@@ -89,7 +89,7 @@ $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahie
             foreach($group as $note){
                 // overflow = hidden for the notes that overflow the page dimensions
                 echo "<div class='note-container'>";
-                echo sprintf("<div class='text-muted'><strong>%s:</strong> %s</div>", get_string('noteTitle', 'mod_recitcahiertraces'), $note->title);
+                echo sprintf("<div class='text-muted'><strong>%s:</strong> %s</div>", get_string('notetitle', 'mod_recitcahiertraces'), $note->title);
                 
                 echo sprintf("<div class='alert alert-secondary student-note'>%s</div>", $note->suggestedNote);
                 

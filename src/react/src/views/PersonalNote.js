@@ -154,7 +154,7 @@ class PersonalNoteForm extends Component{
                 <h5 className="text-truncate">{i18n.get_string('note')+': '+this.state.remoteData.noteDef.title}</h5>
                 <Card>
                     <Card.Header style={styleHeader} onClick={() => this.onCollapse("note")}>
-                        {i18n.get_string('studentNote')}
+                        {i18n.get_string('studentnote')}
                     </Card.Header>
                     <Collapse in={this.state.collapse.note}>
                         <Card.Body>{student}</Card.Body>
@@ -175,7 +175,7 @@ class PersonalNoteForm extends Component{
                     </div>
                 }
                 <Card>
-                    <Card.Header style={styleHeader} onClick={() => this.onCollapse("feedback")}>{i18n.get_string('teacherFeedback')}</Card.Header>
+                    <Card.Header style={styleHeader} onClick={() => this.onCollapse("feedback")}>{i18n.get_string('teacherfeedback')}</Card.Header>
                     <Collapse in={this.state.collapse.feedback}>
                         <Card.Body>{teacher}</Card.Body>
                     </Collapse>

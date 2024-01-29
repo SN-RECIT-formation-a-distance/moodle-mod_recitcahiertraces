@@ -28,7 +28,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {VisualFeedback, Loading} from "./libs/components/Components";
 import Utils, {UtilsMoodle} from "./libs/utils/Utils";
 import {TeacherView, StudentView} from "./views/Views";
-import {$glVars} from "./common/common";
+import {$glVars, Options} from "./common/common";
 export * from "./common/i18n";
  
 class App extends Component {
@@ -58,6 +58,7 @@ class App extends Component {
 
     componentDidMount(){
         $glVars.feedback.addObserver("App", this.onFeedback); 
+        window.document.title = `${window.document.title} | ${Options.appVersion()}`; 
     }
 
     componentWillUnmount(){

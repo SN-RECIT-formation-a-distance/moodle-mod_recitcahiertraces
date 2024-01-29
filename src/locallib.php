@@ -117,7 +117,7 @@ class recitcahiertraces_portfolio_caller extends portfolio_module_caller_base {
                 $content .= '</blockquote>';
                 
                 if(strlen($note->feedback) > 0){
-                    $content .= sprintf('<div class="alert alert-primary teacher-feedback" role="alert"><strong>%s:</strong><br/>%s</div>', get_string('teacherFeedback', 'mod_recitcahiertraces'), $note->feedback);
+                    $content .= sprintf('<div class="alert alert-primary teacher-feedback" role="alert"><strong>%s:</strong><br/>%s</div>', get_string('teacherfeedback', 'mod_recitcahiertraces'), $note->feedback);
                 }
                 
                 $content .= "</div>";

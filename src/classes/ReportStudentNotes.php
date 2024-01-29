@@ -51,13 +51,31 @@ $roles = Utils::getUserRoles($course->id, $USER->id);
 if(!Utils::isAdminRole($roles)){
     // if not admin then the user has the right to see its own notes
     if($userId != $USER->id){
-        die(get_string('forbiddenAccess', 'mod_recitcahiertraces'));
+        die(get_string('forbiddenaccess', 'mod_recitcahiertraces'));
     }
 }
 
 
 $userNotes = PersistCtrl::getInstance($DB, $USER)->getUserNotes($cmId, $userId);
-$student = current(current(PersistCtrl::getInstance()->getEnrolledUserList($cmId, $userId)));
+
+$currentStudent = new stdClass();
+$currentStudent->userName = "";
+$currentStudent->groups = array();
+
+$enrolledUserList = PersistCtrl::getInstance()->getEnrolledUserList($cmId);
+foreach($enrolledUserList as $studentList){
+    foreach($studentList as $student){        
+        if($student->userId != $userId){
+            continue;
+        }
+
+        $currentStudent->userName = $student->userName;
+
+        if($student->groupId != -1){
+            $currentStudent->groups[] = $student->groupName;
+        }
+    }
+}
 
 if(empty($userNotes)){
     echo "<h5>".get_string('nodata', 'mod_recitcahiertraces')."</h5>";
@@ -66,7 +84,7 @@ if(empty($userNotes)){
 
 $userNote = current(current($userNotes));
 
-$pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahiertraces'), $userNote->noteDef->group->ct->name, get_string('printedOn', 'mod_recitcahiertraces'), date('Y-m-d H:i:s'));
+$pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahiertraces'), $userNote->noteDef->group->ct->name, get_string('printedon', 'mod_recitcahiertraces'), date('Y-m-d H:i:s'));
 ?>
 
 <!DOCTYPE html>
@@ -83,7 +101,7 @@ $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahie
         <header class='Header'>
             <div style='flex-grow: 1'>
                 <div class='Title'><?php echo get_string('pluginname', 'mod_recitcahiertraces'); ?></div>
-                <div class='Subtitle'><?php echo sprintf("%s | %s | %s", $userNote->noteDef->group->ct->name, $student->userName, $student->groupName) ; ?></div>
+                <div class='Subtitle'><?php echo sprintf("%s | %s | %s", $userNote->noteDef->group->ct->name, $currentStudent->userName, implode(", ", $currentStudent->groups));  ?></div>
             </div>
             <div class='Logo'><img src='<?php echo $brandImage; ?>' alt='brand logo'/></div>
         </header>
@@ -98,7 +116,7 @@ $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahie
             foreach($group as $note){
                 // overflow = hidden for the notes that overflow the page dimensions
                 echo "<div class='note-container'>";
-                echo sprintf("<div class='text-muted'><strong>%s:</strong> %s</div>",  get_string('noteTitle', 'mod_recitcahiertraces'), $note->noteDef->title);
+                echo sprintf("<div class='text-muted'><strong>%s:</strong> %s</div>",  get_string('notetitle', 'mod_recitcahiertraces'), $note->noteDef->title);
                 
                 echo sprintf("<div class='alert alert-secondary student-note'>%s</div>", $note->noteContent->text);
 
@@ -108,7 +126,7 @@ $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahie
                 echo '</blockquote>';
                 
                 if(($showFeedback) && (strlen($note->feedback) > 0)){
-                    echo sprintf('<div class="alert alert-primary teacher-feedback" role="alert"><strong>%s:</strong><br/>%s</div>', get_string('teacherFeedback', 'mod_recitcahiertraces'), $note->feedback);
+                    echo sprintf('<div class="alert alert-primary teacher-feedback" role="alert"><strong>%s:</strong><br/>%s</div>', get_string('teacherfeedback', 'mod_recitcahiertraces'), $note->feedback);
                 }
                 
                 echo "</div>";

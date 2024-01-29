@@ -36,7 +36,17 @@ function recitcahiertraces_strings_for_js() {
     global $PAGE; 
 
     $PAGE->requires->strings_for_js(array(
-        'pluginname','turnOnEditingMode','reset','infobs','preview','turnOffEditingMode','clonegroup','selectGroup','print','previousstudent','nextstudent','selectUser','selectOption','previous','next','activity','noteTitle','templateNote','studentNote','teacherFeedback','edit','close','save','remove','cancel','copy','selectSectionActivity','integrationCode','addNewNote','msgActionCompleted','msgConfirmDeletion','msgDeletionExtraInfo','nodata','recitcahiertraces:viewadmin','recitcahiertraces:view','recitcahiertraces:addinstance','printNotes','note','suggestednote','timestamp','printedOn','forbiddenAccess','msgCCSeqPos','course','module','report','full_name','email','tags','typeToSearch','messageprovider:note_updated','group','suggestedresponse','invalidargument', 'newupdateinnote','msgsuccess','saveandclose','student','progress','notenotcompleted','notenotrestored','feedbackrequired','givefeedback','feedbackmissing','viewnotes','mynotes','notegroup','title','notifyteacheruponupdate','position','yes','no','notetemplate','teachertips','selectnotegroup','addgroup','ordergroup','order','importcc','addnote','deletegroup','editgroup','groupname','moveitem','nblines','color','savebtn','savebtndesc','resetbtn','resetbtndesc','createintegrationcode'   ), 'mod_recitcahiertraces');
+        'pluginname','turnoneditingmode','reset','infobs','preview','turnoffeditingmode','clonegroup','selectgroup','print','previousstudent',
+        'nextstudent','selectuser','selectoption','previous','next','activity','notetitle','templatenote','studentnote','teacherfeedback','edit',
+        'close','save','remove','cancel','copy','selectsectionactivity','integrationcode','addnewnote','msgactioncompleted','msgconfirmdeletion',
+        'msgdeletionextrainfo','nodata','recitcahiertraces:viewadmin','recitcahiertraces:view','recitcahiertraces:addinstance','printnotes','note',
+        'suggestednote','timestamp','printedon','forbiddenaccess','course','module','report','full_name','email','tags','messageprovider:note_updated',
+        'group','suggestedresponse','invalidargument', 'newupdateinnote','msgsuccess','saveandclose','student','progress','notenotcompleted',
+        'notenotrestored','feedbackrequired','givefeedback','feedbackmissing','viewnotes','mynotes','notegroup','title','notifyteacheruponupdate',
+        'position','yes','no','notetemplate','teachertips','selectnotegroup','addgroup','ordergroup','order','importcc','addnote','deletegroup',
+        'editgroup','groupname','moveitem','nblines','color','savebtn','savebtndesc','resetbtn','resetbtndesc','createintegrationcode',
+        'btnshape','btnlook'),
+         'mod_recitcahiertraces');
 }
 /**
  * List of features supported in recitcahiertraces module

@@ -229,7 +229,7 @@ class ViewRequiredNotes extends Component{
                             <DataGrid.Header.Cell style={{width: 80}}>{"#"}</DataGrid.Header.Cell>
                             <DataGrid.Header.Cell >{i18n.get_string('activity')}</DataGrid.Header.Cell>
                             <DataGrid.Header.Cell >{i18n.get_string('student')}</DataGrid.Header.Cell>
-                            <DataGrid.Header.Cell >{i18n.get_string('noteTitle')}</DataGrid.Header.Cell>
+                            <DataGrid.Header.Cell >{i18n.get_string('notetitle')}</DataGrid.Header.Cell>
                             <DataGrid.Header.Cell style={{width: 80}}></DataGrid.Header.Cell>
                         </DataGrid.Header.Row>
                     </DataGrid.Header>
@@ -596,7 +596,7 @@ class NavActivities extends Component{
     createFeedbackView(index, item){
         let text = (item.feedback.length === 0 ? '<span style="opacity: .6">'+i18n.get_string('givefeedback')+'</span>' : item.feedbackFiltered);
         let result = 
-            <div className="balon1 p-2 m-0 position-relative d-flex" data-is={i18n.get_string('teacherFeedback')} key={"key"+index} style={{justifyContent: 'flex-end', alignItems: 'flex-start'}}>
+            <div className="balon1 p-2 m-0 position-relative d-flex" data-is={i18n.get_string('teacherfeedback')} key={"key"+index} style={{justifyContent: 'flex-end', alignItems: 'flex-start'}}>
                 {this.props.isTeacher && <Button className="" onClick={() => this.props.onEdit(item)} title={i18n.get_string('edit')} variant="link"><FontAwesomeIcon icon={faPencilAlt}/></Button>}
                 {this.props.isTeacher && item.noteDef.suggestedNote.length > 0 && <Button className="" onClick={() => this.onSendSuggestedNote(item)} title="Envoyer la réponse suggérée" variant="link"><FontAwesomeIcon icon={faCopy}/></Button>}
                 <div className="balon1-content"  style={{minWidth: "30%", minHeight: "3rem"}} dangerouslySetInnerHTML={{ __html: text }}></div>
@@ -693,7 +693,7 @@ export class TeacherNotebook extends Component{
                     <Tab eventKey={"2"} title={<span><FontAwesomeIcon icon={faTasks}/> {i18n.get_string('progress')}</span>}>
                         <ViewProgression show={(this.state.tab === "2")} style={{padding: "1rem"}} onDetail={this.onProgressionDetail} enrolledUserList={this.state.enrolledUserList}/>
                     </Tab>
-                    <Tab eventKey={"3"} title={<span><FontAwesomeIcon icon={faPrint}/> {i18n.get_string('printNotes')}</span>}>
+                    <Tab eventKey={"3"} title={<span><FontAwesomeIcon icon={faPrint}/> {i18n.get_string('printnotes')}</span>}>
                         <ViewPrintingNotes style={{padding: "1rem"}} enrolledUserList={this.state.enrolledUserList}/>
                     </Tab>
                 </Tabs>
@@ -879,8 +879,8 @@ class GroupUserSelect extends Component{
                 <Row>
                     <Col sm={6}>
                         <Form.Group as={Col}>
-                            <Form.Label>{i18n.get_string('selectGroup')}:</Form.Label>
-                            <ComboBox placeholder={i18n.get_string('selectOption')} options={this.state.groupList} onChange={this.onSelectGroup} value={this.state.selectedGroupId}/>
+                            <Form.Label>{i18n.get_string('selectgroup')}:</Form.Label>
+                            <ComboBox placeholder={i18n.get_string('selectoption')} options={this.state.groupList} onChange={this.onSelectGroup} value={this.state.selectedGroupId}/>
                         </Form.Group>
                     </Col>
                     {this.props.onSelectUser !== null && 
@@ -888,8 +888,8 @@ class GroupUserSelect extends Component{
                             <Row>
                                 <Col sm={12}>
                                     <Form.Group  as={Col}>
-                                        <Form.Label>{i18n.get_string('selectUser')}:</Form.Label>
-                                        <ComboBox placeholder={i18n.get_string('selectOption')} options={this.state.userListFiltered} onChange={this.onSelectUser} value={value} style={{float: "left", width: "90%"}}/>
+                                        <Form.Label>{i18n.get_string('selectuser')}:</Form.Label>
+                                        <ComboBox placeholder={i18n.get_string('selectoption')} options={this.state.userListFiltered} onChange={this.onSelectUser} value={value} style={{float: "left", width: "90%"}}/>
                                         <ButtonGroup style={{display: "flex"}}>
                                             <Button variant="link" onClick={this.onPrevious} disabled={(this.state.selectedUserIndex <= -1)}><FontAwesomeIcon icon={faArrowLeft}/></Button>
                                             <Button variant="link" onClick={this.onNext} disabled={(this.state.userListFiltered.length <= (this.state.selectedUserIndex + 1))}><FontAwesomeIcon icon={faArrowRight}/></Button>

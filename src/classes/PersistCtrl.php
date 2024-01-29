@@ -645,6 +645,11 @@ class PersistCtrl extends MoodlePersistCtrl
         
         $result = $this->getRecordsSQL($query, [$cmId]);
         foreach($result as $item){
+            if(empty($item->groupIds)){
+                $item->groupIds = array();
+                continue;
+            }
+            
             $item->groupIds = array_map('intval', explode(",", $item->groupIds));
         }
 

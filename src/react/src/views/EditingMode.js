@@ -118,7 +118,7 @@ class NoteForm extends Component
                         <Form.Row>
                             <Form.Group as={Col}>
                                 <Form.Label>{i18n.get_string('notegroup')+":"}</Form.Label>
-                                <ComboBox placeholder={i18n.get_string('selectOption')} required={true}  name="gId" value={data.gId} options={this.state.dropdownLists.groupList} onChange={this.onDataChange} />
+                                <ComboBox placeholder={i18n.get_string('selectoption')} required={true}  name="gId" value={data.gId} options={this.state.dropdownLists.groupList} onChange={this.onDataChange} />
                             </Form.Group>
                         </Form.Row>
                         <Form.Row>
@@ -398,7 +398,7 @@ export class EditionMode extends Component{
                     <Form.Row>
                         <Form.Group as={Col}>
                             <Form.Label>{i18n.get_string('selectnotegroup')+":"}</Form.Label>
-                            <ComboBox placeholder={i18n.get_string('selectOption')} value={(this.state.selectedGroup !== null ? this.state.selectedGroup.id : 0)} options={this.state.groupList} onChange={this.onSelectGroup} />
+                            <ComboBox placeholder={i18n.get_string('selectoption')} value={(this.state.selectedGroup !== null ? this.state.selectedGroup.id : 0)} options={this.state.groupList} onChange={this.onSelectGroup} />
                         </Form.Group>
                     </Form.Row>
                 </Form>
@@ -424,7 +424,7 @@ export class EditionMode extends Component{
                             <DataGrid.Header.Cell style={{width: 40}}></DataGrid.Header.Cell>
                             <DataGrid.Header.Cell style={{width: 80}}>{"#"}</DataGrid.Header.Cell>
                             <DataGrid.Header.Cell >{i18n.get_string('note')}</DataGrid.Header.Cell>
-                            <DataGrid.Header.Cell style={{width: 200}}>{i18n.get_string('integrationCode')}</DataGrid.Header.Cell>
+                            <DataGrid.Header.Cell style={{width: 200}}>{i18n.get_string('integrationcode')}</DataGrid.Header.Cell>
                             <DataGrid.Header.Cell  style={{width: 120}}></DataGrid.Header.Cell>
                         </DataGrid.Header.Row>
                     </DataGrid.Header> 
@@ -440,7 +440,7 @@ export class EditionMode extends Component{
                                             <ButtonGroup size="sm">
                                                 <Button onClick={() => this.onEditNote(item.id)} title={i18n.get_string('edit')} variant="outline-primary"><FontAwesomeIcon icon={faPencilAlt}/></Button>
                                                 <Button onClick={() => this.onRemoveNote(item)} title={i18n.get_string('remove')} variant="outline-primary"><FontAwesomeIcon icon={faTrashAlt}/></Button>
-                                                <Button onClick={() => this.onCopy(item.intCode)} title={i18n.get_string('integrationCode')} variant="outline-primary"><FontAwesomeIcon icon={faCopy}/></Button>
+                                                <Button onClick={() => this.onCopy(item.intCode)} title={i18n.get_string('integrationcode')} variant="outline-primary"><FontAwesomeIcon icon={faCopy}/></Button>
                                             </ButtonGroup>
                                         </DataGrid.Body.Cell>
                                     </DataGrid.Body.RowDraggable>
@@ -471,7 +471,7 @@ export class EditionMode extends Component{
                 $glVars.feedback.showError(i18n.get_string('pluginname'), result.msg);
             }
         }
-        if(window.confirm(i18n.get_string('msgConfirmDeletion'))){
+        if(window.confirm(i18n.get_string('msgconfirmdeletion'))){
             $glVars.webApi.removeNoteGroup($glVars.urlParams.id, this.state.selectedGroup.id, callback);
         }
     }
@@ -550,7 +550,7 @@ export class EditionMode extends Component{
             }
         }
 
-        if(window.confirm(i18n.get_string('msgConfirmDeletion'))){
+        if(window.confirm(i18n.get_string('msgconfirmdeletion'))){
             $glVars.webApi.removeNote(item.id, $glVars.urlParams.id, callback);
         }
     }    
@@ -606,8 +606,8 @@ class ModalGenerateIntCode extends Component{
                         <Form.Label>{i18n.get_string('savebtn')} <HelpButton helpText={<>
                 <span>{i18n.get_string('infobs')}</span>
                 <br/>
-                <a href="https://getbootstrap.com/docs/4.6/utilities/borders/#border-radius" target="_blank">{M.util.get_string('btnshape', 'atto_recitautolink')} <i className='p-1 fa fa-info-circle'></i> </a><br/>
-                <a href="https://getbootstrap.com/docs/4.6/components/buttons/" target="_blank">{M.util.get_string('btnlook', 'atto_recitautolink')} <i className='p-1 fa fa-info-circle'></i> </a>
+                <a href="https://getbootstrap.com/docs/4.6/utilities/borders/#border-radius" target="_blank">{i18n.get_string('btnshape')} <i className='p-1 fa fa-info-circle'></i> </a><br/>
+                <a href="https://getbootstrap.com/docs/4.6/components/buttons/" target="_blank">{i18n.get_string('btnlook')} <i className='p-1 fa fa-info-circle'></i> </a>
                 </>}/></Form.Label>
                         <Form.Control type="text" value={this.state.data.btnSaveVariant} name="btnSaveVariant" onChange={this.onDataChange}/>
                         <Form.Text className="text-muted">{i18n.get_string('savebtndesc')}</Form.Text>
@@ -624,8 +624,8 @@ class ModalGenerateIntCode extends Component{
                         <Form.Label>{i18n.get_string('resetbtn')} <HelpButton helpText={<>
                 <span>{i18n.get_string('infobs')}</span>
                 <br/>
-                <a href="https://getbootstrap.com/docs/4.6/utilities/borders/#border-radius" target="_blank">{M.util.get_string('btnshape', 'atto_recitautolink')} <i className='p-1 fa fa-info-circle'></i> </a><br/>
-                <a href="https://getbootstrap.com/docs/4.6/components/buttons/" target="_blank">{M.util.get_string('btnlook', 'atto_recitautolink')} <i className='p-1 fa fa-info-circle'></i> </a>
+                <a href="https://getbootstrap.com/docs/4.6/utilities/borders/#border-radius" target="_blank">{i18n.get_string('btnshape')} <i className='p-1 fa fa-info-circle'></i> </a><br/>
+                <a href="https://getbootstrap.com/docs/4.6/components/buttons/" target="_blank">{i18n.get_string('btnlook')} <i className='p-1 fa fa-info-circle'></i> </a>
                 </>}/></Form.Label>
                         <Form.Control type="text" value={this.state.data.btnResetVariant} name="btnResetVariant" onChange={this.onDataChange}/>
                         <Form.Text className="text-muted">{i18n.get_string('resetbtndesc')}</Form.Text>
