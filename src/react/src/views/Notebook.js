@@ -786,8 +786,8 @@ class ActionBar extends Component{
     render(){
         let main = 
             <div style={{marginBottom: "1rem"}}>
-                <a className='btn btn-outline-primary' href={this.getPrintLink(1)} target="_blank"><FontAwesomeIcon icon={faPrint}/>{" Imprimer des notes"}</a>
-                {$glVars.signedUser.portfolioUrl && <a href={$glVars.signedUser.portfolioUrl} className='btn btn-outline-primary' target="_blank" style={{marginLeft:'15px'}}><FontAwesomeIcon icon={faFileExport}/>{" Exporter des notes vers portfolio"}</a>}
+                <a className='btn btn-outline-primary' href={this.getPrintLink(1)} target="_blank"><FontAwesomeIcon icon={faPrint}/>{` ${i18n.get_string('printnotes')}`}</a>
+                {$glVars.signedUser.portfolioUrl && <a href={$glVars.signedUser.portfolioUrl} className='btn btn-outline-primary' target="_blank" style={{marginLeft:'15px'}}><FontAwesomeIcon icon={faFileExport}/>{` ${i18n.get_string('exportnotesportfolio')}`}</a>}
             </div>;
 
         return main;

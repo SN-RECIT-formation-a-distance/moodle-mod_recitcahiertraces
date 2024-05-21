@@ -49,6 +49,7 @@ $string['recitcahiertraces:view'] = "View";
 $string['recitcahiertraces:accessallgroups'] = 'Whether or not the user can see all group data even if they are not in that group';
 $string['recitcahiertraces:addinstance'] = "Add instance";
 $string['printnotes'] = "Print Notes";
+$string['exportnotesportfolio'] = "Export notes to portfolio";
 $string['note'] = "Note";
 $string['suggestednote'] = "Suggested Notes";
 $string['timestamp'] = "Timestamp";

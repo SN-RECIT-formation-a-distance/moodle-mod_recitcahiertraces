@@ -45,7 +45,7 @@ function recitcahiertraces_strings_for_js() {
         'notenotrestored','feedbackrequired','givefeedback','feedbackmissing','viewnotes','mynotes','notegroup','title','notifyteacheruponupdate',
         'position','yes','no','notetemplate','teachertips','selectnotegroup','addgroup','ordergroup','order','importcc','addnote','deletegroup',
         'editgroup','groupname','moveitem','nblines','color','savebtn','savebtndesc','resetbtn','resetbtndesc','createintegrationcode',
-        'btnshape','btnlook'),
+        'btnshape','btnlook', 'exportnotesportfolio'),
          'mod_recitcahiertraces');
 }
 /**
