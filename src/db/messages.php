@@ -26,7 +26,7 @@ $messageproviders = array (
      // Notify teacher that a student has submitted a note
      'note_updated' => array (
         'defaults' => [
-            'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_LOGGEDIN + MESSAGE_DEFAULT_LOGGEDOFF,
+            'popup' => MESSAGE_PERMITTED + MESSAGE_DEFAULT_ENABLED,
             'email' => MESSAGE_DISALLOWED
         ],
          // no capability means that the notifications are available to all users
