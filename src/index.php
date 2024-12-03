@@ -20,13 +20,24 @@
  * @copyright 2019 RÉCIT FAD
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+namespace recitcahiertraces;
 
+require_once('../../config.php');
+require_once(dirname(__FILE__) . "/classes/MainView.php");
+require_once(dirname(__FILE__) . "/lib.php");
 
-require('../../config.php');
+// For this type of page this is the course id.
+$id = required_param('id', PARAM_INT);
 
-$id = required_param('id', PARAM_INT); // course id
+$course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
 
-$course = $DB->get_record('course', array('id'=>$id), '*', MUST_EXIST);
+require_login($course);
 
-require_course_login($course, true);
-$PAGE->set_pagelayout('incourse');
+$USER->preference['htmleditor'] = 'atto';//Force atto
+recitcahiertraces_strings_for_js();
+
+$PAGE->set_url('/mod/recitcahiertraces/index.php', array('id' => $id));
+$PAGE->set_title($course->shortname);
+
+$view = new MainView($PAGE, $course, $OUTPUT, $USER, $DB, $CFG);
+$view->display();
