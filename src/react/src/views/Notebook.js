@@ -41,7 +41,7 @@ class ViewPrintingNotes extends Component{
 
         this.onSelectUser = this.onSelectUser.bind(this);
 
-        this.state = {userId: 0};
+        this.state = {user: {id: 0, name: ''}};
     }
 
     render(){
@@ -50,8 +50,8 @@ class ViewPrintingNotes extends Component{
                 <GroupUserSelect dataProvider={this.props.enrolledUserList} onSelectUser={this.onSelectUser}/>
 
                 <hr/>
-                {this.state.userId > 0 &&
-                   <ActionBar gId={$glVars.urlParams.id} userId={this.state.userId}/>              
+                {this.state.user.id > 0 &&
+                   <ActionBar gId={$glVars.urlParams.id} user={this.state.user}/>              
                 }            
                           
             </div>;
@@ -60,7 +60,7 @@ class ViewPrintingNotes extends Component{
     }
 
     onSelectUser(userId, username){
-        this.setState({userId: userId});
+        this.setState({user: {id: userId, name: username}});
     }
 }
 
@@ -744,7 +744,7 @@ export class StudentNotebook extends Component{
             <div>  
                 {this.state.data.userId > 0 &&
                     <div>
-                        <ActionBar userId={this.state.data.userId}/>
+                        <ActionBar user={{id: this.state.data.userId, name: ''}}/>
                         <hr/>
                         <NavActivities userId={this.state.data.userId} onEdit={this.onEdit}/>
                         {this.state.data.nId > 0 && 
@@ -780,13 +780,18 @@ export class StudentNotebook extends Component{
 
 class ActionBar extends Component{
     static defaultProps = {
-        userId: 0
+        user: {id: 0, name: ''}
     };
 
     render(){
+        let btnText = ` ${i18n.get_string('printnotes')}`;
+        btnText = (this.props.user.name.length > 0 ? `${btnText} (${this.props.user.name})` : btnText);
+
         let main = 
             <div style={{marginBottom: "1rem"}}>
-                <a className='btn btn-outline-primary' href={this.getPrintLink(1)} target="_blank"><FontAwesomeIcon icon={faPrint}/>{` ${i18n.get_string('printnotes')}`}</a>
+                <a className='btn btn-outline-primary' href={this.getPrintLink(1)} target="_blank">
+                    <FontAwesomeIcon icon={faPrint}/>{btnText}
+                </a>
                 {$glVars.signedUser.portfolioUrl && <a href={$glVars.signedUser.portfolioUrl} className='btn btn-outline-primary' target="_blank" style={{marginLeft:'15px'}}><FontAwesomeIcon icon={faFileExport}/>{` ${i18n.get_string('exportnotesportfolio')}`}</a>}
             </div>;
 

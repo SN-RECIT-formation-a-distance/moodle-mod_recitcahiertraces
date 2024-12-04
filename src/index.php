@@ -28,5 +28,49 @@ $id = required_param('id', PARAM_INT); // course id
 
 $course = $DB->get_record('course', array('id'=>$id), '*', MUST_EXIST);
 
-require_course_login($course, true);
+require_login($course);
+
+$strpluginname = get_string("modulenameplural", "recitcahiertraces");
+$PAGE->set_url('/mod/recitcahiertraces/index.php', ['id' => $id]);
 $PAGE->set_pagelayout('incourse');
+$PAGE->set_title($course->shortname . ' - ' . $strpluginname);
+$PAGE->set_heading($course->fullname);
+
+echo $OUTPUT->header();
+
+// Get all the appropriate data.
+if (!$modList = get_all_instances_in_course("recitcahiertraces", $course, $USER->id)) {
+    notice(get_string('thereareno', 'moodle', $strpluginname), "../../course/view.php?id=$course->id");
+    die;
+}
+
+echo "<h3>".get_string("modulenameplural", "recitcahiertraces")."</h3>";
+echo "<table class='table table-striped'>";
+echo "<thead>";
+echo "<tr>";
+echo "<th>".get_string('section')."</th>";
+echo "<th>".get_string('name')."</th>";
+echo "</tr>";
+echo "</thead>";
+echo "<tbody>";
+
+$sectionid = 0;
+$sectionname = "";
+
+foreach($modList as $mod){
+    if($sectionid != $mod->section){
+        $sectionname = get_section_name($course, $mod->section);
+        $sectionid = $mod->section;
+    }
+
+    echo "<tr>";
+    echo "<td>$sectionname</td>";
+    echo "<td><a target='_blank' href='{$CFG->wwwroot}/mod/recitcahiertraces/view.php?id={$mod->coursemodule}'>{$mod->name}</a></td>";
+    echo "</tr>";
+}
+
+echo "</tbody>";
+echo "</table>";
+
+echo $OUTPUT->footer();
+

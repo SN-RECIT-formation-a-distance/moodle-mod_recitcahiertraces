@@ -25,6 +25,6 @@ defined('MOODLE_INTERNAL') || die();
 $plugin->version   = 2024071802;        // The current module version (Date: YYYYMMDDXX)
 $plugin->requires  = 2022041912.00; // Moodle 4.0
 $plugin->component = 'mod_recitcahiertraces';        // Full name of the plugin (used for diagnostics)
-$plugin->release = 'v2.4.0-stable'; 
+$plugin->release = 'v2.4.1-stable'; 
 $plugin->supported = [400, 405];      
 $plugin->maturity = MATURITY_STABLE; // MATURITY_ALPHA, MATURITY_BETA, MATURITY_RC or MATURITY_STABLE
