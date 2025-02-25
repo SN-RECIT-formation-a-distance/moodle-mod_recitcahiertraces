@@ -22,7 +22,7 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2021013100;        // The current module version (Date: YYYYMMDDXX)
+$plugin->version   = 2025013000;        // The current module version (Date: YYYYMMDDXX)
 $plugin->requires  = 2024071200.00; // Moodle 4.5.0
 $plugin->component = 'mod_recitcahiertraces';        // Full name of the plugin (used for diagnostics)
 $plugin->release = 'v3.0.0-stable'; 
