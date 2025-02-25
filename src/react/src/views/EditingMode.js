@@ -403,7 +403,7 @@ export class EditionMode extends Component{
                     </Form.Row>
                 </Form>
                 <ButtonToolbar style={{justifyContent: 'space-between'}}>
-                    <ButtonGroup className="mr-4" >
+                    <ButtonGroup className="mr-4 mb-4" >
                         <Button variant="primary" disabled={this.state.selectedGroup === null} onClick={this.onAddNote}><FontAwesomeIcon icon={faPlusCircle}/> {i18n.get_string('addnote')}</Button>
                     </ButtonGroup>
                     <ButtonGroup className="mr-4">
