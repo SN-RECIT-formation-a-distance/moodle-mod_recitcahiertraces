@@ -799,7 +799,7 @@ class ActionBar extends Component{
     }
 
     getPrintLink(showFeedback){
-        return UtilsMoodle.wwwRoot()+`/mod/recitcahiertraces/classes/ReportStudentNotes.php?cmId=${$glVars.urlParams.id}&userId=${this.props.userId}&sf=${showFeedback || 0}`;
+        return UtilsMoodle.wwwRoot()+`/mod/recitcahiertraces/classes/ReportStudentNotes.php?cmId=${$glVars.urlParams.id}&userId=${this.props.user.id}&sf=${showFeedback || 0}`;
     }
 
 }

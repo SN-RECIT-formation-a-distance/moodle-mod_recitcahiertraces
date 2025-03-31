@@ -45,18 +45,6 @@ $capabilities = array(
                'manager' => CAP_ALLOW
            ),
        ),
-
-       'mod/recitcahiertraces:accessallgroups' => array(
-              'riskbitmask' => RISK_XSS,
-      
-              'captype' => 'write',
-              'contextlevel' => CONTEXT_COURSE,
-              'archetypes' => array(
-                  'editingteacher' => CAP_ALLOW,
-                  'teacher' => CAP_PREVENT,
-                  'manager' => CAP_ALLOW
-              ),
-          ),
     
     'mod/recitcahiertraces:addinstance' => array(
         'riskbitmask' => RISK_XSS,

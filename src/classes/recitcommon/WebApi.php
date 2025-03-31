@@ -296,10 +296,12 @@ abstract class MoodleApi extends AWebApi
             $courseId = $course->id;
             $userId = $USER->id;
             $ownGroup = true;
-            $ccontext = \context_course::instance($courseId);
-            if (has_capability('mod/recitcahiertraces:accessallgroups', $ccontext, $userId, false)) {
+            $context = \context_module::instance($cm->id);            
+            
+            $accessallgroups = ($course->groupmode != '1') || has_capability('moodle/site:accessallgroups', $context);
+            if ($accessallgroups) {
                 $ownGroup = false;
-                $userId = 0;
+                $userId = 0;  
             }
             $this->canUserAccess('a', 0, 0, $courseId);
             $tmp = PersistCtrl::getInstance()->getEnrolledUserList($cmId, $userId, $courseId, $ownGroup);

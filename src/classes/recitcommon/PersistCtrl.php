@@ -118,8 +118,10 @@ abstract class MoodlePersistCtrl extends APersistCtrl{
         }
         
         $groupStmt = " true ";
+        $groupStmt2 = " true ";
         if($ownGroup){
             $groupStmt = "t4.groupid in (select groupid from {groups_members} where userid = :user3)";
+            $groupStmt2 = " false ";
             $vars['user3'] = $userId;
         }
 
@@ -143,7 +145,7 @@ abstract class MoodlePersistCtrl extends APersistCtrl{
         from {enrol} t1
         inner join {user_enrolments} t2 on t1.id = t2.enrolid
         inner join {user} t3 on t2.userid = t3.id and t3.suspended = 0 and t3.deleted = 0
-        where $cmStmt2 and $userStmt2 and $courseStmt2
+        where $cmStmt2 and $userStmt2 and $courseStmt2 and $groupStmt2
         order by user_name asc)";
         
         $tmp = $this->getRecordsSQL($query, $vars);
