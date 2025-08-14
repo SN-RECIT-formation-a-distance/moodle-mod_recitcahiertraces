@@ -134,7 +134,7 @@ abstract class MoodlePersistCtrl extends APersistCtrl{
 
         $vars['str'] = get_string("nogroup", 'mod_recitcahiertraces');
         $vars['str2'] = get_string("nogroup", 'mod_recitcahiertraces');
-        $query = "(select ".$this->mysqlConn->sql_concat('t3.id', "' '", 't5.id')." uniqueId, t1.id, t1.enrol, t1.courseid course_id, t3.id user_id,".$this->mysqlConn->sql_concat("t3.firstname", "' '", "t3.lastname")." user_name, coalesce(t5.id,-1) group_id, 
+        $query = "(select uuid() uniqueId, t1.id, t1.enrol, t1.courseid course_id, t3.id user_id,".$this->mysqlConn->sql_concat("t3.firstname", "' '", "t3.lastname")." user_name, coalesce(t5.id,-1) group_id, 
             coalesce(t5.name, :str) group_name 
             from {enrol} t1
         inner join {user_enrolments} t2 on t1.id = t2.enrolid
@@ -144,7 +144,7 @@ abstract class MoodlePersistCtrl extends APersistCtrl{
         where (t1.courseid = t5.courseid) and $cmStmt and $userStmt and $courseStmt
         order by group_name asc, user_name asc)
         union
-        (select ".$this->mysqlConn->sql_concat('t2.id', "' '", 't3.id')." uniqueId, t1.id, t1.enrol, t1.courseid course_id, t3.id user_id, ".$this->mysqlConn->sql_concat("t3.firstname", "' '", "t3.lastname")." user_name, -1 group_id, :str2 group_name 
+        (select uuid() uniqueId, t1.id, t1.enrol, t1.courseid course_id, t3.id user_id, ".$this->mysqlConn->sql_concat("t3.firstname", "' '", "t3.lastname")." user_name, -1 group_id, :str2 group_name 
         from {enrol} t1
         inner join {user_enrolments} t2 on t1.id = t2.enrolid
         inner join {user} t3 on t2.userid = t3.id and t3.suspended = 0 and t3.deleted = 0
