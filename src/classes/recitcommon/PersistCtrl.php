@@ -79,12 +79,27 @@ abstract class MoodlePersistCtrl extends APersistCtrl{
         $users = get_users_by_capability($coursecontext, 'mod/recitcahiertraces:viewadmin', '', '', '', '', null, null, false);
 
         foreach($users as $item){
+            $item->groupIds = array();
+
             if (!is_enrolled($coursecontext, $item->id)){//Ensure they are actually enrolled and not category manager
                 unset($item);
+                continue;
             }
+
+            // anomaly found at CSSBE, get_users_by_capability return an user with id = 0
+            if(empty($item->id) == null){
+                unset($item);
+                continue;
+            }
+
             $item->groupIds = groups_get_user_groups($courseId, $item->id);
             $item->groupIds = array_values(array_pop($item->groupIds));
+            
             unset($item->password);
+        }
+
+        if(empty($users)){
+            $users = array();
         }
 
         return $users;
