@@ -1,119 +1,110 @@
-export class EditorDecorator {
-    constructor(id){
-        this.init = this.init.bind(this);
-        this.onFocusOut = this.onFocusOut.bind(this);
+import React, { useState } from 'react';
+import ReactQuill, {Quill} from 'react-quill-new';
+import QuillTableBetter from 'quill-table-better';
+import { Button, ButtonGroup} from 'react-bootstrap';
+import {faCode, faEye, faPencilAlt} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import CodeMirror from '@uiw/react-codemirror';
+import { html, htmlLanguage } from '@codemirror/lang-html';
+import { EditorView } from '@codemirror/view';
+import 'react-quill-new/dist/quill.snow.css';
+import 'quill-table-better/dist/quill-table-better.css'
+var beautifyingHTML = require("pretty");
 
-		this.id = id;
-        this.dom = document.getElementById(this.id);
-        this.format = this.dom.getAttribute("data-format");
-        this.onFocusOutCallback = null;
+Quill.register({
+  'modules/table-better': QuillTableBetter
+}, true);
 
-        this.init();
+
+export class TextEditor extends React.Component {
+    static id = 0;
+    static defaultProps = {
+        onClose: null,
+        onSave: null,
+        element: null,
+        height: '275px',
+        quillOnly: true,
+    };
+
+
+    constructor(props){
+        super(props);
+
+        this.editorRef = React.createRef();
+        this.id = TextEditor.id;
+        TextEditor.id = this.id + 1;
+
+        this.initModules();
+        this.state = {view: 'source'};
     }
 
-    checkDom(){
-        return (this.dom !== null);
-    }
-
-    init(){
-        if(!this.checkDom()){ return; }
-
-        switch(this.format){
-            case 'editor_tiny\\editor':
-                break;
-            case 'atto_texteditor':
-                break;
-            case 'recit_rich_editor': // created manually
-                window.RecitRichEditorCreateInstance(this.dom, null, 'word');
-                break;
-            case 'recit_texteditor':    // created by Utils.createEditor
-                break;
+    componentDidMount(){
+        let view = this.props.value.length > 1 ? 'preview' : 'text';
+        if (this.props.quillOnly){
+            view = 'text';
         }
+        this.setState({view: view})
     }
 
-    onFocusOut(){
-        if(!this.checkDom()){ return; }
+    render(){ 
 
-        if(this.onFocusOutCallback !== null){
-            this.onFocusOutCallback();
-        }
-    }
-
-    show(){
-        if(!this.checkDom()){ return; }
-        
-        switch(this.format){
-            case 'atto_texteditor':
-                let attoContent = this.dom.querySelector(".editor_atto_content");
+       let src = <>
+       <CodeMirror height={this.props.height} 
+       value={beautifyingHTML(this.props.value, {ocd: true})}
+       options={{
+         mode: 'htmlmixed',
+         lineNumbers: true,
+         lineWrapping: true
+       }}
+        extensions={[html({ base: htmlLanguage }), EditorView.lineWrapping]}
+        onChange={(e) => this.props.onChange(e)} />
+        </>;
             
-                if(attoContent.onblur === null){
-                    attoContent.onblur = this.onFocusOut;
-                }
-                break;
-            case 'editor_tiny\\editor':
-        }
+        return <>
+            {!this.props.quillOnly && <ButtonGroup className="mb-2">
+                <Button title='Afficher éditeur' variant={this.state.view == 'text' ? 'primary' : 'secondary'} onClick={() => this.setState({view: 'text'})}><FontAwesomeIcon icon={faPencilAlt}/> Éditeur</Button>
+                <Button title='Afficher le code source' variant={this.state.view == 'source' ? 'primary' : 'secondary'} onClick={() => this.setState({view: 'source'})}><FontAwesomeIcon icon={faCode}/> Code source</Button>
+                <Button title='Aperçu' variant={this.state.view == 'preview' ? 'primary' : 'secondary'} onClick={() => this.setState({view: 'preview'})}><FontAwesomeIcon icon={faEye}/> Aperçu</Button>
+            </ButtonGroup>}
 
-        this.dom.style.display = 'block';
+            {this.state.view == 'source' && src}
+            
+            {this.state.view == 'text' && <>
+                    <ReactQuill {...this.props} modules={this.modules} ref={this.editorRef}/>
+                </>}
+            
+            {this.state.view == 'preview' && 
+                <div dangerouslySetInnerHTML={{__html: this.props.value}} style={{overflow: 'hidden', maxWidth: '100%'}}></div>}
+            </>;
     }
 
-    close(){
-        this.setValue("");
-    }
-
-    setValue(value){
-        if(!this.checkDom()){ return; }
-
-        switch(this.format){
-            case 'atto_texteditor':
-                this.dom.getElementsByClassName("editor_atto_content")[0].innerHTML = value;
-                this.dom.querySelector(`[name="${this.id}[text]"]`).value = value;
-                //this.atto.editor.setHTML(value);
-                break;
-            case 'editor_tiny\\editor':
-                this.dom.getElementsByTagName("textarea")[0].value = value;
-                this.dom.querySelector('iframe').contentDocument.body.innerHTML = value;
-                break;
-            case 'textarea_texteditor':
-                this.dom.getElementsByTagName("textarea")[0].value = value;
-                break;
-            case 'recit_rich_editor':
-            case 'recit_texteditor':
-                this.dom.querySelector(`[data-recit-rich-editor="content"]`).innerHTML = value;
-                break;
-            default: 
-                alert("Editor: unknown format");
+    initModules(){
+        const toolbarOptions = [
+          ['bold', 'italic', 'underline', 'strike'],        // toggled buttons 
+          [{ 'list': 'ordered'}, { 'list': 'bullet' }, { 'list': 'check' }],
+          ['table-better'],
+          [{ 'indent': '-1'}, { 'indent': '+1' }],          // outdent/indent
+          [{ 'direction': 'rtl' }],                         // text direction
+        
+          [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+        
+          [{ 'color': [] }, { 'background': [] }],          // dropdown with defaults from theme
+          [{ 'font': [] }],
+          [{ 'align': [] }],
+        
+          ['clean'],                                        // remove formatting button
+        ];
+        
+        this.modules = {
+            'table-better': {
+              toolbarTable: true,
+              menus: ['column', 'row', 'merge', 'table', 'cell', 'wrap', 'copy', 'delete'],
+            },
+            keyboard: {
+              bindings: QuillTableBetter.keyboardBindings
+            },
+            toolbar: toolbarOptions,
         }
-    }
-
-    getValue(){        
-        let result  = {text: "", format: "", itemid: 0};
-
-        if(!this.checkDom()){ return result; }
-
-        switch(this.format){
-            case 'atto_texteditor':
-				for(let attr in result){
-					let name = `${this.id}[${attr}]`;
-					let el = this.dom.querySelector(`[name="${name}"]`);
-					if(el !== null){
-						result[attr] = el.value;
-                    }
-                }
-                break;
-            case 'textarea_texteditor':
-                result.text = this.dom.getElementsByTagName("textarea")[0].value;
-                break;
-            case 'recit_rich_editor':
-            case 'recit_texteditor':
-                result.text = this.dom.querySelector(`[data-recit-rich-editor="content"]`).innerHTML;
-                break;
-            case 'editor_tiny\\editor':
-                result.text = this.dom.querySelector('iframe').contentDocument.body.innerHTML
-                break;
-            default: 
-                alert("Editor: unknown format");
-        }
-
-        return result;
     }
 }
+ 

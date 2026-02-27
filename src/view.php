@@ -78,25 +78,10 @@ class MainView
         $roles = Utils::getUserRoles($this->course->id, $this->user->id);
         $studentId = (in_array('t', $roles) ? 0 : $this->user->id);
         $portfolioUrl = $this->getPortfolioUrl();
-        
-        echo $this->getEditorOption("recit_cahiertraces_editor", 1);        
-        echo $this->getEditorOption("recit_cahiertraces_editor", 2);
-        echo $this->getEditorOption("recit_cahiertraces_editor", 3);
 
         echo sprintf("<div id='recit_cahiertraces' data-student-id='%ld' data-roles='%s' %s></div>", $studentId, implode(",", $roles), $portfolioUrl);
         
         echo $this->output->footer();
-    }
-
-    protected function getEditorOption($name, $index){
-        $context = \context_course::instance($this->course->id);
-
-        /*if($this->editorOption == "2"){
-            return "<div id='{$name}_container_{$index}' data-format='recit_rich_editor' style='display: none;'></div>";
-        }
-        else{*/
-            return Utils::createEditorHtml(false, "{$name}_container_{$index}", "{$name}_{$index}", "", 15, $context, 0, 0);
-        //}
     }
 
     protected function getPortfolioUrl(){

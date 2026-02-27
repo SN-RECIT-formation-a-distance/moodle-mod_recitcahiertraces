@@ -28,7 +28,7 @@ import { Modal} from '../libs/components/Components';
 import {UtilsMoodle, JsNx} from '../libs/utils/Utils';
 import {$glVars} from '../common/common';
 import { i18n } from '../common/i18n';
-import { EditorDecorator } from '../libs/components/TextEditor';
+import { TextEditor } from '../libs/components/TextEditor';
 
 class PersonalNoteForm extends Component{
     static defaultProps = {        
@@ -59,8 +59,6 @@ class PersonalNoteForm extends Component{
         }
         this.state = {data: null, remoteData: null, dropdownLists: null, mode: mode, collapse: {note: true, suggestedNote: false, feedback: true}};
 
-        this.editorRef = React.createRef();
-        this.editorDec = new EditorDecorator(`recit_cahiertraces_editor_container_1`);
 
         this.props.setOnSave(this.onSave);
     }
@@ -69,20 +67,7 @@ class PersonalNoteForm extends Component{
         this.getData();     
     }  
 
-    componentWillUnmount(){
-        this.editorDec.close();
-        this.editorDec.dom.style.display = 'none';
-        document.body.appendChild(this.editorDec.dom);
-    }
-
     componentDidUpdate(prevProps){
-        if(this.editorRef.current !== null){
-            this.editorDec.show();        
-            
-            if(!this.editorRef.current.hasChildNodes()){
-                this.editorRef.current.appendChild(this.editorDec.dom);   
-            }
-        }
 
         if((prevProps.userId !== this.props.userId) || (prevProps.nId !== this.props.nId)){
             this.getData();
@@ -133,15 +118,14 @@ class PersonalNoteForm extends Component{
 
         // it is a student?
         if(this.state.mode === "s"){
-            this.editorDec.setValue(data.note.text);       
-            student = <div ref={this.editorRef}></div>;
+            //student = <TextEditor style={{height:'270px', marginBottom: '3rem'}} theme="snow" value={data.note.text} onChange={(value) => this.onDataChange({target: {value: value, name: 'noteText'}})} />;
+            student = <div style={styleText} dangerouslySetInnerHTML={{__html: data.note.text}}></div>;
             teacher = <div style={styleText} dangerouslySetInnerHTML={{__html: data.feedback}}></div>;
         }
         // it is a teacher
         else if(this.state.mode === "t"){
-            this.editorDec.setValue(data.feedback);       
-            teacher = <div ref={this.editorRef}></div>;
-            student =  <div style={styleText} dangerouslySetInnerHTML={{__html: data.note.text}}></div>;
+            teacher = <TextEditor style={{height:'270px', marginBottom: '3rem'}} theme="snow" value={data.feedback} onChange={(value) => this.onDataChange({target: {value: value, name: 'feedback'}})} />;
+            student = <div style={styleText} dangerouslySetInnerHTML={{__html: data.note.text}}></div>;
             suggestedNote = <div style={styleText} dangerouslySetInnerHTML={{__html: this.state.remoteData.noteDef.suggestedNote}}></div>;
         }
         else{
@@ -205,14 +189,8 @@ class PersonalNoteForm extends Component{
         let flags = {mode: this.state.mode, teacherFeedbackUpdated: 0};
 
         if(this.state.mode === "s"){
-            data.note.text = this.editorDec.getValue().text;
+            data.note.text = data.noteText;
         }
-        // it is a teacher
-        else if(this.state.mode === "t"){
-            let tmp = this.editorDec.getValue().text;
-            flags.teacherFeedbackUpdated = (tmp !== data.feedback ? 1 : 0);
-            data.feedback = tmp;
-        }        
 
         data.userId = this.props.userId;
 

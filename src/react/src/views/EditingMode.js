@@ -28,7 +28,7 @@ import {ComboBox, FeedbackCtrl, DataGrid, InputNumber, ToggleButtons, Modal} fro
 import {JsNx, UtilsMoodle} from '../libs/utils/Utils';
 import {$glVars} from '../common/common';
 import { i18n } from '../common/i18n';
-import { EditorDecorator } from '../libs/components/TextEditor';
+import { TextEditor } from '../libs/components/TextEditor';
 
 export class BtnModeEdition extends Component{
     static defaultProps = {
@@ -67,7 +67,6 @@ class NoteForm extends Component
         this.onSaveResult = this.onSaveResult.bind(this);
         this.prepareNewState = this.prepareNewState.bind(this);
         this.onClose = this.onClose.bind(this);
-        this.facadeUpdateEditor = this.facadeUpdateEditor.bind(this);
         
         this.state = {
             data: null,  
@@ -78,31 +77,10 @@ class NoteForm extends Component
         };
 
         this.formRef = React.createRef();
-        this.editorTemplateNoteRef = React.createRef();
-        this.editorSuggestedNoteRef = React.createRef();
-        this.editorTeacherTipRef = React.createRef();
-        this.editorTemplateNote = new EditorDecorator('recit_cahiertraces_editor_container_1');
-        this.editorSuggestedNote = new EditorDecorator('recit_cahiertraces_editor_container_2');
-        this.editorTeacherTip = new EditorDecorator('recit_cahiertraces_editor_container_3');
     }
 
     componentDidMount(){
-        this.facadeUpdateEditor();
         this.getData();             
-    }  
-
-    componentWillUnmount(){
-        this.editorTemplateNote.close();
-        this.editorSuggestedNote.close();
-        this.editorTeacherTip.close();
-
-        this.editorTemplateNote.dom.style.display = 'none';
-        this.editorSuggestedNote.dom.style.display = 'none';
-        this.editorTeacherTip.dom.style.display = 'none';
-
-        document.body.appendChild(this.editorTemplateNote.dom);
-        document.body.appendChild(this.editorSuggestedNote.dom);
-        document.body.appendChild(this.editorTeacherTip.dom);
     }
 
     render(){
@@ -147,21 +125,21 @@ class NoteForm extends Component
                     <Tab eventKey={1} title={i18n.get_string('notetemplate')} style={styleTab}>
                         <Form.Row>
                             <Form.Group as={Col}>
-                                <div ref={this.editorTemplateNoteRef}></div>
+                                <TextEditor style={{height:'270px', marginBottom: '3rem'}} quillOnly={false} theme="snow" value={data.templateNote} onChange={(value) => this.onDataChange({target: {value: value, name: 'templateNote'}})} />
                             </Form.Group>
                         </Form.Row>
                     </Tab>
                     <Tab eventKey={2} title={i18n.get_string('suggestedresponse')} style={styleTab}>
                         <Form.Row>
                             <Form.Group as={Col}>
-                                <div ref={this.editorSuggestedNoteRef}></div>
+                                <TextEditor style={{height:'270px', marginBottom: '3rem'}} theme="snow" value={data.suggestedNote} onChange={(value) => this.onDataChange({target: {value: value, name: 'suggestedNote'}})} />
                             </Form.Group>
                         </Form.Row>
                     </Tab>
                     <Tab eventKey={3} title={i18n.get_string('teachertips')} style={styleTab}> 
                         <Form.Row>
                             <Form.Group as={Col}>
-                                <div ref={this.editorTeacherTipRef}></div>
+                                <TextEditor style={{height:'270px', marginBottom: '3rem'}} theme="snow" value={data.teacherTip} onChange={(value) => this.onDataChange({target: {value: value, name: 'teacherTip'}})} />
                             </Form.Group>
                         </Form.Row>
                     </Tab>
@@ -183,23 +161,6 @@ class NoteForm extends Component
     
     onSelectTab(eventKey){
         this.setState({activeTab: eventKey});
-    }
-
-    updateEditor(instance, ref, value){
-        if(ref.current !== null){
-            instance.show();        
-            instance.setValue(value);       
-            if(!ref.current.hasChildNodes()){
-                ref.current.appendChild(instance.dom);   
-            }
-        }
-    }
-
-    facadeUpdateEditor(){
-        if(this.state.data === null){ return;}
-        this.updateEditor(this.editorTemplateNote, this.editorTemplateNoteRef, this.state.data.templateNote);
-        this.updateEditor(this.editorSuggestedNote, this.editorSuggestedNoteRef, this.state.data.suggestedNote);
-        this.updateEditor(this.editorTeacherTip, this.editorTeacherTipRef, this.state.data.teacherTip);
     }
 
     onClose(){
@@ -293,9 +254,6 @@ class NoteForm extends Component
     onSave(){
         let data = JsNx.clone(this.state.data);
         
-        data.templateNote = this.editorTemplateNote.getValue().text;
-        data.suggestedNote = this.editorSuggestedNote.getValue().text;
-        data.teacherTip = this.editorTeacherTip.getValue().text;
         $glVars.webApi.saveNote(data, this.onSaveResult);
     }
 
