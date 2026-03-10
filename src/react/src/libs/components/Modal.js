@@ -21,6 +21,7 @@
  */
 
 import React, { Component } from 'react';
+import { Modal as ModalBS } from 'react-bootstrap';
 
 /**
  * Ce modal est nécessaire, car le Bootstrap Modal ne marche pas avec les menus déroulants de Atto
@@ -31,21 +32,20 @@ export class Modal extends Component{
         body: null,
         footer: null,
         onClose: null,
-        width: '75%'
+        size: 'xl' //sm, lg, xl
     };
 
     render(){
         let main = 
-            <div style={{position: "fixed", top: 0, backgroundColor: "rgba(0,0,0,0.5)", left: 0, bottom: 0, right: 0, zIndex: 1040, overflowX: 'hidden', overflowY: 'auto'}}>
-                <div style={{width: this.props.width, margin: "1.75rem auto", backgroundColor: "#FFF", maxWidth: 1450}}>
-                    <div className="modal-header">
-                        <h4 className="text-truncate">{this.props.title}</h4>
-                        <button type="button" className="close" onClick={this.props.onClose}><span aria-hidden="true">×</span><span className="sr-only">Fermer</span></button>
-                    </div>
-                    <div className="modal-body">{this.props.body}</div>
-                    <div className="modal-footer">{this.props.footer}</div>
-                </div>
-            </div>;
+            <>
+                <ModalBS show={true} onHide={this.props.onClose} backdrop="static" keyboard={false}  size={this.props.size}>
+                    <ModalBS.Header closeButton>
+                        <ModalBS.Title>{this.props.title}</ModalBS.Title>
+                    </ModalBS.Header>
+                    <ModalBS.Body>{this.props.body}</ModalBS.Body>
+                    <ModalBS.Footer>{this.props.footer}</ModalBS.Footer>
+                </ModalBS>
+        </>;
 
         return main;
     }

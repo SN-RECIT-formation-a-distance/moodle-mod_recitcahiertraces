@@ -95,5 +95,3 @@ document.addEventListener('DOMContentLoaded', function(){
 
     root.render(<App signedUser={signedUser}/>);
 }, false);
-
-

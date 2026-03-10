@@ -22,9 +22,9 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2025052303;        // The current module version (Date: YYYYMMDDXX)
-$plugin->requires  = 2024071200.00; // Moodle 4.5.0
+$plugin->version   = 2026031000;        // The current module version (Date: YYYYMMDDXX)
+$plugin->requires  = 2025100603.00; // Moodle 5.1.3
 $plugin->component = 'mod_recitcahiertraces';        // Full name of the plugin (used for diagnostics)
-$plugin->release = 'v3.0.3-stable'; 
-$plugin->supported = [405, 405];      
+$plugin->release = 'v4.0.0-stable'; 
+$plugin->supported = [501, 501];      
 $plugin->maturity = MATURITY_STABLE; // MATURITY_ALPHA, MATURITY_BETA, MATURITY_RC or MATURITY_STABLE

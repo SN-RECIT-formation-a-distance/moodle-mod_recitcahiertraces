@@ -1,5 +1,5 @@
 $from = "moodle-mod_recitcahiertraces/src/*"
-$to = "shared/recitfad3/mod/recitcahiertraces"
+$to = "shared/recitfad4/public/mod/recitcahiertraces"
 $source = "./src";
 
 try {

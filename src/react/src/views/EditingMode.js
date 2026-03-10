@@ -21,7 +21,7 @@
  */
 
 import React, { Component } from 'react';
-import {ButtonGroup, Button, Form, Col, Tabs, Tab, ButtonToolbar, OverlayTrigger, Popover} from 'react-bootstrap';
+import {ButtonGroup, Button, Form, Row, Col, Tabs, Tab, ButtonToolbar, OverlayTrigger, Popover} from 'react-bootstrap';
 import {faPencilAlt, faPlusCircle, faWrench, faTrashAlt, faCopy, faPrint, faQuestionCircle, faArrowsAlt, faSortAmountDownAlt, faArrowDown, faArrowUp, faClone} from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {ComboBox, FeedbackCtrl, DataGrid, InputNumber, ToggleButtons, Modal} from '../libs/components/Components';
@@ -93,25 +93,25 @@ class NoteForm extends Component
             <Form noValidate validated={this.state.formValidated} ref={this.formRef}>
                 <Tabs defaultActiveKey={this.state.activeTab} id="tab" onSelect={this.onSelectTag}>
                     <Tab eventKey={0} title="Note" style={styleTab}>
-                        <Form.Row>
+                        <Row className='mb-3'>
                             <Form.Group as={Col}>
                                 <Form.Label>{i18n.get_string('notegroup')+":"}</Form.Label>
                                 <ComboBox placeholder={i18n.get_string('selectoption')} required={true}  name="gId" value={data.gId} options={this.state.dropdownLists.groupList} onChange={this.onDataChange} />
                             </Form.Group>
-                        </Form.Row>
-                        <Form.Row>
+                        </Row>
+                        <Row className='mb-3'>
                             <Form.Group as={Col}>
                                 <Form.Label>{i18n.get_string('title')}</Form.Label>
                                 <Form.Control type="text" required value={data.title} maxLength="255" name="title" onChange={this.onDataChange}/>
                             </Form.Group>
-                        </Form.Row>
-                        <Form.Row>
+                        </Row>
+                        <Row className='mb-3'>
                             <Form.Group as={Col}>
                                 <Form.Label>{i18n.get_string('position')}</Form.Label>
                                 <InputNumber value={data.slot} name="slot" min={0} onChange={this.onDataChange}/>
                             </Form.Group>
-                        </Form.Row>
-                        <Form.Row>
+                        </Row>
+                        <Row className='mb-3'>
                             <Form.Group as={Col}>
                                 <Form.Label>{i18n.get_string('notifyteacheruponupdate')}</Form.Label>
                                 <ToggleButtons name="notifyTeacher" defaultValue={[data.notifyTeacher]} onChange={this.onDataChange} 
@@ -120,28 +120,28 @@ class NoteForm extends Component
                                             {value: 0, text: i18n.get_string('no')}
                                         ]}/>
                             </Form.Group>
-                        </Form.Row>
+                        </Row>
                     </Tab>
                     <Tab eventKey={1} title={i18n.get_string('notetemplate')} style={styleTab}>
-                        <Form.Row>
+                        <Row className='mb-3'>
                             <Form.Group as={Col}>
                                 <TextEditor style={{height:'270px', marginBottom: '3rem'}} quillOnly={false} theme="snow" value={data.templateNote} onChange={(value) => this.onDataChange({target: {value: value, name: 'templateNote'}})} />
                             </Form.Group>
-                        </Form.Row>
+                        </Row>
                     </Tab>
                     <Tab eventKey={2} title={i18n.get_string('suggestedresponse')} style={styleTab}>
-                        <Form.Row>
+                        <Row className='mb-3'>
                             <Form.Group as={Col}>
                                 <TextEditor style={{height:'270px', marginBottom: '3rem'}} theme="snow" value={data.suggestedNote} onChange={(value) => this.onDataChange({target: {value: value, name: 'suggestedNote'}})} />
                             </Form.Group>
-                        </Form.Row>
+                        </Row>
                     </Tab>
                     <Tab eventKey={3} title={i18n.get_string('teachertips')} style={styleTab}> 
-                        <Form.Row>
+                        <Row className='mb-3'>
                             <Form.Group as={Col}>
                                 <TextEditor style={{height:'270px', marginBottom: '3rem'}} theme="snow" value={data.teacherTip} onChange={(value) => this.onDataChange({target: {value: value, name: 'teacherTip'}})} />
                             </Form.Group>
-                        </Form.Row>
+                        </Row>
                     </Tab>
                 </Tabs>
             </Form>;
@@ -353,25 +353,25 @@ export class EditionMode extends Component{
         let main =
             <div>
                 <Form>
-                    <Form.Row>
+                    <Row className='mb-3'>
                         <Form.Group as={Col}>
                             <Form.Label>{i18n.get_string('selectnotegroup')+":"}</Form.Label>
                             <ComboBox placeholder={i18n.get_string('selectoption')} value={(this.state.selectedGroup !== null ? this.state.selectedGroup.id : 0)} options={this.state.groupList} onChange={this.onSelectGroup} />
                         </Form.Group>
-                    </Form.Row>
+                    </Row>
                 </Form>
                 <ButtonToolbar style={{justifyContent: 'space-between'}}>
-                    <ButtonGroup className="mr-4 mb-4" >
+                    <ButtonGroup className=" mr-4 mb-4" >
                         <Button variant="primary" disabled={this.state.selectedGroup === null} onClick={this.onAddNote}><FontAwesomeIcon icon={faPlusCircle}/> {i18n.get_string('addnote')}</Button>
                     </ButtonGroup>
-                    <ButtonGroup className="mr-4">
+                    <ButtonGroup className="m-1 mr-4">
                         <Button variant="primary" onClick={this.onAddCollection}><FontAwesomeIcon icon={faPlusCircle}/> {i18n.get_string('addgroup')}</Button>
                         <Button variant="warning" disabled={this.state.selectedGroup === null} onClick={this.removeNoteGroup}><FontAwesomeIcon icon={faTrashAlt}/> {i18n.get_string('deletegroup')}</Button>
                         <Button variant="primary" onClick={() => this.showGroupOrderForm(true)}><FontAwesomeIcon icon={faSortAmountDownAlt}/> {i18n.get_string('ordergroup')}</Button>
                         <Button variant="primary" disabled={this.state.selectedGroup === null} onClick={this.onEditCollection}><FontAwesomeIcon icon={faPencilAlt}/> {i18n.get_string('editgroup')}</Button>
                         <Button variant="primary" disabled={this.state.selectedGroup === null} onClick={() => this.onCloneCollection()}><FontAwesomeIcon icon={faClone}/> {i18n.get_string('clonegroup')}</Button>
                     </ButtonGroup>
-                    <ButtonGroup>
+                    <ButtonGroup className='m-1'>
                         <a className="btn btn-primary" href={this.getSuggestedNotesPrintLink()} target="_blank" title={i18n.get_string('print')}><FontAwesomeIcon icon={faPrint}/> {i18n.get_string('print')}</a>
                     </ButtonGroup>
                 </ButtonToolbar>
@@ -547,19 +547,19 @@ class ModalGenerateIntCode extends Component{
     render(){        
         let body = 
             <Form >
-                <Form.Row>
+                <Row className='mb-3'>
                     <Form.Group as={Col}>
                         <Form.Label>{i18n.get_string('nblines')}</Form.Label>
                         <InputNumber  value={this.state.data.nbLines} name="nbLines" min={1} onChange={this.onDataChange}/>
                     </Form.Group>
-                </Form.Row>
-                <Form.Row>
+                </Row>
+                <Row className='mb-3'>
                     <Form.Group as={Col}>
                         <Form.Label>{i18n.get_string('color')}</Form.Label>
                         <Form.Control type="color" value={this.state.data.color} name="color" onChange={this.onDataChange} style={{width: "80px"}}/>
                     </Form.Group>
-                </Form.Row>
-                <Form.Row>
+                </Row>
+                <Row className='mb-3'>
                     <Form.Group as={Col}>
                         <Form.Label>{i18n.get_string('savebtn')} <HelpButton helpText={<>
                 <span>{i18n.get_string('infobs')}</span>
@@ -570,14 +570,14 @@ class ModalGenerateIntCode extends Component{
                         <Form.Control type="text" value={this.state.data.btnSaveVariant} name="btnSaveVariant" onChange={this.onDataChange}/>
                         <Form.Text className="text-muted">{i18n.get_string('savebtndesc')}</Form.Text>
                     </Form.Group>
-                </Form.Row>
-                <Form.Row>
+                </Row>
+                <Row className='mb-3'>
                     <Form.Group as={Col}>
                         <Form.Label>{i18n.get_string('preview')}</Form.Label><br/>
                         <a className={this.state.data.btnSaveVariant}>{i18n.get_string('save')}</a>
                     </Form.Group>
-                </Form.Row>
-                <Form.Row>
+                </Row>
+                <Row className='mb-3'>
                     <Form.Group as={Col}>
                         <Form.Label>{i18n.get_string('resetbtn')} <HelpButton helpText={<>
                 <span>{i18n.get_string('infobs')}</span>
@@ -588,13 +588,13 @@ class ModalGenerateIntCode extends Component{
                         <Form.Control type="text" value={this.state.data.btnResetVariant} name="btnResetVariant" onChange={this.onDataChange}/>
                         <Form.Text className="text-muted">{i18n.get_string('resetbtndesc')}</Form.Text>
                     </Form.Group>
-                </Form.Row>
-                <Form.Row>
+                </Row>
+                <Row className='mb-3'>
                     <Form.Group as={Col}>
                         <Form.Label>{i18n.get_string('preview')}</Form.Label><br/>
                         <a className={this.state.data.btnResetVariant}>{i18n.get_string('reset')}</a>
                     </Form.Group>
-                </Form.Row>
+                </Row>
                 <Form.Control type="hidden" ref={this.intCodeRef}/>
             </Form>;
 
@@ -606,7 +606,7 @@ class ModalGenerateIntCode extends Component{
                 </div>
             </div>;
 
-        let main = <Modal title={i18n.get_string('createintegrationcode')} body={body} footer={footer} onClose={this.props.onClose} width={"400px"}/>;
+        let main = <Modal title={i18n.get_string('createintegrationcode')} body={body} footer={footer} onClose={this.props.onClose} size={"md"}/>;
 
         return main;
     }
@@ -679,12 +679,12 @@ class GroupForm extends Component{
     render(){        
         let body = 
             <Form onSubmit={(event) => (event.preventDefault())}>
-                <Form.Row>
+                <Row className='mb-3'>
                     <Form.Group as={Col}>
                         <Form.Label>{i18n.get_string('groupname')}</Form.Label>
                         <Form.Control type="text" value={this.state.data.name} name="name" onChange={this.onDataChange}/>
                     </Form.Group>
-                </Form.Row>
+                </Row>
             </Form>;
 
         let footer = 
@@ -695,7 +695,7 @@ class GroupForm extends Component{
                 </div>
             </div>;
 
-        let main = <Modal title={i18n.get_string('notegroup')} body={body} footer={footer} onClose={() => this.props.onClose()} width={"400px"}/>;
+        let main = <Modal title={i18n.get_string('notegroup')} body={body} footer={footer} onClose={() => this.props.onClose()} size="md"/>;
 
         return main;
     }
@@ -789,7 +789,7 @@ class GroupOrderForm extends Component{
                 <Button variant="primary" onClick={() => this.reorderGroups()}>{i18n.get_string('close')}</Button>
             </div>;
 
-        let main = <Modal title={i18n.get_string('ordergroup')} body={body} footer={footer} onClose={() => this.props.onClose()} width={"500px"}/>;
+        let main = <Modal title={i18n.get_string('ordergroup')} body={body} footer={footer} onClose={() => this.props.onClose()} size="md"/>;
 
         return main;
     }
