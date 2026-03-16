@@ -19,6 +19,7 @@ create_zipfile() {
     # Create ZIP excluding unnecessary node files and folders
     zip -r "$zip_file" src/ \
         --exclude "src/react/.cache/*" \
+        --exclude "src/react/.parcel-cache/*" \
         --exclude "src/react/node_modules/*" \
         --exclude "src/react/src/*" \
         --exclude "src/react/.babelrc" \
