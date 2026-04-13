@@ -361,10 +361,10 @@ export class EditionMode extends Component{
                     </Row>
                 </Form>
                 <ButtonToolbar style={{justifyContent: 'space-between'}}>
-                    <ButtonGroup className=" mr-4 mb-4" >
+                    <ButtonGroup className=" me-4 mb-4" >
                         <Button variant="primary" disabled={this.state.selectedGroup === null} onClick={this.onAddNote}><FontAwesomeIcon icon={faPlusCircle}/> {i18n.get_string('addnote')}</Button>
                     </ButtonGroup>
-                    <ButtonGroup className="m-1 mr-4">
+                    <ButtonGroup className="m-1 me-4">
                         <Button variant="primary" onClick={this.onAddCollection}><FontAwesomeIcon icon={faPlusCircle}/> {i18n.get_string('addgroup')}</Button>
                         <Button variant="warning" disabled={this.state.selectedGroup === null} onClick={this.removeNoteGroup}><FontAwesomeIcon icon={faTrashAlt}/> {i18n.get_string('deletegroup')}</Button>
                         <Button variant="primary" onClick={() => this.showGroupOrderForm(true)}><FontAwesomeIcon icon={faSortAmountDownAlt}/> {i18n.get_string('ordergroup')}</Button>
@@ -771,9 +771,17 @@ class GroupOrderForm extends Component{
                                 <DataGrid.Body.Row data={item} key={index}>
                                     <DataGrid.Body.Cell>{item.slot.toString()}</DataGrid.Body.Cell>
                                     <DataGrid.Body.Cell>{item.name}</DataGrid.Body.Cell>
-                                    <DataGrid.Body.Cell style={{textAlign: 'center'}}>
-                                        {index > 0 && <FontAwesomeIcon style={{cursor:'pointer',marginRight:'1rem'}} icon={faArrowUp} title={i18n.get_string('moveitem')} onClick={() => this.onMoveRow(index, -1)}/>}
-                                        {index < this.state.data.length-1 && <FontAwesomeIcon style={{cursor:'pointer'}} icon={faArrowDown} title={i18n.get_string('moveitem')} onClick={() => this.onMoveRow(index, 1)}/>}
+                                    <DataGrid.Body.Cell style={{justifyContent: "center", display: "flex"}} >
+                                        {index > 0 && 
+                                            <Button variant='link' title={i18n.get_string('moveitem')} onClick={() => this.onMoveRow(index, -1)}>
+                                                <FontAwesomeIcon  icon={faArrowUp} />
+                                            </Button>
+                                        }
+                                        {index < this.state.data.length-1 && 
+                                            <Button variant='link'  title={i18n.get_string('moveitem')} onClick={() => this.onMoveRow(index, 1)}>
+                                                <FontAwesomeIcon icon={faArrowDown}/>
+                                            </Button>
+                                        }
                                     </DataGrid.Body.Cell>
                                 </DataGrid.Body.Row>;
 

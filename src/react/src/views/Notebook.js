@@ -561,7 +561,7 @@ class NavActivities extends Component{
 
                                                 let row = 
                                                         <div className="balon2 p-2 m-0 position-relative" data-is={time+i18n.get_string('activity')+": "+(that.formatText(item.cmName))} key={index2}>
-                                                            <div className="float-left w-100 balon2-content">                                                                    
+                                                            <div className="float-start  w-100 balon2-content">                                                                    
                                                                 <p style={{fontWeight:'bold'}}>
                                                                     
                                                                     {that.props.isTeacher && item.noteDef.notifyTeacher === 1 ? 
