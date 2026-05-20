@@ -44,7 +44,11 @@ class WebApi extends MoodleApi
             $userId = clean_param($request['userId'], PARAM_INT);
             $flag = clean_param($request['flag'], PARAM_TEXT);
 
-            $this->canUserAccess('s', $cmId, $userId);
+            if($this->signedUser->id == $userId){
+                $this->canUserAccess('s', $cmId, $userId);
+            } else {
+                $this->canUserAccess('a', $cmId);
+            }
 
             $result = PersistCtrl::getInstance()->getUserNotes($cmId, $userId, $flag);
             $this->prepareJson($result);
@@ -60,8 +64,12 @@ class WebApi extends MoodleApi
             $nId = clean_param($request['nId'], PARAM_INT);
             $userId = clean_param($request['userId'], PARAM_INT);
             $cmId = clean_param($request['cmId'], PARAM_INT);
-
-            $this->canUserAccess('s', $cmId, $userId);
+ 
+            if($this->signedUser->id == $userId){
+                $this->canUserAccess('s', $cmId, $userId);
+            } else {
+                $this->canUserAccess('a', $cmId);
+            }
             
             $result = PersistCtrl::getInstance()->getUserNote($nId, $userId);
 
@@ -79,6 +87,8 @@ class WebApi extends MoodleApi
         try{			
             $data = (object)$request['data'];
             $data->nId = clean_param($data->nId, PARAM_INT);
+            $data->userId = clean_param(isset($data->userId) ? $data->userId : 0, PARAM_INT);
+            $data->courseId = clean_param(isset($data->courseId) ? $data->courseId : 0, PARAM_INT);
             $data->unId = clean_param(isset($data->unId) ? $data->unId : 0, PARAM_INT);
             $data->nCmId = clean_param(isset($data->nCmId) ? $data->nCmId : 0, PARAM_INT);
             $data->feedback = clean_param(isset($data->feedback) ? $data->feedback : '', PARAM_RAW);
@@ -86,12 +96,16 @@ class WebApi extends MoodleApi
                 $data->note = (object)$data->note;
                 $data->note->itemid = clean_param($data->note->itemid, PARAM_INT);
                 $data->note->text = clean_param($data->note->text, PARAM_RAW);
-            }                
+            }
 
             $flags = (object)$request['flags'];
             $flags->mode = clean_param($flags->mode, PARAM_TEXT);
 
-            $this->canUserAccess('s', 0, $data->userId, $data->courseId);
+            if($flags->mode == "t"){
+                $this->canUserAccess('a', 0, 0, $data->courseId);
+            } else {
+                $this->canUserAccess('s', 0, $data->userId, $data->courseId);
+            }
 
             $result = PersistCtrl::getInstance()->saveUserNote($data, $flags->mode);
             $this->prepareJson($result);

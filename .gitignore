@@ -4,3 +4,4 @@ node_modules
 mod_recitcahiertraces.zip
 package-lock.json
 *.zip
+.parcel-cache

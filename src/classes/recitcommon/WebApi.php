@@ -281,6 +281,9 @@ abstract class MoodleApi extends AWebApi
         }
         // if the user is student then it has access only if it is accessing its own stuff
         else if(($level == 's') && in_array('s', $userRoles)){
+            if($userId > 0 && $userId != $this->signedUser->id){
+                throw new Exception(get_string('accessdenied', 'admin'));
+            }
             return true;
         }
         else{

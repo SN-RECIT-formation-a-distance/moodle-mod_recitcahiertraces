@@ -187,6 +187,10 @@ class PersistCtrl extends MoodlePersistCtrl
                 $this->mysqlConn->insert_record("recitct_user_notes", $values);
             }
             else{
+                $existing = $this->mysqlConn->get_record('recitct_user_notes', ['id' => $data->unId]);
+                if(!$existing || intval($existing->userid) != intval($data->userId)){
+                    throw new Exception(get_string('accessdenied', 'admin'));
+                }
                 $values['id'] = $data->unId;
                 $this->mysqlConn->update_record("recitct_user_notes", $values);
             }

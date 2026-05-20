@@ -1,12 +1,12 @@
 {
   "name": "recit_cahiertraces",
-  "version": "v3.0.0-stable",
+  "version": "v3.0.4-stable",
   "description": "RÉCIT Cahier de traces",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "parcel ./src/index.js --out-dir ./build",
-    "build": "parcel build ./src/index.js --out-dir ./build"
+    "start": "parcel ./src/index.js --dist-dir ./build",
+    "build": "parcel build ./src/index.js --dist-dir ./build"
   },
   "keywords": [],
   "author": "",
