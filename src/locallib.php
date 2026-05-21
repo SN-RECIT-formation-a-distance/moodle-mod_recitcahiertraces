@@ -108,7 +108,7 @@ class recitcahiertraces_portfolio_caller extends portfolio_module_caller_base {
             foreach($noteGroup as $note){
                 // overflow = hidden for the notes that overflow the page dimensions
                 $content .= "<div class='note-container'>";
-                $content .= sprintf("<h5 class='text-muted note-title'>%s: %s</h5>",  get_string('note', 'mod_recitcahiertraces'), htmlspecialchars($note->noteDef->title, ENT_QUOTES, 'UTF-8'));
+                $content .= sprintf("<h5 class='text-muted note-title'>%s: %s</h5>",  get_string('note', 'mod_recitcahiertraces'), s($note->noteDef->title));
                 
                 $content .= sprintf("<div class='alert alert-secondary student-note'>%s</div>", $note->noteContent->text);
 
