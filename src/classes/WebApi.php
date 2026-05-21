@@ -33,9 +33,33 @@ use stdClass;
 
 class WebApi extends MoodleApi
 {
+    protected static $allowedServices = [
+        'getUserNotes', 'getUserNote', 'saveUserNote', 'getGroupNotes',
+        'getGroupList', 'getNoteFormKit', 'removeNote', 'removeNoteGroup',
+        'reorderNoteGroups', 'saveNoteGroup', 'cloneNoteGroup', 'saveNote',
+        'switchNoteSlot', 'getRequiredNotes', 'getStudentsProgression',
+        'getEnrolledUserList'
+    ];
+
     public function __construct($DB, $COURSE, $USER){
         parent::__construct($DB, $COURSE, $USER);
         PersistCtrl::getInstance($DB, $USER);
+    }
+
+    // overridden with an explicit service whitelist; no arbitrary method can be invoked via the service parameter
+    public function processRequest(){
+        if(!$this->preProcessRequest()){
+            return;
+        }
+
+        $serviceWanted = clean_param($this->request['service'], PARAM_TEXT);
+        
+        if(!in_array($serviceWanted, self::$allowedServices)){
+            $this->lastResult = new WebApiResult(false, null, get_string('servicenotfound', 'mod_recitcahiertraces'));
+            return;
+        }
+
+        $this->lastResult = $this->$serviceWanted($this->request);
     }
 
     public function getUserNotes($request){
@@ -44,6 +68,7 @@ class WebApi extends MoodleApi
             $userId = clean_param($request['userId'], PARAM_INT);
             $flag = clean_param($request['flag'], PARAM_TEXT);
 
+            // branch between student (own data) and teacher (any student) checks
             if($this->signedUser->id == $userId){
                 $this->canUserAccess('s', $cmId, $userId);
             } else {
@@ -65,6 +90,7 @@ class WebApi extends MoodleApi
             $userId = clean_param($request['userId'], PARAM_INT);
             $cmId = clean_param($request['cmId'], PARAM_INT);
  
+            // branch between student (own data) and teacher (any student) checks
             if($this->signedUser->id == $userId){
                 $this->canUserAccess('s', $cmId, $userId);
             } else {
@@ -91,16 +117,17 @@ class WebApi extends MoodleApi
             $data->courseId = clean_param(isset($data->courseId) ? $data->courseId : 0, PARAM_INT);
             $data->unId = clean_param(isset($data->unId) ? $data->unId : 0, PARAM_INT);
             $data->nCmId = clean_param(isset($data->nCmId) ? $data->nCmId : 0, PARAM_INT);
-            $data->feedback = clean_param(isset($data->feedback) ? $data->feedback : '', PARAM_RAW);
+            $data->feedback = clean_param(isset($data->feedback) ? $data->feedback : '', PARAM_CLEANHTML);
             if (isset($data->note)){
                 $data->note = (object)$data->note;
                 $data->note->itemid = clean_param($data->note->itemid, PARAM_INT);
-                $data->note->text = clean_param($data->note->text, PARAM_RAW);
+                $data->note->text = clean_param($data->note->text, PARAM_CLEANHTML);
             }
 
             $flags = (object)$request['flags'];
             $flags->mode = clean_param($flags->mode, PARAM_TEXT);
 
+            // splits access by mode: "t" → teacher check, "s" → student ownership check
             if($flags->mode == "t"){
                 $this->canUserAccess('a', 0, 0, $data->courseId);
             } else {
@@ -167,6 +194,10 @@ class WebApi extends MoodleApi
                 $result->data = new NoteDef();
             }
             else{
+                // verify the target nId/gId belongs to the provided cmId before acting
+                if(PersistCtrl::getInstance()->getCmIdFromNoteId($nId) != $cmId){
+                    throw new Exception(get_string('accessdenied', 'admin'));
+                }
                 $result->data = PersistCtrl::getInstance()->getNoteDef($nId);
             }
 
@@ -186,7 +217,12 @@ class WebApi extends MoodleApi
             $cmId = clean_param($request['cmId'], PARAM_INT);
 
             $this->canUserAccess('a', $cmId);
-            
+
+            // verify the target nId/gId belongs to the provided cmId before acting
+            if(PersistCtrl::getInstance()->getCmIdFromNoteId($nId) != $cmId){
+                throw new Exception(get_string('accessdenied', 'admin'));
+            }
+
             PersistCtrl::getInstance()->removeNote($nId);
             return new WebApiResult(true);
         }
@@ -201,7 +237,12 @@ class WebApi extends MoodleApi
             $cmId = clean_param($request['cmId'], PARAM_INT);
 
             $this->canUserAccess('a', $cmId);
-            
+
+            // verify the target nId/gId belongs to the provided cmId before acting
+            if(PersistCtrl::getInstance()->getCmIdFromGroupId($gId) != $cmId){
+                throw new Exception(get_string('accessdenied', 'admin'));
+            }
+
             PersistCtrl::getInstance()->removeNoteGroup($gId);
             return new WebApiResult(true);
         }
@@ -280,12 +321,21 @@ class WebApi extends MoodleApi
         }     
     }
 
-    public function saveNote($request){        
+    public function saveNote($request){
         try{
             $data = (object)$request['data'];
             $data->cmId = clean_param($data->cmId, PARAM_INT);
 
             $this->canUserAccess('a', $data->cmId);
+
+            $data->nId = clean_param(isset($data->nId) ? $data->nId : 0, PARAM_INT);
+            $data->slot = clean_param(isset($data->slot) ? $data->slot : 0, PARAM_INT);
+            $data->notifyTeacher = clean_param(isset($data->notifyTeacher) ? $data->notifyTeacher : 0, PARAM_INT);
+            $data->title = clean_param(isset($data->title) ? $data->title : '', PARAM_TEXT);
+            $data->intCode = clean_param(isset($data->intCode) ? $data->intCode : '', PARAM_TEXT);
+            $data->templateNote = clean_param(isset($data->templateNote) ? $data->templateNote : '', PARAM_CLEANHTML);
+            $data->suggestedNote = clean_param(isset($data->suggestedNote) ? $data->suggestedNote : '', PARAM_CLEANHTML);
+            $data->teacherTip = clean_param(isset($data->teacherTip) ? $data->teacherTip : '', PARAM_CLEANHTML);
 
             $data = NoteDef::create($data);
             PersistCtrl::getInstance()->saveNote($data);
@@ -304,6 +354,12 @@ class WebApi extends MoodleApi
 
             $from = clean_param($request['from'], PARAM_INT);
             $to = clean_param($request['to'], PARAM_INT);
+
+            // verify the target nId/gId belongs to the provided cmId before acting
+            if(PersistCtrl::getInstance()->getCmIdFromNoteId($from) != $cmId){
+                throw new Exception(get_string('accessdenied', 'admin'));
+            }
+
             PersistCtrl::getInstance()->switchNoteSlot($from, $to);
             return new WebApiResult(true);
         }

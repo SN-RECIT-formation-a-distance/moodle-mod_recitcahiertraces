@@ -179,9 +179,9 @@ function recitcahiertraces_reset_course_form_definition(&$mform) {
 function mod_recitcahiertraces_pluginfile($course, $cm, $context, $filearea, $args, $forcedownload, array $options=array()) {
     global $CFG, $USER, $DB;
 
-    /*if ($context->contextlevel != CONTEXT_MODULE) {
+    if ($context->contextlevel != CONTEXT_MODULE) {
         return false;
-    }*/
+    }
     require_login();
     
 

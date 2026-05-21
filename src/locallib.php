@@ -69,7 +69,7 @@ class recitcahiertraces_portfolio_caller extends portfolio_module_caller_base {
      */
     public function check_permissions() {
         $context = context_module::instance($this->cm->id);
-        return true;
+        return has_capability('mod/recitcahiertraces:view', $context);
     }
     
     public function expected_time() {
@@ -108,7 +108,7 @@ class recitcahiertraces_portfolio_caller extends portfolio_module_caller_base {
             foreach($noteGroup as $note){
                 // overflow = hidden for the notes that overflow the page dimensions
                 $content .= "<div class='note-container'>";
-                $content .= sprintf("<h5 class='text-muted note-title'>%s: %s</h5>",  get_string('note', 'mod_recitcahiertraces'), $note->noteDef->title);
+                $content .= sprintf("<h5 class='text-muted note-title'>%s: %s</h5>",  get_string('note', 'mod_recitcahiertraces'), htmlspecialchars($note->noteDef->title, ENT_QUOTES, 'UTF-8'));
                 
                 $content .= sprintf("<div class='alert alert-secondary student-note'>%s</div>", $note->noteContent->text);
 
@@ -117,7 +117,7 @@ class recitcahiertraces_portfolio_caller extends portfolio_module_caller_base {
                 $content .= '</blockquote>';
                 
                 if(strlen($note->feedback) > 0){
-                    $content .= sprintf('<div class="alert alert-primary teacher-feedback" role="alert"><strong>%s:</strong><br/>%s</div>', get_string('teacherfeedback', 'mod_recitcahiertraces'), $note->feedback);
+                    $content .= sprintf('<div class="alert alert-primary teacher-feedback" role="alert"><strong>%s:</strong><br/>%s</div>', get_string('teacherfeedback', 'mod_recitcahiertraces'), clean_text($note->feedback, FORMAT_HTML));
                 }
                 
                 $content .= "</div>";
