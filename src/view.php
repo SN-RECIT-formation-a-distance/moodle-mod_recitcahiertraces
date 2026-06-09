@@ -30,8 +30,8 @@ use moodle_url;
 $id = required_param('id', PARAM_INT);
 list ($course, $cm) = get_course_and_cm_from_cmId($id, 'recitcahiertraces');
 
-//require_course_login($course, true, $cm);
-require_login();
+// enrollment is now verified
+require_course_login($course, true, $cm);
 
 $USER->preference['htmleditor'] = 'atto';//Force atto
 $view = new MainView($PAGE, $course, $cm, $OUTPUT, $USER, $DB, $CFG);

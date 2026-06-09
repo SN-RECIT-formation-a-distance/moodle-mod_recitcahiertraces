@@ -9,6 +9,7 @@ $string['privacy:metadata:recitct_user_notes:nid'] = 'ID de la note';
 $string['privacy:metadata:recitct_user_notes:note'] = 'Note des élèves';
 $string['privacy:metadata:recitct_user_notes:note_itemid'] = 'Atto item ID';
 $string['privacy:metadata:recitct_user_notes:userid'] = 'ID de l\'utilisateur';
+$string['privacy:metadata:core_files'] = 'Les notes des élèves peuvent inclure des fichiers téléversés via l\'éditeur de note (ex.: images).';
 $string['userpreferences'] = "Préférences de l'utilisateur";
 $string['modulename'] = 'Cahier de traces v2';
 $string['modulenameplural'] = "Cahiers de traces";

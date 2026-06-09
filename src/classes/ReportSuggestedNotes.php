@@ -43,14 +43,15 @@ if(!empty($customerLogo)){
     $brandImage = $customerLogo;
 }
 
-// check the permissions
+// check the permissions: this report exposes the teacher's suggested-answer key, so it is admin/teacher-only
 $roles = Utils::getUserRoles($course->id, $USER->id);
-// check if the user has admin access
 if(!Utils::isAdminRole($roles)){
-    // if not admin then the user has the right to see its own notes
-    if($userId != $USER->id){
-        die(get_string('forbiddenaccess', 'mod_recitcahiertraces'));
-    }
+    die(get_string('forbiddenaccess', 'mod_recitcahiertraces'));
+}
+
+// when a specific group is requested, verify it belongs to the claimed course module before querying its notes
+if($gId != 0 && PersistCtrl::getInstance($DB, $USER)->getCmIdFromGroupId($gId) != $cId){
+    die(get_string('forbiddenaccess', 'mod_recitcahiertraces'));
 }
 
 $ctId = PersistCtrl::getInstance($DB, $USER)->getCtIdFromCmId($cId);
@@ -84,14 +85,14 @@ $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahie
             
             echo '<div class="activity-container">';
 
-            echo sprintf("<h4 class='activity-name'>%s: %s</h4>", get_string('group', 'mod_recitcahiertraces'), $note->group->name);
-        
+            echo sprintf("<h4 class='activity-name'>%s: %s</h4>", get_string('group', 'mod_recitcahiertraces'), s($note->group->name));
+
             foreach($group as $note){
                 // overflow = hidden for the notes that overflow the page dimensions
                 echo "<div class='note-container'>";
-                echo sprintf("<div class='text-muted'><strong>%s:</strong> %s</div>", get_string('notetitle', 'mod_recitcahiertraces'), $note->title);
-                
-                echo sprintf("<div class='alert alert-secondary student-note'>%s</div>", $note->suggestedNote);
+                echo sprintf("<div class='text-muted'><strong>%s:</strong> %s</div>", get_string('notetitle', 'mod_recitcahiertraces'), s($note->title));
+
+                echo sprintf("<div class='alert alert-secondary student-note'>%s</div>", clean_text($note->suggestedNote, FORMAT_HTML));
                 
                 echo "</div>";
             }

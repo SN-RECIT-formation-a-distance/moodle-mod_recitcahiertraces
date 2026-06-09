@@ -84,7 +84,7 @@ if(empty($userNotes)){
 
 $userNote = current(current($userNotes));
 
-$pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahiertraces'), $userNote->noteDef->group->ct->name, get_string('printedon', 'mod_recitcahiertraces'), date('Y-m-d H:i:s'));
+$pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahiertraces'), s($userNote->noteDef->group->ct->name), get_string('printedon', 'mod_recitcahiertraces'), date('Y-m-d H:i:s'));
 ?>
 
 <!DOCTYPE html>
@@ -101,7 +101,7 @@ $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahie
         <header class='Header'>
             <div style='flex-grow: 1'>
                 <div class='Title'><?php echo get_string('pluginname', 'mod_recitcahiertraces'); ?></div>
-                <div class='Subtitle'><?php echo sprintf("%s | %s | %s", $userNote->noteDef->group->ct->name, $currentStudent->userName, implode(", ", $currentStudent->groups));  ?></div>
+                <div class='Subtitle'><?php echo sprintf("%s | %s | %s", s($userNote->noteDef->group->ct->name), s($currentStudent->userName), s(implode(", ", $currentStudent->groups)));  ?></div>
             </div>
             <div class='Logo'><img src='<?php echo $brandImage; ?>' alt='brand logo'/></div>
         </header>
@@ -111,12 +111,12 @@ $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahie
             $note = current($group);
             echo '<div class="activity-container">';
 
-            echo sprintf("<h4 class='activity-name'>%s: %s</h4>", get_string('group', 'mod_recitcahiertraces'), $note->noteDef->group->name);
+            echo sprintf("<h4 class='activity-name'>%s: %s</h4>", get_string('group', 'mod_recitcahiertraces'), s($note->noteDef->group->name));
 
             foreach($group as $note){
                 // overflow = hidden for the notes that overflow the page dimensions
                 echo "<div class='note-container'>";
-                echo sprintf("<div class='text-muted'><strong>%s:</strong> %s</div>",  get_string('notetitle', 'mod_recitcahiertraces'), $note->noteDef->title);
+                echo sprintf("<div class='text-muted'><strong>%s:</strong> %s</div>",  get_string('notetitle', 'mod_recitcahiertraces'), s($note->noteDef->title));
                 
                 echo sprintf("<div class='alert alert-secondary student-note'>%s</div>", $note->noteContent->text);
 
@@ -126,7 +126,7 @@ $pageTitle = sprintf("%s: %s | %s: %s", get_string('pluginname', 'mod_recitcahie
                 echo '</blockquote>';
                 
                 if(($showFeedback) && (strlen($note->feedback) > 0)){
-                    echo sprintf('<div class="alert alert-primary teacher-feedback" role="alert"><strong>%s:</strong><br/>%s</div>', get_string('teacherfeedback', 'mod_recitcahiertraces'), $note->feedback);
+                    echo sprintf('<div class="alert alert-primary teacher-feedback" role="alert"><strong>%s:</strong><br/>%s</div>', get_string('teacherfeedback', 'mod_recitcahiertraces'), clean_text($note->feedback, FORMAT_HTML));
                 }
                 
                 echo "</div>";

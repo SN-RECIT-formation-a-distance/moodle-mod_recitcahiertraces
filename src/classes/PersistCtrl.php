@@ -187,6 +187,11 @@ class PersistCtrl extends MoodlePersistCtrl
                 $this->mysqlConn->insert_record("recitct_user_notes", $values);
             }
             else{
+                // verifies unId belongs to userId before updating
+                $existing = $this->mysqlConn->get_record('recitct_user_notes', ['id' => $data->unId]);
+                if(!$existing || intval($existing->userid) != intval($data->userId)){
+                    throw new Exception(get_string('accessdenied', 'admin'));
+                }
                 $values['id'] = $data->unId;
                 $this->mysqlConn->update_record("recitct_user_notes", $values);
             }
@@ -297,6 +302,17 @@ class PersistCtrl extends MoodlePersistCtrl
         $result = $this->getRecordsSQL($query, [$cmId]);
         if (count($result) == 0) return 0;
         return current($result)->instance;
+    }
+
+    public function getCmIdFromGroupId($gId){
+        $query = "select t2.id from {course_modules} t2
+        inner join {recitcahiertraces} t1_1 on t2.instance = t1_1.id
+        inner join {recitct_groups} t3 on t1_1.id = t3.ct_id
+        where t2.module = (select id from {modules} where name = 'recitcahiertraces') and t3.id = ?";
+
+        $result = $this->getRecordsSQL($query, [$gId]);
+        if (count($result) == 0) return 0;
+        return current($result)->id;
     }
 
     public function getCmIdFromNoteId($nId){
@@ -784,9 +800,15 @@ class UserNote
         }
 
         if(isset($dbData->username)){ $result->username = $dbData->username; }
-        if(isset($dbData->feedback)){ 
+        if(isset($dbData->feedback)){
             $result->feedback = $dbData->feedback;
+            try {
+                // Normal API context (page initialized): format_text with filter: full Moodle filters applied.
             $result->feedbackFiltered = format_text($dbData->feedback, FORMAT_MOODLE, array('filter' => true, 'context' => $context));
+            } catch (\Exception $e) {
+                // Portfolio context (page not initialized): the coding_exception from the emoticon filter is caught → falls back to clean_text() which runs HTMLPurifier without needing the page.
+                $result->feedbackFiltered = clean_text($dbData->feedback, FORMAT_HTML);
+            }
         }
         if(isset($dbData->lastUpdate)){ $result->lastUpdate = $dbData->lastUpdate; }
         if(isset($dbData->isTemplate)){ $result->isTemplate = $dbData->isTemplate; }

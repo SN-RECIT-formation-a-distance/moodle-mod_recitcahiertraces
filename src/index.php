@@ -64,8 +64,8 @@ foreach($modList as $mod){
     }
 
     echo "<tr>";
-    echo "<td>$sectionname</td>";
-    echo "<td><a target='_blank' href='{$CFG->wwwroot}/mod/recitcahiertraces/view.php?id={$mod->coursemodule}'>{$mod->name}</a></td>";
+    echo "<td>" . format_string($sectionname) . "</td>";
+    echo "<td><a target='_blank' href='{$CFG->wwwroot}/mod/recitcahiertraces/view.php?id={$mod->coursemodule}'>" . format_string($mod->name) . "</a></td>";
     echo "</tr>";
 }
 

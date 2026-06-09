@@ -9,6 +9,7 @@ $string['privacy:metadata:recitct_user_notes:nid'] = 'Note ID';
 $string['privacy:metadata:recitct_user_notes:note'] = 'User note';
 $string['privacy:metadata:recitct_user_notes:note_itemid'] = 'Atto item ID';
 $string['privacy:metadata:recitct_user_notes:userid'] = 'User ID';
+$string['privacy:metadata:core_files'] = 'User notes may include files uploaded through the note editor (e.g. images).';
 $string['userpreferences'] = 'User preferences';
 $string['modulename'] = 'Notebook v2';
 $string['modulenameplural'] = "Notebooks";

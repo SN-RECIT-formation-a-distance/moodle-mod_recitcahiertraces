@@ -118,8 +118,7 @@ class PersonalNoteForm extends Component{
 
         // it is a student?
         if(this.state.mode === "s"){
-            //student = <TextEditor style={{height:'270px', marginBottom: '3rem'}} theme="snow" value={data.note.text} onChange={(value) => this.onDataChange({target: {value: value, name: 'noteText'}})} />;
-            student = <div style={styleText} dangerouslySetInnerHTML={{__html: data.note.text}}></div>;
+            student = <TextEditor style={{height:'270px', marginBottom: '3rem'}} theme="snow" value={data.note.text} onChange={(value) => this.onDataChange({target: {value: value, name: 'noteText'}})} />;
             teacher = <div style={styleText} dangerouslySetInnerHTML={{__html: data.feedback}}></div>;
         }
         // it is a teacher
@@ -180,20 +179,18 @@ class PersonalNoteForm extends Component{
 
     onDataChange(event){
         let data = this.state.data;
-        data[event.target.name] = event.target.value;
+        if(event.target.name === 'noteText'){
+            data.note.text = event.target.value;
+        } else {
+            data[event.target.name] = event.target.value;
+        }
         this.setState({data: data})
     }
     
     onEditorDataChange(){
         let data = JsNx.clone(this.state.data);
         let flags = {mode: this.state.mode, teacherFeedbackUpdated: 0};
-
-        if(this.state.mode === "s"){
-            data.note.text = data.noteText;
-        }
-
         data.userId = this.props.userId;
-
         return {data: data, flags: flags};
     }
 

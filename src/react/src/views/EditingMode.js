@@ -114,7 +114,7 @@ class NoteForm extends Component
                         <Row className='mb-3'>
                             <Form.Group as={Col}>
                                 <Form.Label>{i18n.get_string('notifyteacheruponupdate')}</Form.Label>
-                                <ToggleButtons name="notifyTeacher" defaultValue={[data.notifyTeacher]} onChange={this.onDataChange} 
+                                <ToggleButtons type="radio" name="notifyTeacher" defaultValue={data.notifyTeacher} onChange={this.onDataChange}
                                         options={[
                                             {value: 1, text: i18n.get_string('yes')},
                                             {value: 0, text: i18n.get_string('no')}
@@ -171,12 +171,8 @@ class NoteForm extends Component
         let data = this.state.data;
         data[event.target.name] = event.target.value;
 
-        // if the group has changed then it restart the slot
         if(event.target.name === "gId"){
             data.slot = 0;
-        }
-        else if(event.target.name === "notifyTeacher"){
-            data[event.target.name] = data[event.target.name].pop();
         }
 
         this.setState({data: data})
@@ -244,7 +240,7 @@ class NoteForm extends Component
 
     onSubmit(){
         if (this.formRef.current.checkValidity() === false) {
-            this.setState({formValidated: false});            
+            this.setState({formValidated: true});
         }
         else{
             this.setState({formValidated: true}, this.onSave);

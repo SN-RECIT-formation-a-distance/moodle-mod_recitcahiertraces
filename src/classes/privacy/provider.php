@@ -27,6 +27,11 @@ use \core_privacy\local\request\approved_userlist;
 
 defined('MOODLE_INTERNAL') || die();
 
+/**
+ * Personal data (the student's notes, the teacher's feedback on them, and any files uploaded
+ * through the note editor) lives in {recitct_user_notes}, scoped to the course module (CONTEXT_MODULE)
+ * context of the "Cahier de traces" instance the note belongs to — not in a user context.
+ */
 class provider implements
         \core_privacy\local\metadata\provider,
         \core_privacy\local\request\core_userlist_provider,
@@ -53,6 +58,7 @@ class provider implements
             'privacy:metadata:recitct_user_notes'
         );
 
+        $collection->add_subsystem_link('core_files', [], 'privacy:metadata:core_files');
 
         return $collection;
     }
@@ -64,13 +70,24 @@ class provider implements
      * @return  contextlist   $contextlist  The contextlist containing the list of contexts used in this plugin.
      */
     public static function get_contexts_for_userid(int $userid) : contextlist {
-        $params = ['userid' => $userid, 'contextuser' => CONTEXT_MODULE];
-        $sql = "SELECT id
-                  FROM {context}
-                 WHERE instanceid = :userid and contextlevel = :contextuser";
+        $sql = "SELECT ctx.id
+                  FROM {context} ctx
+                  JOIN {course_modules} cm ON cm.id = ctx.instanceid AND ctx.contextlevel = :modlevel
+                  JOIN {modules} m ON m.id = cm.module AND m.name = :modname
+                  JOIN {recitcahiertraces} r ON r.id = cm.instance
+                  JOIN {recitct_groups} g ON g.ct_id = r.id
+                  JOIN {recitct_notes} n ON n.gid = g.id
+                  JOIN {recitct_user_notes} un ON un.nid = n.id
+                 WHERE un.userid = :userid";
+
+        $params = [
+            'modlevel' => CONTEXT_MODULE,
+            'modname' => 'recitcahiertraces',
+            'userid' => $userid,
+        ];
+
         $contextlist = new contextlist();
         $contextlist->add_from_sql($sql, $params);
-        //Templates aren't tied to any context
         return $contextlist;
     }
 
@@ -82,16 +99,23 @@ class provider implements
     public static function get_users_in_context(userlist $userlist) {
         $context = $userlist->get_context();
 
-        if (!$context instanceof \context_user) {
+        if (!$context instanceof \context_module) {
             return;
         }
 
-        $sql = "SELECT userid
-                  FROM {recitct_user_notes}
-                 WHERE userid = ?";
-        $params = [$context->instanceid];
+        $cm = get_coursemodule_from_id('recitcahiertraces', $context->instanceid);
+        if (!$cm) {
+            return;
+        }
 
-        $userlist->add_from_sql('userid', $sql, $params);
+        $sql = "SELECT un.userid
+                  FROM {recitcahiertraces} r
+                  JOIN {recitct_groups} g ON g.ct_id = r.id
+                  JOIN {recitct_notes} n ON n.gid = g.id
+                  JOIN {recitct_user_notes} un ON un.nid = n.id
+                 WHERE r.id = :ctid";
+
+        $userlist->add_from_sql('userid', $sql, ['ctid' => $cm->instance]);
     }
 
     /**
@@ -102,35 +126,52 @@ class provider implements
     public static function export_user_data(approved_contextlist $contextlist) {
         global $DB;
 
-        // If the user has repository_instances data, then only the User context should be present so get the first context.
-        $contexts = $contextlist->get_contexts();
-        if (count($contexts) == 0) {
-            return;
-        }
-        $context = reset($contexts);
+        $user = $contextlist->get_user();
 
-        // Sanity check that context is at the User context level, then get the userid.
-        if ($context->contextlevel !== CONTEXT_USER) {
-            return;
-        }
-        $userid = $context->instanceid;
+        foreach ($contextlist->get_contexts() as $context) {
+            if (!$context instanceof \context_module) {
+                continue;
+            }
 
-        $sql = "SELECT *
-                  FROM {recitct_user_notes}
-                 WHERE userid = :userid";
+            $cm = get_coursemodule_from_id('recitcahiertraces', $context->instanceid);
+            if (!$cm) {
+                continue;
+            }
 
-        $params = [
-            'userid' => $userid
-        ];
+            $sql = "SELECT un.id, un.note, un.note_itemid, un.feedback, un.lastupdate, n.title
+                      FROM {recitcahiertraces} r
+                      JOIN {recitct_groups} g ON g.ct_id = r.id
+                      JOIN {recitct_notes} n ON n.gid = g.id
+                      JOIN {recitct_user_notes} un ON un.nid = n.id
+                     WHERE r.id = :ctid AND un.userid = :userid
+                     ORDER BY n.id";
 
-        $instances = $DB->get_records_sql($sql, $params);
+            $records = $DB->get_records_sql($sql, ['ctid' => $cm->instance, 'userid' => $user->id]);
+            if (empty($records)) {
+                continue;
+            }
 
-        foreach ($instances as $instance) {
-            $subcontext = [
-                get_string('pluginname', 'mod_recitcahiertraces')
-            ];
+            $subcontext = [get_string('pluginname', 'mod_recitcahiertraces')];
+            $notes = [];
+            foreach ($records as $record) {
+                $notes[] = (object) [
+                    'note_title' => $record->title,
+                    'note' => $record->note,
+                    'feedback' => $record->feedback,
+                    'lastupdate' => transform::datetime($record->lastupdate),
+                ];
 
-            writer::with_context($context)->export_data($subcontext, $instance);
+                if (!empty($record->note_itemid)) {
+                    writer::with_context($context)->export_area_files(
+                        array_merge($subcontext, [$record->id]),
+                        'mod_recitcahiertraces',
+                        'usernote',
+                        $record->note_itemid
+                    );
+                }
+            }
+
+            writer::with_context($context)->export_data($subcontext, (object) ['notes' => $notes]);
         }
     }
 
@@ -140,16 +181,20 @@ class provider implements
      * @param   context $context The specific context to delete data for.
      */
     public static function delete_data_for_all_users_in_context(\context $context) {
-        global $DB;
-
-        // Sanity check that context is at the User context level, then get the userid.
-        if ($context->contextlevel !== CONTEXT_USER) {
+        if (!$context instanceof \context_module) {
             return;
         }
-        $userid = $context->instanceid;
 
-        // Delete the records created for the userid.
-        $DB->delete_records('recitct_user_notes', ['userid' => $userid]);
+        $cm = get_coursemodule_from_id('recitcahiertraces', $context->instanceid);
+        if (!$cm) {
+            return;
+        }
+
+        self::delete_notes_and_files(
+            $context,
+            "nid IN (SELECT n.id FROM {recitct_notes} n JOIN {recitct_groups} g ON g.id = n.gid WHERE g.ct_id = ?)",
+            [$cm->instance]
+        );
     }
 
     /**
@@ -161,10 +206,28 @@ class provider implements
         global $DB;
 
         $context = $userlist->get_context();
-
-        if ($context instanceof \context_user) {
-            $DB->delete_records('recitct_user_notes', ['userid' => $context->instanceid]);
+        if (!$context instanceof \context_module) {
+            return;
         }
+
+        $cm = get_coursemodule_from_id('recitcahiertraces', $context->instanceid);
+        if (!$cm) {
+            return;
+        }
+
+        $userids = $userlist->get_userids();
+        if (empty($userids)) {
+            return;
+        }
+
+        list($insql, $inparams) = $DB->get_in_or_equal($userids);
+        $params = array_merge($inparams, [$cm->instance]);
+
+        self::delete_notes_and_files(
+            $context,
+            "userid $insql AND nid IN (SELECT n.id FROM {recitct_notes} n JOIN {recitct_groups} g ON g.id = n.gid WHERE g.ct_id = ?)",
+            $params
+        );
     }
 
     /**
@@ -173,22 +236,45 @@ class provider implements
      * @param   approved_contextlist $contextlist The approved contexts and user information to delete information for.
      */
     public static function delete_data_for_user(approved_contextlist $contextlist) {
-        global $DB;
+        $user = $contextlist->get_user();
 
-        // If the user has data, then only the User context should be present so get the first context.
-        $contexts = $contextlist->get_contexts();
-        if (count($contexts) == 0) {
-            return;
+        foreach ($contextlist->get_contexts() as $context) {
+            if (!$context instanceof \context_module) {
+                continue;
+            }
+
+            $cm = get_coursemodule_from_id('recitcahiertraces', $context->instanceid);
+            if (!$cm) {
+                continue;
+            }
+
+            self::delete_notes_and_files(
+                $context,
+                "userid = ? AND nid IN (SELECT n.id FROM {recitct_notes} n JOIN {recitct_groups} g ON g.id = n.gid WHERE g.ct_id = ?)",
+                [$user->id, $cm->instance]
+            );
         }
-        $context = reset($contexts);
-
-        // Sanity check that context is at the User context level, then get the userid.
-        if ($context->contextlevel !== CONTEXT_USER) {
-            return;
-        }
-        $userid = $context->instanceid;
-
-        $DB->delete_records('recitct_user_notes', ['userid' => $userid]);
     }
 
+    /**
+     * Remove the {recitct_user_notes} rows matching $select/$params from the given module context,
+     * along with any files attached to them through the note editor (mod_recitcahiertraces/usernote).
+     */
+    private static function delete_notes_and_files(\context $context, string $select, array $params) {
+        global $DB;
+
+        $records = $DB->get_records_select('recitct_user_notes', $select, $params, '', 'id, note_itemid');
+        if (empty($records)) {
+            return;
+        }
+
+        $fs = get_file_storage();
+        foreach ($records as $record) {
+            if (!empty($record->note_itemid)) {
+                $fs->delete_area_files($context->id, 'mod_recitcahiertraces', 'usernote', $record->note_itemid);
+            }
+        }
+
+        $DB->delete_records_select('recitct_user_notes', $select, $params);
+    }
 }
